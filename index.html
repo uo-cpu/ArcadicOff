@@ -2957,13 +2957,16 @@ function checkPlayerPin() {
 
 // ─── 起動時：GitHubから制作データを読み込む ─
 (function() {
-  loadWorldFromGitHub().then(ok => {
-    if (ok) {
-      // データ更新後にシーン一覧を再描画
-      if (typeof renderSceneList === 'function') renderSceneList();
-    }
-  });
+  // まずログイン画面を表示
+  ['title-screen','scene-select','char-select','scene-viewer','share-screen']
+    .forEach(s => document.getElementById(s).classList.add('hidden'));
+  document.getElementById('player-login-screen').classList.remove('hidden');
   renderPlayerList();
+
+  // バックグラウンドでGitHubからデータ読み込み
+  loadWorldFromGitHub().then(ok => {
+    if (ok && typeof renderSceneList === 'function') renderSceneList();
+  });
 })();
 </script>
 
