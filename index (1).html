@@ -1,0 +1,2827 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ArcadicOff</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Serif+JP:wght@200;300;400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   ROOT VARIABLES
+═══════════════════════════════════════════ */
+:root {
+  --world: afstasia;
+
+  /* AFSTASIA — Gothic Nobility */
+  --af-bg:    #0e0608;
+  --af-s1:    rgba(20,10,12,0.97);
+  --af-gold:  #a07828;
+  --af-gold2: #c8a040;
+  --af-gold3: #f5e4b0;
+  --af-red:   #7a1010;
+  --af-red2:  #c85858;
+  --af-red3:  #e88080;
+  --af-dim:   #5a3a40;
+  --af-line:  rgba(200,168,75,0.15);
+  --af-text:  #f0e6da;
+  --af-accent:#b87a30;
+
+  /* TELOSTIA — Alchemical Lab */
+  --te-bg:    #030810;
+  --te-s1:    rgba(4,12,22,0.97);
+  --te-cyan:  #3ab0c8;
+  --te-cyan2: #70d4e8;
+  --te-cyan3: #b0f0ff;
+  --te-lav:   #6a5caa;
+  --te-lav2:  #9b8bc8;
+  --te-lav3:  #c4b8e8;
+  --te-dim:   #2a3a5a;
+  --te-line:  rgba(58,176,200,0.15);
+  --te-text:  #d4eef5;
+  --te-green: #2aaa88;
+
+  /* ACTIVE (defaults to afstasia) */
+  --c-bg:     var(--af-bg);
+  --c-s1:     var(--af-s1);
+  --c-prime:  var(--af-gold);
+  --c-prime2: var(--af-gold2);
+  --c-prime3: var(--af-gold3);
+  --c-dim:    var(--af-dim);
+  --c-line:   var(--af-line);
+  --c-text:   var(--af-text);
+}
+
+body.world-telostia {
+  --c-bg:     var(--te-bg);
+  --c-s1:     var(--te-s1);
+  --c-prime:  var(--te-cyan);
+  --c-prime2: var(--te-cyan2);
+  --c-prime3: var(--te-cyan3);
+  --c-dim:    var(--te-dim);
+  --c-line:   var(--te-line);
+  --c-text:   var(--te-text);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{
+  background:var(--c-bg);
+  font-family:'Noto Serif JP',serif;
+  min-height:100vh;
+  user-select:none;
+  transition:background 1.5s ease;
+}
+
+/* ═══════════════════════════════════════════
+   WORLD BACKGROUNDS
+═══════════════════════════════════════════ */
+.bg-layer{position:fixed;inset:0;z-index:0;transition:opacity 1.5s ease;pointer-events:none;}
+
+/* Afstasia — candlelit gothic */
+.bg-af{
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(100,130,170,0.9) 0%, rgba(80,110,155,0.7) 25%, transparent 65%),
+    radial-gradient(ellipse at 25% 35%, rgba(90,115,150,0.3) 0%, transparent 45%),
+    radial-gradient(ellipse at 80% 18%, rgba(110,130,160,0.25) 0%, transparent 40%),
+   linear-gradient(180deg,
+  #243850 0%,
+  #2e4860 10%,
+  #385058 20%,
+  #404858 35%,
+  #404048 50%,
+  #3a3845 65%,
+  #2e2838 80%,
+  #1e1a2e 100%);
+  opacity:1;
+}
+.bg-af::before{
+  content:'';position:absolute;inset:0;z-index:1;
+  background:
+    /* 太陽（くすんだ白銀） */
+    radial-gradient(circle at 35% 14%, rgba(220,225,235,0.55) 0%, rgba(200,210,225,0.2) 7%, transparent 20%),
+    /* 光の拡散 */
+    radial-gradient(ellipse at 35% 14%, rgba(180,195,215,0.15) 0%, transparent 40%),
+    /* 薄い雲 */
+    radial-gradient(ellipse at 18% 20%, rgba(180,190,205,0.22) 0%, transparent 28%),
+    radial-gradient(ellipse at 62% 10%, rgba(170,185,200,0.18) 0%, transparent 22%),
+    radial-gradient(ellipse at 82% 25%, rgba(175,188,205,0.16) 0%, transparent 24%),
+    /* 地平線の暖かみ（抑えめ） */
+    radial-gradient(ellipse at 50% 100%, rgba(120,105,90,0.35) 0%, rgba(100,88,75,0.15) 28%, transparent 50%),
+    /* 全体を少し暗く落とす */
+    linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.18) 60%, rgba(0,0,0,0.45) 100%);
+}
+.bg-af::after{
+  content:'';position:absolute;inset:0;z-index:2;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 440' preserveAspectRatio='xMidYMax slice'%3E%3C!-- 雲 --%3E%3Cellipse cx='180' cy='75' rx='160' ry='24' fill='%23c8cdd8' opacity='0.2'/%3E%3Cellipse cx='720' cy='50' rx='200' ry='20' fill='%23c4cad5' opacity='0.16'/%3E%3Cellipse cx='1020' cy='88' rx='140' ry='18' fill='%23c4cad5' opacity='0.14'/%3E%3Cellipse cx='460' cy='108' rx='120' ry='14' fill='%23c8cdd8' opacity='0.12'/%3E%3C!-- 遠景の丘 --%3E%3Cpath d='M0 308 Q150 258 300 275 Q480 245 660 265 Q820 242 1000 260 Q1100 250 1200 265 L1200 440 L0 440Z' fill='%23404858' opacity='0.7'/%3E%3Cpath d='M0 332 Q200 285 380 302 Q560 275 740 295 Q920 270 1100 288 L1200 292 L1200 440 L0 440Z' fill='%23383040' opacity='0.8'/%3E%3C!-- 中景：街並み --%3E%3Cpath d='M0 440 L0 362 L20 362 L20 345 L30 345 L30 330 L36 330 L36 316 L44 316 L44 308 L50 308 L50 316 L56 316 L56 330 L66 330 L66 345 L80 345 L80 362 L95 362 L95 340 L104 340 L104 324 L111 318 L118 324 L118 340 L132 340 L132 356 L150 356 L150 332 L159 332 L159 316 L165 310 L171 316 L171 332 L185 332 L185 348 L200 348 L200 328 L210 328 L210 312 L216 306 L222 298 L228 306 L234 312 L234 328 L250 328 L250 345 L268 345 L268 322 L278 322 L278 306 L284 300 L284 286 L289 279 L294 286 L294 300 L302 306 L302 370 L318 370 L318 340 L332 340 L332 324 L339 317 L346 324 L346 340 L364 340 L364 356 L382 356 L382 330 L392 330 L392 314 L398 308 L404 300 L410 308 L416 314 L416 330 L434 330 L434 352 L452 352 L452 325 L462 325 L462 308 L468 302 L468 288 L473 280 L478 288 L478 302 L486 308 L486 365 L502 365 L502 338 L516 338 L516 320 L523 314 L528 305 L533 314 L540 320 L540 375 L555 375 L555 345 L568 345 L568 328 L574 321 L579 312 L584 321 L591 328 L591 382 L605 382 L605 352 L618 352 L618 334 L624 327 L629 318 L634 327 L641 334 L641 360 L658 360 L658 334 L670 334 L670 317 L676 311 L682 302 L688 311 L694 317 L694 360 L710 360 L710 338 L722 338 L722 321 L728 315 L734 306 L740 315 L746 321 L746 368 L762 368 L762 340 L775 340 L775 323 L781 317 L787 308 L793 317 L799 323 L799 354 L815 354 L815 328 L827 328 L827 311 L833 305 L833 291 L838 283 L843 291 L843 305 L851 311 L851 375 L867 375 L867 346 L880 346 L880 329 L887 322 L894 329 L894 346 L910 346 L910 362 L928 362 L928 332 L938 332 L938 315 L944 309 L950 300 L956 309 L962 315 L962 350 L978 350 L978 323 L990 323 L990 306 L996 300 L996 285 L1001 277 L1006 285 L1006 300 L1014 306 L1014 356 L1030 356 L1030 330 L1042 330 L1042 313 L1048 307 L1054 298 L1060 307 L1066 313 L1066 348 L1082 348 L1082 321 L1094 321 L1094 304 L1100 298 L1105 287 L1110 298 L1117 304 L1117 340 L1135 340 L1135 358 L1155 358 L1155 330 L1165 330 L1165 313 L1171 307 L1177 298 L1183 307 L1189 313 L1189 348 L1200 348 L1200 440 L0 440Z' fill='%23302838' opacity='0.92'/%3E%3C!-- 宮殿本体 --%3E%3Crect x='530' y='222' width='140' height='178' fill='%23383048' opacity='0.95'/%3E%3Cpolygon points='520,222 600,170 680,222' fill='%23302840' opacity='0.95'/%3E%3C!-- 中央尖塔 --%3E%3Crect x='590' y='150' width='20' height='78' fill='%232e2840' opacity='0.96'/%3E%3Cpolygon points='587,150 600,120 613,150' fill='%23282438' opacity='0.96'/%3E%3C!-- 左右の塔 --%3E%3Crect x='530' y='202' width='18' height='198' fill='%23342c44' opacity='0.95'/%3E%3Cpolygon points='527,202 539,174 551,202' fill='%232e2840' opacity='0.95'/%3E%3Crect x='652' y='202' width='18' height='198' fill='%23342c44' opacity='0.95'/%3E%3Cpolygon points='649,202 661,174 673,202' fill='%232e2840' opacity='0.95'/%3E%3C!-- 外側の細塔 --%3E%3Crect x='500' y='240' width='12' height='160' fill='%23302840' opacity='0.9'/%3E%3Cpolygon points='498,240 506,217 514,240' fill='%232a2438' opacity='0.9'/%3E%3Crect x='688' y='240' width='12' height='160' fill='%23302840' opacity='0.9'/%3E%3Cpolygon points='686,240 694,217 702,240' fill='%232a2438' opacity='0.9'/%3E%3C!-- 大扉 --%3E%3Crect x='588' y='342' width='24' height='58' fill='%23786050' opacity='0.7' rx='12 12 0 0'/%3E%3C!-- 宮殿足元の影 --%3E%3Cellipse cx='600' cy='400' rx='85' ry='9' fill='%23201828' opacity='0.35'/%3E%3C!-- 街並みの窓 --%3E%3Crect x='310' y='322' width='8' height='11' fill='%23907840' opacity='0.4' rx='4 4 0 0'/%3E%3Crect x='325' y='322' width='8' height='11' fill='%23907840' opacity='0.35' rx='4 4 0 0'/%3E%3Crect x='870' y='317' width='8' height='11' fill='%23907840' opacity='0.4' rx='4 4 0 0'/%3E%3Crect x='885' y='317' width='8' height='11' fill='%23907840' opacity='0.35' rx='4 4 0 0'/%3E%3Crect x='420' y='310' width='7' height='10' fill='%23887238' opacity='0.35' rx='3 3 0 0'/%3E%3Crect x='770' y='307' width='7' height='10' fill='%23887238' opacity='0.35' rx='3 3 0 0'/%3E%3C/svg%3E");
+  background-size:100% 100%;
+  background-position:bottom;
+  background-repeat:no-repeat;
+  pointer-events:none;
+}
+
+/* Telostia — cold lab glow */
+.bg-te{
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(10,30,50,0.9) 0%, transparent 60%),
+    radial-gradient(ellipse at 15% 60%, rgba(30,20,70,0.5) 0%, transparent 40%),
+    radial-gradient(ellipse at 85% 40%, rgba(5,40,55,0.4) 0%, transparent 35%),
+    linear-gradient(180deg,#020810 0%,#040c18 50%,#020608 100%);
+  opacity:0;
+}
+.bg-te::after{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(58,176,200,0.012) 2px,rgba(58,176,200,0.012) 4px);
+  animation:scanlines 8s linear infinite;
+}
+@keyframes scanlines{0%{transform:translateY(0);}100%{transform:translateY(4px);}}
+
+/* Stars */
+.stars{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.star{position:absolute;border-radius:50%;background:white;animation:twinkle var(--d,3s) ease-in-out infinite var(--delay,0s);}
+@keyframes twinkle{0%,100%{opacity:var(--min,0.05);}50%{opacity:var(--max,0.7);}}
+
+/* Afstasia ornamental particles (embers) */
+.af-particles{position:fixed;inset:0;pointer-events:none;z-index:1;}
+.af-particle{position:absolute;border-radius:50%;animation:ember linear infinite;opacity:0;}
+@keyframes ember{
+  0%{transform:translateY(100vh) translateX(0) rotate(0deg);opacity:0;}
+  5%{opacity:1;}
+  90%{opacity:0.4;}
+  100%{transform:translateY(-50px) translateX(var(--dx,20px)) rotate(360deg);opacity:0;}
+}
+
+/* Telostia grid overlay */
+.te-grid{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:0;transition:opacity 1.5s;}
+body.world-telostia .te-grid{opacity:1;}
+.te-grid::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(58,176,200,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(58,176,200,0.04) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+/* Telostia floating runes */
+.te-rune{position:absolute;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:rgba(58,176,200,0.12);animation:runeFloat linear infinite;pointer-events:none;}
+@keyframes runeFloat{0%{opacity:0;transform:translateY(0);}10%{opacity:1;}90%{opacity:0.3;}100%{opacity:0;transform:translateY(-120px);}}
+
+/* ═══════════════════════════════════════════
+   MIST TRANSITION
+═══════════════════════════════════════════ */
+.mist-layer{
+  position:fixed;inset:0;z-index:100;pointer-events:none;
+  opacity:0;
+  background:radial-gradient(ellipse at center,rgba(220,210,240,0.0) 0%,rgba(180,160,220,0.0) 100%);
+  transition:none;
+}
+.mist-layer.misting{
+  animation:mistAnim 1.8s ease-in-out forwards;
+}
+@keyframes mistAnim{
+  0%{opacity:0;filter:blur(0px);}
+  25%{opacity:0.85;filter:blur(8px);background:radial-gradient(ellipse at center,rgba(240,235,255,0.9) 0%,rgba(200,180,255,0.6) 60%,rgba(180,160,240,0.3) 100%);}
+  50%{opacity:1;filter:blur(20px);background:radial-gradient(ellipse at center,rgba(255,252,255,1) 0%,rgba(220,210,255,0.95) 50%,rgba(200,190,255,0.8) 100%);}
+  75%{opacity:0.6;filter:blur(10px);}
+  100%{opacity:0;filter:blur(0px);}
+}
+
+/* ═══════════════════════════════════════════
+   SCREENS
+═══════════════════════════════════════════ */
+.screen{
+  position:fixed;inset:0;z-index:10;
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity 0.6s ease;
+}
+.screen.hidden{opacity:0;pointer-events:none;}
+
+/* ═══════════════════════════════════════════
+   TITLE SCREEN
+═══════════════════════════════════════════ */
+#title-screen{flex-direction:column;}
+
+.title-logo-wrap{
+  animation:logoIn 1.6s cubic-bezier(.16,1,.3,1) forwards;
+  opacity:0;display:flex;flex-direction:column;align-items:center;
+}
+@keyframes logoIn{
+  0%{opacity:0;transform:translateY(-20px) scale(.95);}
+  100%{opacity:1;transform:translateY(0) scale(1);}
+}
+.title-logo{
+  width:min(460px,82vw);height:auto;
+  filter:drop-shadow(0 0 60px rgba(200,168,75,.4)) drop-shadow(0 6px 28px rgba(0,0,0,.7));
+  transition:filter 1.5s;
+}
+body.world-telostia .title-logo{
+  filter:drop-shadow(0 0 60px rgba(58,176,200,.4)) drop-shadow(0 6px 28px rgba(0,0,0,.8));
+}
+#logo-fallback{
+  display:none;font-family:'Cinzel Decorative',cursive;
+  font-size:clamp(1.5rem,6vw,3rem);letter-spacing:.1em;
+  color:var(--c-prime2);text-shadow:0 0 40px rgba(200,168,75,.4);
+}
+.title-sub{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(.58rem,1.3vw,.75rem);letter-spacing:.45em;
+  color:rgba(200,168,75,.45);margin-top:10px;
+  animation:fadeUp 2s ease .8s forwards;opacity:0;
+  transition:color 1.5s;
+}
+body.world-telostia .title-sub{color:rgba(58,176,200,.45);}
+
+/* Afstasia ornamental divider */
+.af-ornament{
+  width:200px;height:1px;margin:18px auto 0;
+  background:linear-gradient(90deg,transparent,rgba(200,168,75,.5),transparent);
+  animation:fadeUp 2s ease 1s forwards;opacity:0;
+  transition:opacity 1.5s;
+}
+body.world-telostia .af-ornament{
+  background:linear-gradient(90deg,transparent,rgba(58,176,200,.4),transparent);
+}
+
+/* WORLD TOGGLE */
+.world-toggle{
+  display:flex;gap:3px;margin-top:42px;
+  animation:fadeUp 2s ease 1s forwards;opacity:0;
+  border:1px solid var(--c-line);
+ background:transparent;
+  backdrop-filter:blur(12px);
+}
+.w-btn{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:10px 28px;border:none;border-right:1px solid var(--c-line);
+  background:transparent;cursor:pointer;
+  font-family:'Cinzel',serif;font-size:.54rem;letter-spacing:.28em;
+  color:rgba(200,168,75,.4);text-transform:uppercase;
+  transition:all .5s;
+}
+.w-btn:last-child{border-right:none;}
+.w-btn .wicon{font-size:1.1rem;line-height:1;margin-bottom:2px;}
+.w-btn.active{background:rgba(200,168,75,.1);color:rgba(200,168,75,.95);}
+.w-btn:hover:not(.active){background:rgba(200,168,75,.05);}
+body.world-telostia .w-btn{color:rgba(58,176,200,.4);}
+body.world-telostia .w-btn.active{background:rgba(58,176,200,.1);color:rgba(58,176,200,.95);}
+
+/* TITLE MENU BUTTONS */
+.title-menu{
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  margin-top:32px;
+  animation:fadeUp 2s ease 1.3s forwards;opacity:0;
+}
+.title-menu-btn{
+  background:none;border:1px solid rgba(200,168,75,.35);
+  color:rgba(200,168,75,.8);font-family:'Cinzel',serif;
+  font-size:.72rem;letter-spacing:.5em;text-transform:uppercase;
+  padding:11px 52px;cursor:pointer;
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+  transition:all .4s;backdrop-filter:blur(10px);
+  min-width:240px;
+}
+.title-menu-btn:hover{
+  background:rgba(200,168,75,.1);letter-spacing:.6em;
+  border-color:rgba(200,168,75,.7);
+}
+.title-menu-btn.secondary{
+  font-size:.6rem;border-color:rgba(200,168,75,.2);color:rgba(200,168,75,.5);
+  padding:8px 40px;
+}
+.title-menu-btn.secondary:hover{
+  border-color:rgba(200,168,75,.4);color:rgba(200,168,75,.75);letter-spacing:.5em;
+}
+body.world-telostia .title-menu-btn{
+  border-color:rgba(58,176,200,.35);color:rgba(58,176,200,.8);
+  font-family:'Share Tech Mono',monospace;font-size:.65rem;
+}
+body.world-telostia .title-menu-btn:hover{background:rgba(58,176,200,.08);}
+body.world-telostia .title-menu-btn.secondary{
+  border-color:rgba(58,176,200,.2);color:rgba(58,176,200,.5);
+}
+
+.v-tag{
+  position:fixed;bottom:18px;right:22px;
+  font-family:'Cormorant Garamond',serif;font-size:.6rem;
+  letter-spacing:.2em;color:rgba(200,168,75,.25);z-index:20;
+}
+body.world-telostia .v-tag{color:rgba(58,176,200,.25);}
+
+/* Corner gear icon */
+.admin-corner{
+  position:fixed;bottom:18px;left:22px;z-index:20;
+  background:none;border:1px solid rgba(200,168,75,.15);
+  color:rgba(200,168,75,.3);font-size:.85rem;
+  width:32px;height:32px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .3s;
+}
+.admin-corner:hover{border-color:rgba(200,168,75,.5);color:rgba(200,168,75,.7);}
+body.world-telostia .admin-corner{border-color:rgba(58,176,200,.15);color:rgba(58,176,200,.3);}
+body.world-telostia .admin-corner:hover{border-color:rgba(58,176,200,.5);color:rgba(58,176,200,.7);}
+
+@keyframes fadeUp{
+  0%{opacity:0;transform:translateY(10px);}
+  100%{opacity:1;transform:translateY(0);}
+}
+
+/* ═══════════════════════════════════════════
+   SCENE SELECT
+═══════════════════════════════════════════ */
+#scene-select{
+  flex-direction:column;justify-content:flex-start;align-items:center;
+  padding:52px 28px 36px;overflow-y:auto;
+}
+.ss-overlay{
+  position:fixed;inset:0;
+  background:rgba(10,6,14,.92);backdrop-filter:blur(4px);z-index:0;
+}
+/* Afstasia frame lines */
+.ss-frame{
+  position:fixed;inset:20px;pointer-events:none;z-index:1;
+  border:1px solid rgba(200,168,75,.06);
+}
+.ss-frame::before,.ss-frame::after{
+  content:'';position:absolute;
+  border-color:var(--c-prime);border-style:solid;
+}
+.ss-frame::before{top:-1px;left:-1px;width:30px;height:30px;border-width:1px 0 0 1px;}
+.ss-frame::after{bottom:-1px;right:-1px;width:30px;height:30px;border-width:0 1px 1px 0;}
+body.world-telostia .ss-frame{border-color:rgba(58,176,200,.06);}
+
+.ss-wrap{position:relative;z-index:2;width:100%;max-width:640px;}
+.ss-header{
+  display:flex;align-items:baseline;justify-content:space-between;
+  margin-bottom:28px;border-bottom:1px solid var(--c-line);padding-bottom:14px;
+}
+.ss-title{
+  font-family:'Cinzel',serif;font-size:.85rem;letter-spacing:.42em;
+  color:rgba(200,168,75,.7);text-transform:uppercase;
+}
+body.world-telostia .ss-title{
+  font-family:'Share Tech Mono',monospace;color:rgba(58,176,200,.7);font-size:.78rem;
+}
+.ss-hbtns{display:flex;gap:8px;}
+.ss-btn{
+  padding:5px 18px;border:1px solid var(--c-line);
+  background:transparent;color:rgba(200,168,75,.5);
+  font-family:'Cinzel',serif;font-size:.54rem;letter-spacing:.25em;
+  cursor:pointer;transition:all .3s;text-transform:uppercase;
+}
+.ss-btn:hover{border-color:rgba(200,168,75,.55);color:rgba(200,168,75,.9);}
+.ss-btn.active{border-color:rgba(200,168,75,.8);background:rgba(200,168,75,.1);color:rgba(200,168,75,1);}
+body.world-telostia .ss-btn{color:rgba(58,176,200,.5);}
+body.world-telostia .ss-btn:hover{border-color:rgba(58,176,200,.55);color:rgba(58,176,200,.9);}
+body.world-telostia .ss-btn.active{border-color:rgba(58,176,200,.8);background:rgba(58,176,200,.08);color:rgba(58,176,200,1);}
+
+.scene-list{display:flex;flex-direction:column;gap:6px;}
+.scene-item{
+  display:flex;align-items:stretch;
+  border:1px solid rgba(200,168,75,.1);
+  background:rgba(255,255,255,.015);
+  transition:all .28s;cursor:pointer;
+  animation:sItem .35s ease forwards;opacity:0;
+  position:relative;overflow:hidden;
+}
+.scene-item::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:linear-gradient(180deg,transparent,rgba(200,168,75,.5),transparent);
+  transform:scaleY(0);transition:transform .3s;
+}
+.scene-item:hover::before{transform:scaleY(1);}
+.scene-item:hover{border-color:rgba(200,168,75,.4);background:rgba(200,168,75,.045);}
+.scene-item:hover .s-arrow{opacity:1;transform:translateX(4px);}
+body.world-telostia .scene-item{border-color:rgba(58,176,200,.1);}
+body.world-telostia .scene-item::before{background:linear-gradient(180deg,transparent,rgba(58,176,200,.5),transparent);}
+body.world-telostia .scene-item:hover{border-color:rgba(58,176,200,.4);background:rgba(58,176,200,.04);}
+@keyframes sItem{from{opacity:0;transform:translateX(-12px);}to{opacity:1;transform:none;}}
+.scene-item.read::after{
+  content:'既読';position:absolute;top:8px;right:42px;
+  font-family:'Cormorant Garamond',serif;font-size:.5rem;letter-spacing:.18em;
+  color:rgba(200,168,75,.25);
+}
+
+.s-num{
+  padding:14px 16px;min-width:50px;display:flex;align-items:center;justify-content:center;
+  font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.1em;
+  color:rgba(200,168,75,.3);border-right:1px solid rgba(200,168,75,.07);
+}
+body.world-telostia .s-num{
+  font-family:'Share Tech Mono',monospace;color:rgba(58,176,200,.3);
+  border-right-color:rgba(58,176,200,.07);
+}
+.s-info{padding:12px 16px;flex:1;}
+.s-name{
+  font-family:'Cormorant Garamond',serif;font-weight:600;
+  font-size:1.02rem;color:rgba(240,230,215,.88);letter-spacing:.06em;
+}
+body.world-telostia .s-name{
+  font-family:'Share Tech Mono',monospace;font-size:.85rem;color:rgba(200,240,250,.85);
+}
+.s-desc{
+  font-size:.66rem;color:rgba(200,185,160,.4);margin-top:3px;
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+}
+.s-badges{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;}
+.s-badge{
+  font-family:'Cinzel',serif;font-size:.46rem;letter-spacing:.18em;
+  padding:2px 7px;border:1px solid;
+}
+.badge-af{border-color:rgba(200,168,75,.32);color:rgba(200,168,75,.62);}
+.badge-te{border-color:rgba(58,176,200,.32);color:rgba(58,176,200,.62);}
+.s-arrow{
+  display:flex;align-items:center;padding:0 16px;
+  color:rgba(200,168,75,.4);font-size:.7rem;opacity:0;transition:all .3s;
+}
+body.world-telostia .s-arrow{color:rgba(58,176,200,.4);}
+.s-del{
+  display:none;align-items:center;padding:0 13px;
+  border:none;background:transparent;color:rgba(180,80,80,.4);
+  font-size:.8rem;cursor:pointer;
+  border-left:1px solid rgba(180,80,80,.07);transition:color .2s;
+}
+.s-del:hover{color:rgba(220,80,80,.9);}
+.edit-mode .s-del{display:flex;}
+.edit-mode .s-arrow{display:none;}
+
+.add-scene-btn{
+  display:none;width:100%;padding:13px;margin-top:7px;
+  border:1px dashed rgba(200,168,75,.18);background:transparent;
+  color:rgba(200,168,75,.42);font-family:'Cinzel',serif;font-size:.55rem;
+  letter-spacing:.32em;cursor:pointer;transition:all .3s;text-transform:uppercase;
+}
+.add-scene-btn:hover{border-color:rgba(200,168,75,.5);background:rgba(200,168,75,.04);color:rgba(200,168,75,.8);}
+.edit-mode .add-scene-btn{display:block;}
+
+/* ═══════════════════════════════════════════
+   CHARACTER LIST SCREEN
+═══════════════════════════════════════════ */
+#char-select{
+  flex-direction:column;justify-content:flex-start;align-items:center;
+  padding:52px 28px 36px;overflow-y:auto;
+}
+.char-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:4px;}
+.char-card{
+  border:1px solid rgba(200,168,75,.12);background:rgba(255,255,255,.018);
+  cursor:pointer;transition:all .32s;animation:sItem .35s ease forwards;opacity:0;
+  position:relative;overflow:hidden;
+}
+.char-card:hover{border-color:rgba(200,168,75,.45);transform:translateY(-2px);}
+body.world-telostia .char-card{border-color:rgba(58,176,200,.12);}
+body.world-telostia .char-card:hover{border-color:rgba(58,176,200,.45);}
+.char-card-img{
+  width:100%;height:160px;object-fit:cover;object-position:top;
+  background:rgba(30,15,20,.6);display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.char-card-img img{width:100%;height:100%;object-fit:cover;object-position:top;}
+.char-card-img .no-img{
+  width:60px;height:60px;border-radius:50%;
+  background:rgba(200,168,75,.08);border:1px solid rgba(200,168,75,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;color:rgba(200,168,75,.4);
+}
+.char-card-info{padding:12px 14px 14px;}
+.char-card-name{
+  font-family:'Cormorant Garamond',serif;font-weight:600;
+  font-size:1.0rem;color:rgba(240,228,208,.9);letter-spacing:.05em;
+}
+body.world-telostia .char-card-name{
+  font-family:'Share Tech Mono',monospace;font-size:.85rem;color:rgba(200,240,250,.85);
+}
+.char-card-role{
+  font-family:'Cinzel',serif;font-size:.5rem;letter-spacing:.28em;
+  color:rgba(200,168,75,.5);margin-top:3px;text-transform:uppercase;
+}
+body.world-telostia .char-card-role{color:rgba(58,176,200,.5);}
+.char-card-desc{
+  font-size:.68rem;color:rgba(200,185,160,.45);margin-top:6px;
+  font-family:'Cormorant Garamond',serif;line-height:1.7;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+
+/* Character Detail Modal */
+.char-detail-overlay{
+  position:fixed;inset:0;z-index:70;
+  background:rgba(5,3,8,.9);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .35s;
+}
+.char-detail-overlay.open{opacity:1;pointer-events:all;}
+.char-detail{
+  width:min(580px,92vw);max-height:85vh;overflow-y:auto;
+  background:var(--c-s1);border:1px solid rgba(200,168,75,.28);
+  transform:translateY(20px);transition:transform .35s;
+}
+.char-detail-overlay.open .char-detail{transform:none;}
+body.world-telostia .char-detail{border-color:rgba(58,176,200,.28);}
+.char-detail-hero{
+  position:relative;height:220px;overflow:hidden;
+  background:rgba(20,8,12,.6);
+  display:flex;align-items:center;justify-content:center;
+}
+.char-detail-hero img{
+  width:100%;height:100%;object-fit:cover;object-position:top;
+  filter:brightness(.8);
+}
+.char-detail-hero::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:80px;
+  background:linear-gradient(transparent,var(--c-s1));
+}
+.char-detail-hero .no-img-lg{
+  width:100px;height:100px;border-radius:50%;
+  background:rgba(200,168,75,.06);border:1px solid rgba(200,168,75,.2);
+  display:flex;align-items:center;justify-content:center;font-size:3rem;
+  color:rgba(200,168,75,.3);
+}
+.char-detail-body{padding:20px 24px 28px;}
+.char-detail-name{
+  font-family:'Cormorant Garamond',serif;font-weight:400;
+  font-size:1.6rem;color:var(--c-prime3);letter-spacing:.1em;
+}
+body.world-telostia .char-detail-name{font-family:'Share Tech Mono',monospace;font-size:1.2rem;}
+.char-detail-meta{
+  display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;
+  border-bottom:1px solid var(--c-line);padding-bottom:14px;margin-bottom:14px;
+}
+.char-meta-item{font-family:'Cinzel',serif;font-size:.52rem;letter-spacing:.25em;color:rgba(200,168,75,.45);}
+body.world-telostia .char-meta-item{font-family:'Share Tech Mono',monospace;color:rgba(58,176,200,.45);}
+.char-meta-item span{color:var(--c-prime2);margin-left:5px;}
+.char-detail-story{
+  font-size:.82rem;line-height:2;color:rgba(230,215,195,.7);
+  font-family:'Cormorant Garamond',serif;
+}
+body.world-telostia .char-detail-story{color:rgba(180,230,245,.65);}
+.char-detail-close{
+  position:absolute;top:12px;right:12px;
+  background:rgba(0,0,0,.5);border:1px solid rgba(200,168,75,.2);
+  color:rgba(200,168,75,.6);font-size:.7rem;padding:5px 10px;cursor:pointer;
+  transition:all .2s;z-index:2;
+}
+.char-detail-close:hover{border-color:rgba(200,168,75,.6);color:rgba(200,168,75,.95);}
+
+/* ═══════════════════════════════════════════
+   SCENE VIEWER
+═══════════════════════════════════════════ */
+#scene-viewer{flex-direction:column;background:transparent;}
+
+.scene-bg-img{
+  position:fixed;inset:0;z-index:0;
+  background-size:cover;background-position:center;
+  opacity:0;transition:opacity 1s;pointer-events:none;
+}
+.scene-bg-img.show{opacity:1;}
+.scene-bg-img::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(8,4,12,.96) 0%,rgba(8,4,12,.4) 55%,rgba(8,4,12,.18) 100%);
+}
+
+/* Afstasia viewer — candlelight vignette */
+.af-vignette{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 50%,transparent 40%,rgba(5,2,8,.7) 100%);
+  opacity:0;transition:opacity 1.5s;
+}
+body.world-afstasia #scene-viewer:not(.hidden) .af-vignette{opacity:1;}
+
+.hud{
+  position:fixed;top:16px;left:16px;z-index:20;
+  display:flex;gap:6px;align-items:center;
+}
+.hud-btn{
+  background:rgba(8,4,12,.85);border:1px solid var(--c-line);color:var(--c-dim);
+  font-size:.52rem;letter-spacing:.22em;padding:6px 12px;cursor:pointer;
+  transition:all .2s;font-family:'Cormorant Garamond',serif;
+  text-transform:uppercase;backdrop-filter:blur(12px);
+}
+body.world-telostia .hud-btn{font-family:'Share Tech Mono',monospace;font-size:.6rem;}
+.hud-btn:hover{border-color:var(--c-prime);color:var(--c-prime);}
+.hud-btn.active{border-color:var(--te-cyan);color:var(--te-cyan);}
+
+/* BGM wave */
+.bgm-wave{display:none;align-items:flex-end;gap:1px;height:10px;}
+.bgm-wave span{display:block;width:2px;background:currentColor;border-radius:1px;animation:wave .8s ease-in-out infinite;}
+.bgm-wave span:nth-child(1){height:4px;}
+.bgm-wave span:nth-child(2){height:7px;animation-delay:.15s;}
+.bgm-wave span:nth-child(3){height:10px;animation-delay:.3s;}
+.bgm-wave span:nth-child(4){height:5px;animation-delay:.45s;}
+@keyframes wave{0%,100%{transform:scaleY(.4);}50%{transform:scaleY(1);}}
+#bgm-btn.active .bgm-icon-s::after{content:'';}
+#bgm-btn.active .bgm-wave{display:flex;}
+.bgm-icon-s::after{content:'♪';}
+
+/* Chars */
+.char-area{
+  position:fixed;bottom:210px;left:0;right:0;
+  display:flex;justify-content:center;gap:80px;
+  pointer-events:none;z-index:5;
+}
+.char-sprite{
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  opacity:.08;transition:opacity .6s,transform .6s;transform:translateY(16px);
+}
+.char-sprite.speaking{opacity:1;transform:translateY(0);}
+.char-sprite.side{opacity:.25;transform:translateY(7px);}
+
+/* Dynamic char body — color from data */
+.char-body{
+  width:80px;height:185px;border-radius:40px 40px 6px 6px;
+  position:relative;overflow:hidden;
+}
+.char-hair{position:absolute;top:0;left:0;right:0;height:68px;border-radius:40px 40px 0 0;}
+.char-nametag{
+  font-family:'Cinzel',serif;font-size:.5rem;letter-spacing:.28em;
+  text-transform:uppercase;color:rgba(200,180,150,.3);transition:color .4s;
+}
+.char-sprite.speaking .char-nametag{color:rgba(200,180,150,.88);}
+
+/* Progress */
+.progress-row{
+  position:fixed;bottom:218px;left:0;right:0;z-index:10;
+  display:flex;align-items:center;gap:8px;padding:0 22px;
+}
+.pdots{display:flex;gap:5px;flex-wrap:wrap;}
+.pdot{width:5px;height:5px;border-radius:50%;background:rgba(80,60,80,.5);transition:background .3s,transform .3s;}
+.pdot.active{background:var(--c-prime);transform:scale(1.4);}
+.pdot.done{background:rgba(200,168,75,.28);}
+.pnum{font-family:'Cormorant Garamond',serif;font-size:.57rem;letter-spacing:.2em;color:rgba(120,100,100,.6);margin-left:auto;}
+body.world-telostia .pnum{font-family:'Share Tech Mono',monospace;}
+
+/* Namplate */
+.name-plate{
+  position:fixed;bottom:194px;left:22px;z-index:10;
+  display:inline-flex;align-items:center;
+  opacity:0;transform:translateY(5px);transition:opacity .3s,transform .3s;
+}
+.name-plate.show{opacity:1;transform:none;}
+.name-tag{
+  background:var(--c-s1);border:1px solid var(--c-prime);border-bottom:none;
+  padding:5px 18px;font-size:.8rem;font-weight:300;letter-spacing:.35em;
+  color:var(--c-prime2);position:relative;font-family:'Noto Serif JP',serif;
+}
+body.world-telostia .name-tag{font-family:'Share Tech Mono',monospace;font-size:.7rem;}
+.name-tag::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--c-prime);}
+.name-tag[style*="--char-color"]{
+  border-color:var(--char-color,var(--c-prime));
+  color:var(--char-color2,var(--c-prime2));
+}
+.name-tag[style*="--char-color"]::before{background:var(--char-color,var(--c-prime));}
+
+/* Dialogue */
+.dialogue-box{
+  position:fixed;bottom:0;left:0;right:0;z-index:10;
+  padding:20px 24px 24px;min-height:194px;
+  background:var(--c-s1);border-top:1px solid var(--c-line);
+  backdrop-filter:blur(16px);box-shadow:0 -4px 60px rgba(0,0,0,.6);
+  cursor:pointer;
+}
+/* Afstasia: ornate top border */
+body.world-afstasia .dialogue-box::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--af-gold),rgba(200,168,75,.3),var(--af-gold),transparent);
+  opacity:.5;
+}
+/* Telostia: scan-line effect */
+body.world-telostia .dialogue-box::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--te-cyan),var(--te-lav2),var(--te-cyan),transparent);
+  opacity:.45;
+}
+.dialogue-text{
+  font-size:clamp(.88rem,2vw,1.06rem);font-weight:300;
+  line-height:2;color:var(--c-text);letter-spacing:.05em;min-height:62px;
+}
+body.world-telostia .dialogue-text{
+  font-family:'Noto Serif JP',serif;letter-spacing:.04em;
+}
+.dialogue-text .cursor{
+  display:inline-block;width:1px;height:13px;
+  background:var(--c-prime);margin-left:2px;
+  vertical-align:middle;animation:blink .85s infinite;
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+.dialogue-footer{
+  display:flex;align-items:center;justify-content:space-between;margin-top:12px;
+}
+.voice-btn{
+  display:flex;align-items:center;gap:6px;background:none;
+  border:1px solid rgba(200,168,75,.15);color:rgba(120,100,100,.6);
+  padding:5px 12px;font-family:'Cormorant Garamond',serif;font-size:.58rem;
+  letter-spacing:.2em;cursor:pointer;transition:all .2s;
+}
+.voice-btn:hover:not(.no-audio){border-color:var(--c-prime);color:var(--c-prime);}
+.voice-btn.playing{border-color:var(--te-cyan);color:var(--te-cyan);}
+.voice-btn.no-audio{opacity:.18;cursor:default;}
+.next-arrow{
+  display:flex;align-items:center;gap:5px;
+  font-family:'Cormorant Garamond',serif;font-size:.58rem;
+  letter-spacing:.28em;color:rgba(120,100,100,.6);
+  animation:arrowPulse 1.7s ease-in-out infinite;
+}
+body.world-telostia .next-arrow{font-family:'Share Tech Mono',monospace;font-size:.6rem;}
+.next-arrow.hidden{opacity:0;}
+@keyframes arrowPulse{0%,100%{opacity:.3;transform:translateX(0);}50%{opacity:.9;transform:translateX(5px);}}
+
+/* ═══════════════════════════════════════════
+   SETTINGS PANEL (user-facing)
+═══════════════════════════════════════════ */
+.settings-overlay{
+  position:fixed;inset:0;z-index:65;
+  background:rgba(5,3,10,.88);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.settings-overlay.open{opacity:1;pointer-events:all;}
+.settings-panel{
+  width:min(440px,90vw);
+  background:var(--c-s1);border:1px solid var(--c-line);
+  padding:0;transform:translateY(18px);transition:transform .3s;
+}
+.settings-overlay.open .settings-panel{transform:none;}
+.settings-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;border-bottom:1px solid var(--c-line);
+}
+.settings-title{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.38em;
+  color:var(--c-prime2);text-transform:uppercase;
+}
+body.world-telostia .settings-title{font-family:'Share Tech Mono',monospace;}
+.settings-close{
+  background:none;border:1px solid var(--c-line);color:var(--c-dim);
+  font-size:.6rem;padding:4px 10px;cursor:pointer;transition:all .2s;
+}
+.settings-close:hover{border-color:var(--c-prime);color:var(--c-prime);}
+.settings-body{padding:20px;}
+.setting-row{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:20px;
+}
+.setting-row:last-child{margin-bottom:0;}
+.setting-label{
+  font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.25em;
+  color:rgba(200,168,75,.55);text-transform:uppercase;
+}
+body.world-telostia .setting-label{font-family:'Share Tech Mono',monospace;color:rgba(58,176,200,.55);}
+.setting-control{display:flex;align-items:center;gap:10px;}
+.vol-slider{
+  -webkit-appearance:none;appearance:none;
+  width:120px;height:2px;background:rgba(200,168,75,.18);outline:none;cursor:pointer;
+}
+.vol-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:12px;height:12px;background:var(--c-prime);cursor:pointer;
+  clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);
+}
+.vol-val{
+  font-family:'Cormorant Garamond',serif;font-size:.68rem;
+  color:var(--c-prime2);min-width:28px;text-align:right;
+}
+body.world-telostia .vol-val{font-family:'Share Tech Mono',monospace;}
+.font-btns{display:flex;gap:4px;}
+.font-btn{
+  background:none;border:1px solid var(--c-line);color:var(--c-dim);
+  padding:4px 10px;cursor:pointer;transition:all .2s;
+  font-family:'Cormorant Garamond',serif;font-size:.72rem;
+}
+.font-btn:hover,.font-btn.active{border-color:var(--c-prime);color:var(--c-prime);background:rgba(200,168,75,.07);}
+.reset-read-btn{
+  background:none;border:1px solid rgba(180,80,80,.28);color:rgba(180,80,80,.55);
+  font-family:'Cinzel',serif;font-size:.52rem;letter-spacing:.2em;
+  padding:6px 14px;cursor:pointer;transition:all .2s;text-transform:uppercase;
+}
+.reset-read-btn:hover{border-color:rgba(220,80,80,.6);color:rgba(220,80,80,.9);}
+.settings-divider{height:1px;background:var(--c-line);margin:10px 0 20px;}
+.settings-section-label{
+  font-family:'Cormorant Garamond',serif;font-size:.62rem;letter-spacing:.25em;
+  color:rgba(160,140,130,.35);margin-bottom:14px;
+}
+
+/* Settings gear icon */
+.settings-corner{
+  position:fixed;bottom:18px;right:60px;z-index:20;
+  background:none;border:1px solid var(--c-line);
+  color:rgba(200,168,75,.3);font-size:.85rem;
+  width:32px;height:32px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .3s;
+}
+.settings-corner:hover{border-color:var(--c-prime);color:var(--c-prime);}
+
+/* ═══════════════════════════════════════════
+   SHARE PAGE
+═══════════════════════════════════════════ */
+#share-screen{
+  flex-direction:column;justify-content:flex-start;align-items:center;
+  padding:52px 28px 36px;overflow-y:auto;
+}
+.share-wrap{position:relative;z-index:2;width:100%;max-width:580px;}
+.share-notice{
+  background:rgba(22,10,14,.8);border:1px solid rgba(200,168,75,.15);
+  padding:16px 20px;margin-bottom:24px;
+}
+.share-notice-text{
+  font-family:'Cormorant Garamond',serif;font-size:.78rem;
+  line-height:1.9;color:rgba(200,185,160,.55);letter-spacing:.05em;
+}
+.share-url-row{
+  display:flex;gap:8px;align-items:center;margin-top:10px;
+}
+.share-url-input{
+  flex:1;background:rgba(10,6,12,.8);border:1px solid rgba(200,168,75,.18);
+  padding:8px 12px;color:rgba(220,205,180,.8);
+  font-family:'Share Tech Mono',monospace;font-size:.72rem;outline:none;
+}
+.share-url-input:focus{border-color:rgba(200,168,75,.45);}
+.share-copy-btn{
+  background:none;border:1px solid rgba(200,168,75,.3);color:rgba(200,168,75,.7);
+  font-family:'Cinzel',serif;font-size:.54rem;letter-spacing:.2em;
+  padding:8px 16px;cursor:pointer;transition:all .2s;text-transform:uppercase;
+}
+.share-copy-btn:hover{background:rgba(200,168,75,.08);color:rgba(200,168,75,1);}
+.share-copy-btn.copied{border-color:rgba(80,200,120,.5);color:rgba(80,200,120,.9);}
+.share-screenshot-notice{
+  background:rgba(10,8,18,.6);border:1px solid rgba(200,168,75,.08);
+  padding:12px 16px;margin-top:16px;
+  font-family:'Cormorant Garamond',serif;font-size:.68rem;
+  line-height:1.8;color:rgba(180,165,145,.45);
+}
+.share-screenshot-notice strong{color:rgba(200,168,75,.65);}
+
+/* Screenshot overlay */
+.screenshot-flash{
+  position:fixed;inset:0;z-index:999;background:white;
+  opacity:0;pointer-events:none;
+}
+.screenshot-flash.flash{animation:flashAnim .6s ease forwards;}
+@keyframes flashAnim{0%{opacity:0;}15%{opacity:0.9;}100%{opacity:0;}}
+.screenshot-msg{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  z-index:998;background:rgba(8,4,12,.95);border:1px solid rgba(200,168,75,.4);
+  padding:18px 36px;opacity:0;pointer-events:none;transition:opacity .3s;
+  font-family:'Cinzel',serif;font-size:.75rem;letter-spacing:.3em;
+  color:rgba(200,168,75,.9);text-align:center;
+}
+.screenshot-msg.show{opacity:1;}
+
+/* ═══════════════════════════════════════════
+   ADMIN / PIN LOGIN
+═══════════════════════════════════════════ */
+.pin-overlay{
+  position:fixed;inset:0;z-index:80;
+  background:rgba(5,3,10,.97);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.pin-overlay.open{opacity:1;pointer-events:all;}
+.pin-box{
+  width:min(340px,88vw);
+  background:rgba(14,8,18,.98);border:1px solid rgba(200,168,75,.28);
+  padding:32px 28px;text-align:center;
+  transform:scale(.96);transition:transform .3s;
+}
+.pin-overlay.open .pin-box{transform:scale(1);}
+.pin-title{
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.45em;
+  color:rgba(200,168,75,.65);text-transform:uppercase;margin-bottom:24px;
+}
+.pin-dots{display:flex;gap:14px;justify-content:center;margin-bottom:24px;}
+.pin-dot-display{
+  width:14px;height:14px;border-radius:50%;
+  border:1px solid rgba(200,168,75,.3);background:transparent;transition:background .2s;
+}
+.pin-dot-display.filled{background:rgba(200,168,75,.8);}
+.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.pin-key{
+  background:rgba(20,12,24,.8);border:1px solid rgba(200,168,75,.12);
+  color:rgba(200,168,75,.75);font-family:'Cinzel',serif;
+  font-size:.88rem;padding:14px;cursor:pointer;transition:all .18s;
+}
+.pin-key:hover{background:rgba(200,168,75,.1);border-color:rgba(200,168,75,.4);}
+.pin-key:active{transform:scale(.95);}
+.pin-key.clear{color:rgba(180,80,80,.65);font-size:.65rem;letter-spacing:.2em;}
+.pin-key.clear:hover{border-color:rgba(180,80,80,.4);}
+.pin-error{
+  font-family:'Cormorant Garamond',serif;font-size:.7rem;letter-spacing:.2em;
+  color:rgba(200,80,80,.8);margin-top:12px;height:20px;
+  animation:shake .3s ease;
+}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+.pin-cancel{
+  background:none;border:none;color:rgba(200,168,75,.3);
+  font-family:'Cormorant Garamond',serif;font-size:.65rem;letter-spacing:.2em;
+  cursor:pointer;margin-top:18px;display:block;width:100%;transition:color .2s;
+}
+.pin-cancel:hover{color:rgba(200,168,75,.7);}
+
+/* ═══════════════════════════════════════════
+   ADMIN PANEL
+═══════════════════════════════════════════ */
+.admin-overlay{
+  position:fixed;inset:0;z-index:75;
+  background:rgba(5,3,10,.98);
+  display:none;flex-direction:column;overflow-y:auto;
+}
+.admin-overlay.show{display:flex;}
+.admin-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 22px;border-bottom:1px solid var(--af-line);flex-shrink:0;
+  background:rgba(14,8,18,.9);
+}
+.admin-title{
+  font-family:'Cinzel',serif;font-size:.75rem;letter-spacing:.45em;
+  color:rgba(200,168,75,.75);text-transform:uppercase;
+}
+.admin-header-btns{display:flex;gap:8px;}
+.admin-tab-bar{
+  display:flex;border-bottom:1px solid var(--af-line);flex-shrink:0;
+  background:rgba(10,6,14,.8);
+}
+.admin-tab{
+  padding:10px 22px;background:none;border:none;border-bottom:2px solid transparent;
+  color:rgba(200,168,75,.4);font-family:'Cinzel',serif;font-size:.58rem;
+  letter-spacing:.28em;cursor:pointer;transition:all .25s;text-transform:uppercase;
+}
+.admin-tab:hover{color:rgba(200,168,75,.7);}
+.admin-tab.active{border-bottom-color:rgba(200,168,75,.7);color:rgba(200,168,75,.95);}
+.admin-body{padding:20px 22px;flex:1;}
+.admin-tab-content{display:none;}
+.admin-tab-content.active{display:block;}
+
+/* Admin sections */
+.admin-section{
+  background:rgba(18,10,22,.7);border:1px solid rgba(200,168,75,.08);
+  padding:16px;margin-bottom:14px;
+}
+.admin-section-title{
+  font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.3em;
+  color:rgba(200,168,75,.55);text-transform:uppercase;margin-bottom:14px;
+  border-bottom:1px solid rgba(200,168,75,.08);padding-bottom:8px;
+}
+.admin-field{margin-bottom:12px;}
+.admin-label{
+  font-family:'Cormorant Garamond',serif;font-size:.6rem;
+  letter-spacing:.22em;color:rgba(150,130,120,.6);
+  display:block;margin-bottom:5px;text-transform:uppercase;
+}
+.admin-input{
+  width:100%;background:rgba(8,4,12,.8);border:1px solid rgba(200,168,75,.08);
+  border-bottom:1px solid rgba(200,168,75,.22);padding:7px 10px;
+  font-family:'Noto Serif JP',serif;font-size:.8rem;font-weight:300;
+  color:rgba(240,228,208,.9);outline:none;transition:border-color .2s;
+}
+.admin-input:focus{border-bottom-color:var(--te-cyan);}
+.admin-input::placeholder{color:rgba(80,65,70,.7);}
+textarea.admin-input{resize:vertical;min-height:60px;line-height:1.8;}
+.admin-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;}
+.admin-btn{
+  background:none;border:1px solid rgba(200,168,75,.2);
+  color:rgba(200,168,75,.6);font-family:'Cinzel',serif;font-size:.55rem;
+  letter-spacing:.22em;padding:7px 16px;cursor:pointer;transition:all .2s;
+  text-transform:uppercase;
+}
+.admin-btn:hover{border-color:rgba(200,168,75,.55);color:rgba(200,168,75,.95);}
+.admin-btn.primary{border-color:var(--te-cyan);color:var(--te-cyan);}
+.admin-btn.primary:hover{background:rgba(58,176,200,.07);}
+.admin-btn.danger{border-color:rgba(180,60,60,.3);color:rgba(180,80,80,.6);}
+.admin-btn.danger:hover{border-color:rgba(220,80,80,.6);color:rgba(220,90,90,.95);}
+
+/* Admin char list */
+.admin-char-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.admin-char-item{
+  display:flex;align-items:center;gap:12px;
+  background:rgba(10,6,14,.8);border:1px solid rgba(200,168,75,.08);
+  padding:10px 14px;
+}
+.admin-char-dot{
+  width:10px;height:10px;border-radius:50%;flex-shrink:0;
+}
+.admin-char-info{flex:1;}
+.admin-char-name{font-family:'Cormorant Garamond',serif;font-size:.88rem;color:rgba(230,215,195,.85);}
+.admin-char-world{font-family:'Cinzel',serif;font-size:.48rem;letter-spacing:.2em;color:rgba(160,140,120,.4);margin-top:2px;}
+.admin-char-btns{display:flex;gap:5px;}
+.admin-char-btn{
+  background:none;border:1px solid rgba(200,168,75,.12);color:rgba(200,168,75,.45);
+  font-size:.55rem;padding:3px 9px;cursor:pointer;transition:all .2s;
+  font-family:'Cormorant Garamond',serif;letter-spacing:.1em;
+}
+.admin-char-btn:hover{border-color:rgba(200,168,75,.45);color:rgba(200,168,75,.9);}
+.admin-char-btn.del{border-color:rgba(180,60,60,.15);color:rgba(180,80,80,.45);}
+.admin-char-btn.del:hover{border-color:rgba(220,80,80,.5);color:rgba(220,80,80,.9);}
+
+/* Admin scene list */
+.admin-scene-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.admin-scene-item{
+  background:rgba(10,6,14,.8);border:1px solid rgba(200,168,75,.08);
+  padding:10px 14px;display:flex;align-items:center;gap:10px;
+}
+.admin-scene-item-info{flex:1;}
+.admin-scene-item-name{font-family:'Cormorant Garamond',serif;font-size:.9rem;color:rgba(230,215,195,.85);}
+.admin-scene-item-meta{font-family:'Cinzel',serif;font-size:.48rem;letter-spacing:.18em;color:rgba(160,140,120,.4);margin-top:2px;}
+.admin-scene-item-btns{display:flex;gap:5px;}
+
+/* ═══════════════════════════════════════════
+   SCENE EDIT OVERLAY
+═══════════════════════════════════════════ */
+.edit-overlay{
+  display:none;position:fixed;inset:0;z-index:85;
+  background:rgba(5,3,10,.98);flex-direction:column;overflow-y:auto;
+}
+.edit-overlay.show{display:flex;}
+.edit-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 22px;border-bottom:1px solid var(--af-line);flex-shrink:0;
+  background:rgba(10,6,14,.95);
+}
+.edit-title-lbl{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.4em;color:var(--af-gold);}
+.edit-close-btn{
+  background:none;border:1px solid var(--af-line);color:var(--af-dim);
+  font-size:.58rem;letter-spacing:.2em;padding:5px 12px;cursor:pointer;
+  transition:all .2s;font-family:'Cormorant Garamond',serif;
+}
+.edit-close-btn:hover{border-color:var(--af-gold);color:var(--af-gold);}
+.edit-body{padding:16px 22px;flex:1;}
+.edit-hint{
+  font-size:.67rem;color:var(--af-dim);letter-spacing:.04em;margin-bottom:16px;
+  line-height:1.9;border-left:2px solid var(--af-line);padding-left:12px;
+}
+.bgm-section{
+  background:rgba(22,10,18,.8);border:1px solid var(--af-line);
+  padding:10px 14px;margin-bottom:16px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+}
+.bgm-section-lbl{font-family:'Cinzel',serif;font-size:.56rem;letter-spacing:.28em;color:var(--af-gold);}
+.bgm-load-btn{
+  background:none;border:1px dashed rgba(200,168,75,.25);color:var(--af-dim);
+  font-size:.56rem;letter-spacing:.18em;padding:5px 10px;cursor:pointer;
+  transition:all .2s;font-family:'Cormorant Garamond',serif;
+  display:flex;align-items:center;gap:4px;
+}
+.bgm-load-btn:hover{border-color:var(--af-gold);color:var(--af-gold);}
+.bgm-status{font-family:'Cormorant Garamond',serif;font-size:.6rem;letter-spacing:.12em;color:var(--te-cyan);}
+.line-card{
+  background:rgba(18,10,22,.8);border:1px solid var(--af-line);
+  padding:14px 16px;margin-bottom:7px;
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;position:relative;
+}
+.line-card-full{grid-column:1/-1;}
+.field-label{
+  font-family:'Cormorant Garamond',serif;font-size:.56rem;
+  letter-spacing:.24em;color:var(--af-dim);margin-bottom:4px;text-transform:uppercase;
+}
+.field-input{
+  width:100%;background:rgba(8,4,12,.8);border:1px solid rgba(200,168,75,.06);
+  border-bottom:1px solid rgba(200,168,75,.2);padding:6px 9px;
+  font-family:'Noto Serif JP',serif;font-size:.76rem;font-weight:300;
+  color:rgba(240,228,208,.9);outline:none;transition:border-color .2s;
+}
+.field-input:focus{border-bottom-color:var(--te-cyan);}
+.field-input::placeholder{color:rgba(80,65,70,.7);}
+textarea.field-input{resize:vertical;min-height:56px;line-height:1.8;}
+select.field-input{cursor:pointer;}
+select.field-input option{background:#0e0810;}
+.card-num{
+  position:absolute;top:9px;right:38px;
+  font-family:'Cormorant Garamond',serif;font-size:.52rem;
+  letter-spacing:.18em;color:var(--af-dim);
+}
+.card-del{
+  position:absolute;top:7px;right:10px;background:none;border:none;
+  color:var(--af-dim);font-size:.78rem;cursor:pointer;padding:2px 5px;transition:color .2s;
+}
+.card-del:hover{color:#c07070;}
+.voice-load-row{display:flex;align-items:center;gap:8px;margin-top:3px;}
+.voice-load-btn{
+  background:none;border:1px dashed rgba(58,176,200,.25);color:var(--af-dim);
+  font-size:.53rem;letter-spacing:.16em;padding:4px 8px;cursor:pointer;
+  transition:all .2s;font-family:'Cormorant Garamond',serif;
+  display:flex;align-items:center;gap:4px;
+}
+.voice-load-btn:hover{border-color:var(--te-cyan);color:var(--te-cyan);}
+.voice-badge{font-family:'Cormorant Garamond',serif;font-size:.53rem;letter-spacing:.1em;color:var(--te-cyan);}
+.edit-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.act-btn{
+  background:none;border:1px solid var(--af-line);color:var(--af-dim);
+  font-size:.56rem;letter-spacing:.2em;padding:7px 14px;cursor:pointer;
+  transition:all .2s;font-family:'Cormorant Garamond',serif;
+}
+.act-btn:hover{border-color:var(--af-gold);color:var(--af-gold);}
+.act-btn.primary{border-color:var(--te-cyan);color:var(--te-cyan);}
+.act-btn.primary:hover{background:rgba(58,176,200,.06);}
+
+/* ═══════════════════════════════════════════
+   MODALS
+═══════════════════════════════════════════ */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);
+  backdrop-filter:blur(5px);z-index:90;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .28s;
+}
+.modal-bg.open{opacity:1;pointer-events:all;}
+.modal{
+  background:rgba(14,8,20,.98);border:1px solid rgba(200,168,75,.3);
+  padding:26px;width:min(460px,90vw);
+  transform:translateY(14px);transition:transform .28s;
+}
+.modal-bg.open .modal{transform:none;}
+.modal-title{
+  font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.4em;
+  color:rgba(200,168,75,.8);margin-bottom:20px;
+}
+.modal-field{margin-bottom:12px;}
+.modal-label{
+  font-family:'Cinzel',serif;font-size:.52rem;letter-spacing:.22em;
+  color:rgba(200,168,75,.42);display:block;margin-bottom:5px;text-transform:uppercase;
+}
+.modal-input{
+  width:100%;padding:7px 10px;
+  background:rgba(255,255,255,.025);border:1px solid rgba(200,168,75,.16);
+  color:rgba(240,228,208,.9);font-family:'Noto Serif JP',serif;
+  font-size:.86rem;outline:none;transition:border-color .3s;
+}
+.modal-input:focus{border-color:rgba(200,168,75,.42);}
+textarea.modal-input{resize:vertical;min-height:70px;line-height:1.8;}
+select.modal-input option{background:#0e0810;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;}
+.modal-cancel,.modal-confirm{
+  padding:7px 20px;border:1px solid rgba(200,168,75,.25);
+  background:transparent;color:rgba(200,168,75,.6);
+  font-family:'Cinzel',serif;font-size:.54rem;letter-spacing:.2em;cursor:pointer;transition:all .3s;
+}
+.modal-confirm{
+  border-color:rgba(200,168,75,.55);background:rgba(200,168,75,.07);
+  color:rgba(200,168,75,1);
+}
+.modal-confirm:hover{background:rgba(200,168,75,.16);}
+.modal-cancel:hover{border-color:rgba(200,168,75,.45);}
+
+/* ═══════════════════════════════════════════
+   MISC
+═══════════════════════════════════════════ */
+@media(max-width:580px){
+  .line-card{grid-template-columns:1fr;}
+  .char-area{gap:36px;}
+  .char-body{width:62px;height:145px;}
+  .char-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));}
+}
+.hidden{opacity:0 !important;pointer-events:none !important;}
+
+/* Afstasia scrollbar */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:rgba(10,6,12,.5);}
+::-webkit-scrollbar-thumb{background:rgba(200,168,75,.2);}
+body.world-telostia ::-webkit-scrollbar-thumb{background:rgba(58,176,200,.2);}
+
+/* Afstasia cursor */
+body.world-afstasia{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Cpath d='M4 2 L10 18 L13 11 L20 8 Z' fill='%23c8a84b' opacity='0.8'/%3E%3C/svg%3E") 4 2,auto;}
+</style>
+</head>
+<body class="world-afstasia">
+
+<!-- BACKGROUNDS -->
+<div class="bg-layer bg-af" id="bg-af"></div>
+<div class="bg-layer bg-te" id="bg-te"></div>
+<div class="stars" id="stars"></div>
+<div class="af-particles" id="af-particles"></div>
+<div class="te-grid" id="te-grid"></div>
+<div class="mist-layer" id="mist-layer"></div>
+<div class="af-vignette"></div>
+
+<!-- SCREENSHOT EFFECTS -->
+<div class="screenshot-flash" id="ss-flash"></div>
+<div class="screenshot-msg" id="ss-msg">— スクリーンショットを検知しました —</div>
+
+<!-- ════════════════════════════════════
+  TITLE SCREEN
+════════════════════════════════════ -->
+<div class="screen" id="title-screen">
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="title-logo-wrap">
+      <img class="title-logo" id="logo-img" src="1000016486.png" alt="ArcadicOff"
+           onerror="this.style.display='none';document.getElementById('logo-fallback').style.display='block'">
+      <div id="logo-fallback">ArcadicOff</div>
+      <div class="title-sub">— Arcadia is Off the Map —</div>
+      <div class="af-ornament"></div>
+    </div>
+    <div class="world-toggle">
+      <button class="w-btn active" id="btn-af" onclick="switchWorld('afstasia')">
+        <span class="wicon">☀</span>AFSTASIA
+      </button>
+      <button class="w-btn" id="btn-te" onclick="switchWorld('telostia')">
+        <span class="wicon">◈</span>TELOSTIA
+      </button>
+    </div>
+    <div class="title-menu">
+      <button class="title-menu-btn" onclick="showSceneSelect()">▷ &nbsp;SCENE</button>
+      <button class="title-menu-btn secondary" onclick="showCharSelect()">◆ &nbsp;CHARACTERS</button>
+      <button class="title-menu-btn secondary" onclick="showShare()">⟁ &nbsp;SHARE</button>
+    </div>
+  </div>
+  <div class="v-tag">— version 0.2 —</div>
+  <button class="admin-corner" title="管理者" onclick="openPinLogin()">⚙</button>
+  <button class="admin-corner" title="バックアップ" onclick="openBackupPanel()" style="left:60px;">💾</button>
+  <button class="settings-corner" onclick="openSettings()">⚙</button>
+</div>
+
+<!-- ════════════════════════════════════
+  SCENE SELECT
+════════════════════════════════════ -->
+<div class="screen hidden" id="scene-select">
+  <div class="ss-overlay"></div>
+  <div class="ss-frame"></div>
+  <div class="ss-wrap">
+    <div class="ss-header">
+      <div class="ss-title" id="ss-title-label">— Scene Select —</div>
+      <div class="ss-hbtns">
+        <button class="ss-btn" onclick="showTitle()">← Back</button>
+      </div>
+    </div>
+    <div class="scene-list" id="scene-list"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+  CHARACTER SELECT
+════════════════════════════════════ -->
+<div class="screen hidden" id="char-select">
+  <div class="ss-overlay"></div>
+  <div class="ss-frame"></div>
+  <div class="ss-wrap" style="position:relative;z-index:2;width:100%;max-width:680px;">
+    <div class="ss-header">
+      <div class="ss-title" id="cs-title-label">— Characters —</div>
+      <div class="ss-hbtns">
+        <button class="ss-btn" onclick="showTitle()">← Back</button>
+      </div>
+    </div>
+    <div class="char-grid" id="char-grid"></div>
+  </div>
+</div>
+
+<!-- CHARACTER DETAIL -->
+<div class="char-detail-overlay" id="char-detail-overlay">
+  <div class="char-detail">
+    <button class="char-detail-close" onclick="closeCharDetail()">× 閉じる</button>
+    <div class="char-detail-hero" id="char-detail-hero">
+      <div class="no-img-lg">✦</div>
+    </div>
+    <div class="char-detail-body">
+      <div class="char-detail-name" id="char-detail-name">—</div>
+      <div class="char-detail-meta" id="char-detail-meta"></div>
+      <div class="char-detail-story" id="char-detail-story"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+  SHARE SCREEN
+════════════════════════════════════ -->
+<div class="screen hidden" id="share-screen">
+  <div class="ss-overlay"></div>
+  <div class="ss-frame"></div>
+  <div class="share-wrap" style="position:relative;z-index:2;">
+    <div class="ss-header">
+      <div class="ss-title">— Share —</div>
+      <button class="ss-btn" onclick="showTitle()">← Back</button>
+    </div>
+    <div class="share-notice">
+      <div class="share-notice-text">
+        このページのURLを共有して、他の人にも ArcadicOff を体験してもらえます。<br>
+        管理者が設定したURLを下に入力してください。
+      </div>
+    </div>
+    <div style="background:rgba(18,10,22,.7);border:1px solid rgba(200,168,75,.1);padding:16px 20px;margin-bottom:14px;">
+      <div style="font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.3em;color:rgba(200,168,75,.5);margin-bottom:12px;text-transform:uppercase;">共有 URL</div>
+      <div class="share-url-row">
+        <input class="share-url-input" id="share-url-display" readonly placeholder="管理者によってURLが設定されると表示されます">
+        <button class="share-copy-btn" id="share-copy-btn" onclick="copyShareUrl()">Copy</button>
+      </div>
+    </div>
+    <div class="share-screenshot-notice">
+      <strong>スクリーンショット保護について：</strong><br>
+      このサイトはスクリーンショット検知機能を試験的に導入しています。<br>
+      スクリーンショット操作を検知した場合、画面上に通知が表示されます。<br>
+      ※完全なブロックは技術的に不可能ですが、制作者への通知・記録が目的です。
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+  SCENE VIEWER
+════════════════════════════════════ -->
+<div class="screen hidden" id="scene-viewer">
+  <div class="scene-bg-img" id="scene-bg-img"></div>
+  <div class="hud">
+    <button class="hud-btn" onclick="backToSelect()">← Menu</button>
+    <button class="hud-btn" id="bgm-btn" onclick="toggleBgm()">
+      <span class="bgm-icon-s"></span>
+      <div class="bgm-wave"><span></span><span></span><span></span><span></span></div>
+      BGM
+    </button>
+  </div>
+  <div class="char-area" id="char-area"></div>
+  <div class="progress-row">
+    <div class="pdots" id="pdots"></div>
+    <div class="pnum" id="pnum"></div>
+  </div>
+  <div class="name-plate" id="name-plate">
+    <div class="name-tag" id="name-tag">—</div>
+  </div>
+  <div class="dialogue-box" onclick="handleTap()">
+    <div class="dialogue-text" id="dialogue-text"></div>
+    <div class="dialogue-footer">
+      <button class="voice-btn no-audio" id="voice-btn" onclick="handleVoice(event)">♪ &nbsp;voice</button>
+      <div class="next-arrow hidden" id="next-arrow">tap &nbsp;›</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+  SETTINGS PANEL
+════════════════════════════════════ -->
+<div class="settings-overlay" id="settings-overlay">
+  <div class="settings-panel">
+    <div class="settings-header">
+      <div class="settings-title">⚙ Settings</div>
+      <button class="settings-close" onclick="closeSettings()">× 閉じる</button>
+    </div>
+    <div class="settings-body">
+      <div class="settings-section-label">◈ Audio</div>
+      <div class="setting-row">
+        <div class="setting-label">BGM Volume</div>
+        <div class="setting-control">
+          <input type="range" class="vol-slider" id="bgm-vol" min="0" max="100" value="28" oninput="updateBgmVol(this.value)">
+          <div class="vol-val" id="bgm-vol-val">28</div>
+        </div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">SE Volume</div>
+        <div class="setting-control">
+          <input type="range" class="vol-slider" id="se-vol" min="0" max="100" value="70" oninput="updateSeVol(this.value)">
+          <div class="vol-val" id="se-vol-val">70</div>
+        </div>
+      </div>
+      <div class="settings-divider"></div>
+      <div class="settings-section-label">◈ Display</div>
+      <div class="setting-row">
+        <div class="setting-label">Font Size</div>
+        <div class="setting-control">
+          <div class="font-btns">
+            <button class="font-btn" onclick="setFontSize('small')">A</button>
+            <button class="font-btn active" onclick="setFontSize('medium')">A</button>
+            <button class="font-btn" style="font-size:1rem" onclick="setFontSize('large')">A</button>
+          </div>
+        </div>
+      </div>
+      <div class="settings-divider"></div>
+      <div class="settings-section-label">◈ Progress</div>
+      <div class="setting-row">
+        <div class="setting-label">既読シーン</div>
+        <div class="setting-control">
+          <button class="reset-read-btn" onclick="resetRead()">リセット</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+  PIN LOGIN
+════════════════════════════════════ -->
+<div class="pin-overlay" id="pin-overlay">
+  <div class="pin-box">
+    <div class="pin-title">— 管理者認証 —</div>
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot-display" id="pd0"></div>
+      <div class="pin-dot-display" id="pd1"></div>
+      <div class="pin-dot-display" id="pd2"></div>
+      <div class="pin-dot-display" id="pd3"></div>
+    </div>
+    <div class="pin-keypad">
+      <button class="pin-key" onclick="pinInput('1')">1</button>
+      <button class="pin-key" onclick="pinInput('2')">2</button>
+      <button class="pin-key" onclick="pinInput('3')">3</button>
+      <button class="pin-key" onclick="pinInput('4')">4</button>
+      <button class="pin-key" onclick="pinInput('5')">5</button>
+      <button class="pin-key" onclick="pinInput('6')">6</button>
+      <button class="pin-key" onclick="pinInput('7')">7</button>
+      <button class="pin-key" onclick="pinInput('8')">8</button>
+      <button class="pin-key" onclick="pinInput('9')">9</button>
+      <button class="pin-key clear" onclick="pinClear()">CLR</button>
+      <button class="pin-key" onclick="pinInput('0')">0</button>
+      <button class="pin-key" onclick="pinBackspace()">⌫</button>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
+    <button class="pin-cancel" onclick="closePinLogin()">キャンセル</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+  ADMIN PANEL
+════════════════════════════════════ -->
+<div class="admin-overlay" id="admin-overlay">
+  <div class="admin-header">
+    <div class="admin-title">✦ Admin Panel</div>
+    <div class="admin-header-btns">
+      <button class="admin-btn" onclick="closeAdmin()">× 閉じる</button>
+    </div>
+  </div>
+  <div class="admin-tab-bar">
+    <button class="admin-tab active" onclick="switchAdminTab('scenes')">Scenes</button>
+    <button class="admin-tab" onclick="switchAdminTab('chars')">Characters</button>
+    <button class="admin-tab" onclick="switchAdminTab('site')">Site</button>
+    <button class="admin-tab" onclick="switchAdminTab('share')">Share</button>
+  </div>
+  <div class="admin-body">
+    <!-- SCENES TAB -->
+    <div class="admin-tab-content active" id="admin-tab-scenes">
+      <div class="admin-section">
+        <div class="admin-section-title">シーン管理</div>
+        <div class="admin-scene-list" id="admin-scene-list"></div>
+        <div class="admin-actions">
+          <button class="admin-btn primary" onclick="adminOpenAddScene()">＋ シーンを追加</button>
+        </div>
+      </div>
+    </div>
+    <!-- CHARS TAB -->
+    <div class="admin-tab-content" id="admin-tab-chars">
+      <div class="admin-section">
+        <div class="admin-section-title">キャラクター管理</div>
+        <div class="admin-char-list" id="admin-char-list"></div>
+        <div class="admin-actions">
+          <button class="admin-btn primary" onclick="adminOpenAddChar()">＋ キャラクターを追加</button>
+        </div>
+      </div>
+    </div>
+    <!-- SITE TAB -->
+    <div class="admin-tab-content" id="admin-tab-site">
+      <div class="admin-section">
+        <div class="admin-section-title">サイト設定</div>
+        <div class="admin-field">
+          <label class="admin-label">サイトタイトル</label>
+          <input class="admin-input" id="site-title-input" value="ArcadicOff">
+        </div>
+        <div class="admin-field">
+          <label class="admin-label">サブタイトル</label>
+          <input class="admin-input" id="site-sub-input" value="— Arcadia is Off the Map —">
+        </div>
+        <div class="admin-field">
+          <label class="admin-label">Afstasia 世界説明</label>
+          <textarea class="admin-input" id="site-af-desc-input" style="min-height:50px">地上世界。貴族社会と古き血脈が支配する王国。</textarea>
+        </div>
+        <div class="admin-field">
+          <label class="admin-label">Telostia 世界説明</label>
+          <textarea class="admin-input" id="site-te-desc-input" style="min-height:50px">地下世界。魔法陣と錬金術の研究施設が広がる迷宮。</textarea>
+        </div>
+        <div class="admin-field">
+          <label class="admin-label">管理者PIN変更（新4桁）</label>
+          <input class="admin-input" id="new-pin-input" placeholder="例: 1234" maxlength="4" type="password">
+        </div>
+        <div class="admin-actions">
+          <button class="admin-btn primary" onclick="saveSiteSettings()">✓ 保存</button>
+        </div>
+      </div>
+    </div>
+    <!-- SHARE TAB -->
+    <div class="admin-tab-content" id="admin-tab-share">
+      <div class="admin-section">
+        <div class="admin-section-title">共有URL設定</div>
+        <div class="admin-field">
+          <label class="admin-label">共有ページURL</label>
+          <input class="admin-input" id="admin-share-url" placeholder="https://yoursite.com/arcadicoff">
+        </div>
+        <div class="admin-field">
+          <label class="admin-label">共有メッセージ</label>
+          <textarea class="admin-input" id="admin-share-msg" placeholder="シェア時のメッセージ（任意）" style="min-height:60px"></textarea>
+        </div>
+        <div class="admin-actions">
+          <button class="admin-btn primary" onclick="saveShareSettings()">✓ 保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCENE EDIT OVERLAY -->
+<div class="edit-overlay" id="edit-overlay">
+  <div class="edit-header">
+    <div class="edit-title-lbl" id="edit-overlay-title">✦ Script Editor</div>
+    <button class="edit-close-btn" onclick="closeSceneEdit()">× 閉じる</button>
+  </div>
+  <div class="edit-body">
+    <div class="edit-hint">
+      ▸ キャラ名・セリフを入力。ナレーションはキャラ名を空欄に。<br>
+      ▸ 話者カラーはキャラクター設定の色を使用。<br>
+      ▸ 各セリフに音声mp3を割り当て可能。BGMは下から読み込めます。
+    </div>
+    <div class="bgm-section">
+      <div class="bgm-section-lbl">♫ BGM</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span class="bgm-status" id="bgm-status">デモトーンを使用中</span>
+        <label class="bgm-load-btn">♪ mp3を読み込む<input type="file" accept="audio/*" style="display:none" onchange="loadBgmFile(event)"></label>
+      </div>
+    </div>
+    <div id="line-cards"></div>
+    <div class="edit-actions">
+      <button class="act-btn" onclick="addLineCard()">＋ セリフを追加</button>
+      <button class="act-btn primary" onclick="saveAndCloseEdit()">✓ 保存して閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD SCENE MODAL -->
+<div class="modal-bg" id="add-scene-modal">
+  <div class="modal">
+    <div class="modal-title">— Add Scene —</div>
+    <div class="modal-field"><label class="modal-label">Scene Title</label>
+      <input class="modal-input" id="new-scene-name" placeholder="シーンのタイトル"></div>
+    <div class="modal-field"><label class="modal-label">Description</label>
+      <input class="modal-input" id="new-scene-desc" placeholder="短い説明（任意）"></div>
+    <div class="modal-field"><label class="modal-label">World</label>
+      <select class="modal-input" id="new-scene-world">
+        <option value="afstasia">Afstasia</option>
+        <option value="telostia">Telostia</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal('add-scene-modal')">Cancel</button>
+      <button class="modal-confirm" onclick="confirmAddScene()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT CHAR MODAL -->
+<div class="modal-bg" id="char-modal">
+  <div class="modal">
+    <div class="modal-title" id="char-modal-title">— Add Character —</div>
+    <input type="hidden" id="char-modal-id">
+    <div class="modal-field"><label class="modal-label">名前</label>
+      <input class="modal-input" id="cm-name" placeholder="キャラクター名"></div>
+    <div class="modal-field"><label class="modal-label">役職 / 肩書き</label>
+      <input class="modal-input" id="cm-role" placeholder="例：王国の剣客"></div>
+    <div class="modal-field"><label class="modal-label">年齢・性別など</label>
+      <input class="modal-input" id="cm-meta" placeholder="例：27歳・男性"></div>
+    <div class="modal-field"><label class="modal-label">所属世界</label>
+      <select class="modal-input" id="cm-world">
+        <option value="afstasia">Afstasia</option>
+        <option value="telostia">Telostia</option>
+      </select>
+    </div>
+    <div class="modal-field"><label class="modal-label">立ち絵URL（任意）</label>
+      <input class="modal-input" id="cm-img" placeholder="https://..."></div>
+    <div class="modal-field"><label class="modal-label">キャラカラー（CSS色）</label>
+      <input class="modal-input" id="cm-color" placeholder="例：#c85858"></div>
+    <div class="modal-field"><label class="modal-label">背景ストーリー</label>
+      <textarea class="modal-input" id="cm-story" placeholder="キャラクターの説明・背景など"></textarea></div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal('char-modal')">Cancel</button>
+      <button class="modal-confirm" onclick="confirmSaveChar()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════
+let siteConfig = {
+  title: 'ArcadicOff',
+  sub: '— Arcadia is Off the Map —',
+  afDesc: '地上世界。貴族社会と古き血脈が支配する王国。',
+  teDesc: '地下世界。魔法陣と錬金術の研究施設が広がる迷宮。',
+  shareUrl: '',
+  shareMsg: '',
+  pin: '0000'
+};
+
+let characters = {
+  afstasia: [
+    {
+      id: 1, world: 'afstasia',
+      name: 'ミラン・レスファイファー',
+      role: '元王国騎士',
+      meta: '推定30代・男性',
+      img: '',
+      color: '#c85858',
+      color2: '#e88080',
+      story: '本名ミラン・アフタシア。かつてアフスタシア王国に仕えた騎士だったが、今は深山の館に隠棲している。人嫌いを装うが、その眼差しは常に誰かを探している。'
+    }
+  ],
+  telostia: [
+    {
+      id: 2, world: 'telostia',
+      name: 'スファレー',
+      role: '錬金術研究員',
+      meta: '年齢不詳・性別不明',
+      img: '',
+      color: '#9b8bc8',
+      color2: '#c4b8e8',
+      story: 'テロスティアの深層研究区に属する術士。魔法陣の設計を専門とし、地上の記録を収集することを生きがいとしている。感情が薄いようで、実は誰よりも深く物事を感じている。'
+    }
+  ]
+};
+
+let scenes = {
+  afstasia: [
+    {
+      id: 1, name: '日常会話 I', desc: '見惚れていた、ということにしておこう', world: 'afstasia',
+      lines: [
+        {char:'',charId:null,text:'——静かな夕暮れ時。かすかに風の音がする。'},
+        {char:'ミラン・レスファイファー',charId:1,text:'おい…おまえ。きいているのか？'},
+        {char:'ミラン・レスファイファー',charId:1,text:'私の言葉が聞こえないなら帰るといい。\n私は君と話している気にはなれないのだからね。'},
+        {char:'ミラン・レスファイファー',charId:1,text:'は？…考え事をしていたと。ゆるさん。'},
+        {char:'ミラン・レスファイファー',charId:1,text:'そんな……私以外の…人を思い浮かべていたわけではあるまいな。'},
+        {char:'ミラン・レスファイファー',charId:1,text:'えっ…あ…そうか私が美しくて見惚れていたと。\nそれなら仕方あるまい。'},
+        {char:'',charId:null,text:'もう空が朱に染まっていた。'},
+        {char:'ミラン・レスファイファー',charId:1,text:'もう暗くなってきたな。\nこ……今夜はここに泊まっていくと良い。'},
+      ]
+    },
+    {
+      id: 2, name: '日常会話 II', desc: 'いつでも訪れてくれ、私はここで待っていよう', world: 'afstasia',
+      lines: [
+        {char:'ミラン・レスファイファー',charId:1,text:'私の名前はミラン・レスファイファーだが\nもとはミラン・アフタシアだった。'},
+        {char:'ミラン・レスファイファー',charId:1,text:'この大陸は随分と変わってしまったな。\n私にとっては生きづらいと言うべきなのだろうが——'},
+        {char:'ミラン・レスファイファー',charId:1,text:'どうも……お前を見るたび、そうとは思えなくなってしまったのだ。'},
+        {char:'',charId:null,text:'しばらく、沈黙。'},
+        {char:'ミラン・レスファイファー',charId:1,text:'いつでもここに訪れてくれ。そして読んでくれ、私の名を。\n私はここで待っていよう。'},
+      ]
+    },
+    {
+      id: 3, name: '挨拶', desc: 'はじめまして——少しぐらいなら話してもよいだろう', world: 'afstasia',
+      lines: [
+        {char:'ミラン・レスファイファー',charId:1,text:'ん？おまえはだれだ……ここには、いや。\n私は誰とも会う気などないのだ。出てゆくと良い。'},
+        {char:'ミラン・レスファイファー',charId:1,text:'は？\n現王から聞いたと——そのような話、嘘であろう。'},
+        {char:'ミラン・レスファイファー',charId:1,text:'会いたいなどと思ったことなど……'},
+        {char:'',charId:null,text:'そのとき——堰を切ったように、声が漏れた。'},
+        {char:'ミラン・レスファイファー',charId:1,text:'ん……はぁ、ぅう……ぁああああ——'},
+        {char:'',charId:null,text:'泣いていた。'},
+        {char:'ミラン・レスファイファー',charId:1,text:'……私はミランだ。はじめまして。\n少しぐらいなら話してもよいだろう。'},
+        {char:'ミラン・レスファイファー',charId:1,text:'これからよろしく……な。'},
+      ]
+    }
+  ],
+  telostia: [
+    {
+      id: 101, name: '研究区での出会い', desc: '観測データに、君が必要だ', world: 'telostia',
+      lines: [
+        {char:'',charId:null,text:'——青白い光が満ちる研究区。床には魔法陣が刻まれている。'},
+        {char:'スファレー',charId:2,text:'…来たのか。予定より3分遅い。'},
+        {char:'スファレー',charId:2,text:'遅刻の言い訳は不要だ。データのほうが大事。\n座れ。'},
+        {char:'スファレー',charId:2,text:'君の反応値を計測したい。\n……怖がらなくていい。痛みはない。たぶん。'},
+        {char:'',charId:null,text:'スファレーはそっと手を差し伸べた。冷たく、でも確かな手だった。'},
+        {char:'スファレー',charId:2,text:'……手が温かい。\n地上の者はみなこうなのか。'},
+      ]
+    }
+  ]
+};
+
+let currentWorld = 'afstasia';
+let currentScene = null, currentLine = 0, isTyping = false, typeTimer = null;
+let voiceFiles = {}, currentVoice = null;
+let bgmAudio = null, bgmOn = false, useDemoTone = true, demoCtx = null, demoNodes = [];
+let readScenes = new Set(JSON.parse(localStorage.getItem('arcadic_read') || '[]'));
+let settings = { bgmVol: 28, seVol: 70, fontSize: 'medium' };
+let pinBuffer = '';
+let adminAuthenticated = false;
+let editingSceneId = null;
+
+// ══════════════════════════════════════════════
+//  STARS & PARTICLES
+// ══════════════════════════════════════════════
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 200; i++) {
+  const s = document.createElement('div'); s.className = 'star';
+  const sz = Math.random() * 1.8 + 0.25;
+  s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;width:${sz}px;height:${sz}px;--d:${2+Math.random()*6}s;--delay:${Math.random()*8}s;--min:${0.03+Math.random()*0.08};--max:${0.3+Math.random()*0.5};`;
+  starsEl.appendChild(s);
+}
+
+function spawnAfParticles() {
+  const c = document.getElementById('af-particles'); c.innerHTML = '';
+  for (let i = 0; i < 14; i++) {
+    const p = document.createElement('div'); p.className = 'af-particle';
+    const sz = Math.random() * 2.5 + 0.8;
+    p.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;background:rgba(200,168,75,${Math.random()*.3+.05});animation-duration:${Math.random()*12+8}s;animation-delay:${Math.random()*10}s;--dx:${(Math.random()-0.5)*60}px;`;
+    c.appendChild(p);
+  }
+}
+spawnAfParticles();
+
+function spawnTeRunes() {
+  const grid = document.getElementById('te-grid');
+  const existing = grid.querySelectorAll('.te-rune');
+  existing.forEach(r => r.remove());
+  const runes = ['∑','∫','∂','∇','Ω','λ','φ','ψ','∞','◈','⊕','⊗','△','□','⬡'];
+  for (let i = 0; i < 12; i++) {
+    const r = document.createElement('div'); r.className = 'te-rune';
+    r.textContent = runes[Math.floor(Math.random()*runes.length)];
+    r.style.cssText = `left:${Math.random()*100}%;top:${40+Math.random()*50}%;animation-duration:${Math.random()*10+6}s;animation-delay:${Math.random()*8}s;`;
+    grid.appendChild(r);
+  }
+}
+spawnTeRunes();
+
+// ══════════════════════════════════════════════
+//  WORLD SWITCH WITH MIST
+// ══════════════════════════════════════════════
+function switchWorld(w, withMist = true) {
+  if (w === currentWorld && withMist) return;
+  const doSwitch = () => {
+    currentWorld = w;
+    document.body.className = 'world-' + w;
+    document.getElementById('bg-af').style.opacity = w === 'afstasia' ? '1' : '0';
+    document.getElementById('bg-te').style.opacity = w === 'telostia' ? '1' : '0';
+    document.getElementById('btn-af').classList.toggle('active', w === 'afstasia');
+    document.getElementById('btn-te').classList.toggle('active', w === 'telostia');
+    // Update scene select title style
+    const ssTitle = document.getElementById('ss-title-label');
+    const csTitle = document.getElementById('cs-title-label');
+    if (ssTitle) ssTitle.textContent = w === 'afstasia' ? '— Scene Select —' : '[ SCENE_LIST ]';
+    if (csTitle) csTitle.textContent = w === 'afstasia' ? '— Characters —' : '[ CHARACTERS ]';
+  };
+  if (withMist) {
+    const mist = document.getElementById('mist-layer');
+    mist.classList.add('misting');
+    setTimeout(doSwitch, 700);
+    setTimeout(() => mist.classList.remove('misting'), 1800);
+  } else {
+    doSwitch();
+  }
+}
+
+// ══════════════════════════════════════════════
+//  SCREEN NAVIGATION
+// ══════════════════════════════════════════════
+function showOnly(id) {
+  ['title-screen','scene-select','char-select','scene-viewer','share-screen']
+    .forEach(s => document.getElementById(s).classList.toggle('hidden', s !== id));
+}
+function showTitle() { showOnly('title-screen'); }
+function showSceneSelect() {
+  showOnly('scene-select');
+  renderSceneList();
+}
+function showCharSelect() {
+  showOnly('char-select');
+  renderCharGrid();
+}
+function showShare() { showOnly('share-screen'); updateShareDisplay(); }
+function backToSelect() { showSceneSelect(); }
+
+// ══════════════════════════════════════════════
+//  SCENE LIST
+// ══════════════════════════════════════════════
+function renderSceneList() {
+  const list = document.getElementById('scene-list');
+  list.innerHTML = '';
+  const worldScenes = scenes[currentWorld] || [];
+  worldScenes.forEach((sc, idx) => {
+    const item = document.createElement('div');
+    item.className = 'scene-item' + (readScenes.has(sc.id) ? ' read' : '');
+    item.style.animationDelay = `${idx * 0.06}s`;
+    const badge = currentWorld === 'afstasia'
+      ? '<span class="s-badge badge-af">AFSTASIA</span>'
+      : '<span class="s-badge badge-te">TELOSTIA</span>';
+    item.innerHTML = `
+      <div class="s-num">${String(idx+1).padStart(2,'0')}</div>
+      <div class="s-info" onclick="playScene(${sc.id})">
+        <div class="s-name">${sc.name}</div>
+        <div class="s-desc">${sc.desc}</div>
+        <div class="s-badges">${badge}</div>
+      </div>
+      <div class="s-arrow" onclick="playScene(${sc.id})">▷</div>`;
+    list.appendChild(item);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  CHARACTER GRID
+// ══════════════════════════════════════════════
+function renderCharGrid() {
+  const grid = document.getElementById('char-grid');
+  grid.innerHTML = '';
+  const chars = characters[currentWorld] || [];
+  chars.forEach((ch, idx) => {
+    const card = document.createElement('div');
+    card.className = 'char-card';
+    card.style.animationDelay = `${idx * 0.07}s`;
+    card.onclick = () => openCharDetail(ch.id);
+    const imgHtml = ch.img
+      ? `<img src="${ch.img}" alt="${ch.name}" onerror="this.style.display='none'">`
+      : `<div class="no-img" style="color:${ch.color}">✦</div>`;
+    card.innerHTML = `
+      <div class="char-card-img">${imgHtml}</div>
+      <div class="char-card-info">
+        <div class="char-card-name">${ch.name}</div>
+        <div class="char-card-role" style="color:${ch.color}">${ch.role}</div>
+        <div class="char-card-desc">${ch.story}</div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function openCharDetail(id) {
+  const ch = findCharById(id);
+  if (!ch) return;
+  const overlay = document.getElementById('char-detail-overlay');
+  const hero = document.getElementById('char-detail-hero');
+  const nameEl = document.getElementById('char-detail-name');
+  const metaEl = document.getElementById('char-detail-meta');
+  const storyEl = document.getElementById('char-detail-story');
+  if (ch.img) {
+    hero.innerHTML = `<button class="char-detail-close" onclick="closeCharDetail()">× 閉じる</button><img src="${ch.img}" alt="${ch.name}">`;
+  } else {
+    hero.innerHTML = `<button class="char-detail-close" onclick="closeCharDetail()">× 閉じる</button><div class="no-img-lg" style="color:${ch.color}">✦</div>`;
+  }
+  nameEl.textContent = ch.name;
+  nameEl.style.color = ch.color2 || ch.color;
+  metaEl.innerHTML = `
+    <div class="char-meta-item">役職<span style="color:${ch.color2||ch.color}">${ch.role}</span></div>
+    <div class="char-meta-item">データ<span style="color:${ch.color2||ch.color}">${ch.meta}</span></div>
+    <div class="char-meta-item">所属<span style="color:${ch.color2||ch.color}">${ch.world === 'afstasia' ? 'Afstasia' : 'Telostia'}</span></div>`;
+  storyEl.textContent = ch.story;
+  overlay.classList.add('open');
+}
+function closeCharDetail() { document.getElementById('char-detail-overlay').classList.remove('open'); }
+
+function findCharById(id) {
+  for (const w of ['afstasia','telostia']) {
+    const ch = (characters[w] || []).find(c => c.id === id);
+    if (ch) return ch;
+  }
+  return null;
+}
+function getAllChars() {
+  return [...(characters.afstasia||[]), ...(characters.telostia||[])];
+}
+
+// ══════════════════════════════════════════════
+//  SCENE PLAYER
+// ══════════════════════════════════════════════
+function findScene(id) {
+  for (const w of ['afstasia','telostia']) {
+    const sc = (scenes[w] || []).find(s => s.id === id);
+    if (sc) return sc;
+  }
+  return null;
+}
+
+function playScene(id) {
+  currentScene = findScene(id);
+  if (!currentScene) return;
+  currentLine = 0;
+  voiceFiles = {};
+  showOnly('scene-viewer');
+  renderCharArea();
+  renderLine();
+}
+
+function renderCharArea() {
+  const area = document.getElementById('char-area');
+  area.innerHTML = '';
+  // Get unique chars in this scene
+  const charIds = [...new Set(currentScene.lines.filter(l => l.charId).map(l => l.charId))];
+  charIds.forEach(cid => {
+    const ch = findCharById(cid);
+    if (!ch) return;
+    const sprite = document.createElement('div');
+    sprite.className = 'char-sprite';
+    sprite.id = `sprite-${cid}`;
+    // Body color from character
+    const bodyBg = `linear-gradient(160deg,${ch.color}22 0%,${ch.color}11 60%,transparent 100%)`;
+    const hairBg = `linear-gradient(180deg,${ch.color}88 0%,transparent 100%)`;
+    sprite.innerHTML = `
+      <div class="char-body" style="background:${bodyBg};box-shadow:0 0 28px ${ch.color}28;">
+        <div class="char-hair" style="background:${hairBg};"></div>
+      </div>
+      <div class="char-nametag">${ch.name.split('・').pop() || ch.name}</div>`;
+    area.appendChild(sprite);
+  });
+}
+
+function renderLine() {
+  if (!currentScene) return;
+  const line = currentScene.lines[currentLine];
+  const plate = document.getElementById('name-plate');
+  const tag = document.getElementById('name-tag');
+
+  // Update name plate
+  if (line.char) {
+    tag.textContent = line.char;
+    const ch = line.charId ? findCharById(line.charId) : null;
+    if (ch) {
+      tag.style = `--char-color:${ch.color};--char-color2:${ch.color2||ch.color}`;
+    } else {
+      tag.style = '';
+    }
+    plate.classList.add('show');
+  } else {
+    plate.classList.remove('show');
+  }
+
+  // Update char sprites
+  document.querySelectorAll('.char-sprite').forEach(s => {
+    s.classList.remove('speaking','side');
+    if (line.charId && s.id === `sprite-${line.charId}`) {
+      s.classList.add('speaking');
+    } else if (line.char) {
+      s.classList.add('side');
+    }
+  });
+
+  // Voice btn
+  const vBtn = document.getElementById('voice-btn');
+  vBtn.classList.toggle('no-audio', !voiceFiles[currentLine]);
+  if (!voiceFiles[currentLine]) {
+    vBtn.classList.remove('playing');
+    if (currentVoice) { currentVoice.pause(); currentVoice = null; }
+  }
+  renderProgress();
+  typeText(line.text);
+}
+
+function typeText(text) {
+  isTyping = true;
+  document.getElementById('next-arrow').classList.add('hidden');
+  const el = document.getElementById('dialogue-text');
+  el.innerHTML = '';
+  let i = 0;
+  const speed = settings.fontSize === 'small' ? 32 : settings.fontSize === 'large' ? 50 : 40;
+  clearInterval(typeTimer);
+  typeTimer = setInterval(() => {
+    if (i < text.length) {
+      el.innerHTML = text.slice(0,i+1).replace(/\n/g,'<br>') + '<span class="cursor"></span>';
+      i++;
+    } else {
+      clearInterval(typeTimer);
+      el.innerHTML = text.replace(/\n/g,'<br>');
+      isTyping = false;
+      document.getElementById('next-arrow').classList.remove('hidden');
+      if (voiceFiles[currentLine]) autoPlayVoice();
+    }
+  }, speed);
+}
+
+function skipType() {
+  clearInterval(typeTimer);
+  isTyping = false;
+  document.getElementById('dialogue-text').innerHTML = (currentScene?.lines[currentLine]?.text||'').replace(/\n/g,'<br>');
+  document.getElementById('next-arrow').classList.remove('hidden');
+}
+
+function handleTap() {
+  if (document.getElementById('edit-overlay').classList.contains('show')) return;
+  if (isTyping) { skipType(); return; }
+  if (currentLine < currentScene.lines.length - 1) {
+    currentLine++;
+    renderLine();
+  } else {
+    showEnd();
+  }
+}
+
+function showEnd() {
+  readScenes.add(currentScene.id);
+  if (typeof saveReadScenes === 'function') saveReadScenes(readScenes);
+  else localStorage.setItem('arcadic_read', JSON.stringify([...readScenes]));
+  document.getElementById('dialogue-text').innerHTML =
+    `<span style="color:var(--c-dim);font-family:'Cormorant Garamond',serif;letter-spacing:.3em;font-size:.82rem;">— fin —</span>`;
+  document.getElementById('name-plate').classList.remove('show');
+  document.getElementById('next-arrow').classList.add('hidden');
+  document.querySelectorAll('.char-sprite').forEach(s => s.className = 'char-sprite');
+}
+
+function renderProgress() {
+  const dots = document.getElementById('pdots');
+  const num = document.getElementById('pnum');
+  dots.innerHTML = '';
+  currentScene.lines.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'pdot' + (i === currentLine ? ' active' : i < currentLine ? ' done' : '');
+    dots.appendChild(d);
+  });
+  num.textContent = `${currentLine+1} / ${currentScene.lines.length}`;
+}
+
+function applyFontSize() {
+  const sizes = { small: '.82rem', medium: '1.0rem', large: '1.14rem' };
+  document.getElementById('dialogue-text').style.fontSize = sizes[settings.fontSize] || sizes.medium;
+}
+
+// ══════════════════════════════════════════════
+//  VOICE
+// ══════════════════════════════════════════════
+function autoPlayVoice() {
+  const a = voiceFiles[currentLine];
+  if (!a) return;
+  if (currentVoice) currentVoice.pause();
+  currentVoice = a;
+  currentVoice.currentTime = 0;
+  currentVoice.volume = settings.seVol / 100;
+  currentVoice.play().catch(() => {});
+  const vBtn = document.getElementById('voice-btn');
+  vBtn.classList.add('playing');
+  currentVoice.onended = () => vBtn.classList.remove('playing');
+}
+function handleVoice(e) {
+  e.stopPropagation();
+  const vBtn = document.getElementById('voice-btn');
+  if (vBtn.classList.contains('no-audio')) return;
+  const a = voiceFiles[currentLine];
+  if (!a) return;
+  if (currentVoice && !currentVoice.paused) {
+    currentVoice.pause(); currentVoice.currentTime = 0;
+    vBtn.classList.remove('playing'); return;
+  }
+  autoPlayVoice();
+}
+
+// ══════════════════════════════════════════════
+//  BGM
+// ══════════════════════════════════════════════
+function createDemoTone() {
+  try {
+    demoCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const master = demoCtx.createGain();
+    master.gain.value = (settings.bgmVol / 100) * 0.25;
+    master.connect(demoCtx.destination);
+    [[220,.08],[277.18,.11],[329.63,.14]].forEach(([freq, lfospd]) => {
+      const osc = demoCtx.createOscillator(), g = demoCtx.createGain();
+      const lfo = demoCtx.createOscillator(), lg = demoCtx.createGain();
+      osc.type = 'sine'; osc.frequency.value = freq; g.gain.value = .28;
+      lfo.type = 'sine'; lfo.frequency.value = lfospd; lg.gain.value = .01;
+      lfo.connect(lg); lg.connect(g.gain); osc.connect(g); g.connect(master);
+      osc.start(); lfo.start(); demoNodes.push(osc, lfo);
+    });
+  } catch(e) {}
+}
+function stopDemoTone() {
+  demoNodes.forEach(n => { try { n.stop(); } catch(e) {} });
+  demoNodes = [];
+  if (demoCtx) { try { demoCtx.close(); } catch(e) {} demoCtx = null; }
+}
+function toggleBgm() { bgmOn ? stopBgm() : playBgm(); }
+function playBgm() {
+  if (useDemoTone) { if (demoCtx) stopDemoTone(); createDemoTone(); }
+  else if (bgmAudio) bgmAudio.play().catch(() => {});
+  bgmOn = true;
+  document.getElementById('bgm-btn').classList.add('active');
+}
+function stopBgm() {
+  if (useDemoTone) stopDemoTone();
+  else if (bgmAudio) { bgmAudio.pause(); bgmAudio.currentTime = 0; }
+  bgmOn = false;
+  document.getElementById('bgm-btn').classList.remove('active');
+}
+function loadBgmFile(e) {
+  const f = e.target.files[0]; if (!f) return;
+  if (bgmOn) stopBgm();
+  useDemoTone = false;
+  bgmAudio = new Audio(URL.createObjectURL(f));
+  bgmAudio.loop = true;
+  bgmAudio.volume = settings.bgmVol / 100;
+  document.getElementById('bgm-status').textContent = f.name;
+}
+
+// ══════════════════════════════════════════════
+//  SETTINGS
+// ══════════════════════════════════════════════
+function openSettings() { document.getElementById('settings-overlay').classList.add('open'); }
+function closeSettings() { document.getElementById('settings-overlay').classList.remove('open'); }
+function updateBgmVol(v) {
+  settings.bgmVol = parseInt(v);
+  document.getElementById('bgm-vol-val').textContent = v;
+  if (bgmAudio) bgmAudio.volume = v / 100;
+  if (demoCtx) {
+    // Update master gain
+    try { demoCtx.destination.channelCount; } catch(e) {}
+  }
+}
+function updateSeVol(v) {
+  settings.seVol = parseInt(v);
+  document.getElementById('se-vol-val').textContent = v;
+}
+function setFontSize(size) {
+  settings.fontSize = size;
+  document.querySelectorAll('.font-btn').forEach((b, i) => {
+    b.classList.toggle('active', ['small','medium','large'][i] === size);
+  });
+  applyFontSize();
+}
+function resetRead() {
+  if (confirm('既読記録をリセットしますか？')) {
+    readScenes.clear();
+    localStorage.removeItem('arcadic_read');
+    renderSceneList();
+  }
+}
+
+// ══════════════════════════════════════════════
+//  SHARE & SCREENSHOT
+// ══════════════════════════════════════════════
+function updateShareDisplay() {
+  const input = document.getElementById('share-url-display');
+  if (input) input.value = siteConfig.shareUrl || '';
+}
+function copyShareUrl() {
+  const url = siteConfig.shareUrl;
+  if (!url) return;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById('share-copy-btn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  }).catch(() => {});
+}
+
+// Screenshot detection (experimental)
+function triggerScreenshotEffect() {
+  const flash = document.getElementById('ss-flash');
+  const msg = document.getElementById('ss-msg');
+  flash.classList.add('flash');
+  msg.classList.add('show');
+  setTimeout(() => { flash.classList.remove('flash'); msg.classList.remove('show'); }, 3000);
+}
+
+// Visibility change (PrintScreen on some browsers)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') {
+    // possible screenshot / task switch
+  }
+});
+// Key-based detection
+document.addEventListener('keyup', (e) => {
+  if (e.key === 'PrintScreen') {
+    triggerScreenshotEffect();
+  }
+});
+// Media query screenshot hack (limited)
+try {
+  const mq = window.matchMedia('print');
+  mq.addEventListener('change', (e) => {
+    if (e.matches) triggerScreenshotEffect();
+  });
+} catch(e) {}
+
+// ══════════════════════════════════════════════
+//  PIN / ADMIN
+// ══════════════════════════════════════════════
+function openPinLogin() { pinBuffer = ''; updatePinDisplay(); document.getElementById('pin-overlay').classList.add('open'); }
+function closePinLogin() { document.getElementById('pin-overlay').classList.remove('open'); pinBuffer = ''; updatePinDisplay(); document.getElementById('pin-error').textContent = ''; }
+function updatePinDisplay() {
+  for (let i = 0; i < 4; i++) {
+    document.getElementById(`pd${i}`).classList.toggle('filled', i < pinBuffer.length);
+  }
+}
+function pinInput(v) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += v;
+  updatePinDisplay();
+  if (pinBuffer.length === 4) checkPin();
+}
+function pinBackspace() { if (pinBuffer.length > 0) { pinBuffer = pinBuffer.slice(0,-1); updatePinDisplay(); } }
+function pinClear() { pinBuffer = ''; updatePinDisplay(); }
+function checkPin() {
+  if (pinBuffer === siteConfig.pin) {
+    adminAuthenticated = true;
+    closePinLogin();
+    openAdmin();
+  } else {
+    const err = document.getElementById('pin-error');
+    err.textContent = '— 認証コードが違います —';
+    pinBuffer = ''; updatePinDisplay();
+    setTimeout(() => { err.textContent = ''; }, 2000);
+  }
+}
+
+function openAdmin() {
+  renderAdminSceneList();
+  renderAdminCharList();
+  loadAdminShare();
+  document.getElementById('admin-overlay').classList.add('show');
+}
+function closeAdmin() { document.getElementById('admin-overlay').classList.remove('show'); }
+function switchAdminTab(tab) {
+  document.querySelectorAll('.admin-tab').forEach((t,i) => {
+    const tabs = ['scenes','chars','site','share'];
+    t.classList.toggle('active', tabs[i] === tab);
+  });
+  document.querySelectorAll('.admin-tab-content').forEach(c => {
+    c.classList.toggle('active', c.id === `admin-tab-${tab}`);
+  });
+}
+
+function renderAdminSceneList() {
+  const list = document.getElementById('admin-scene-list');
+  list.innerHTML = '';
+  ['afstasia','telostia'].forEach(w => {
+    (scenes[w] || []).forEach(sc => {
+      const item = document.createElement('div');
+      item.className = 'admin-scene-item';
+      item.innerHTML = `
+        <div class="admin-scene-item-info">
+          <div class="admin-scene-item-name">${sc.name}</div>
+          <div class="admin-scene-item-meta">${w.toUpperCase()} · ${sc.desc}</div>
+        </div>
+        <div class="admin-scene-item-btns">
+          <button class="admin-char-btn" onclick="adminEditScene(${sc.id})">編集</button>
+          <button class="admin-char-btn del" onclick="adminDeleteScene(${sc.id},'${w}')">削除</button>
+        </div>`;
+      list.appendChild(item);
+    });
+  });
+}
+
+function adminOpenAddScene() {
+  document.getElementById('new-scene-name').value = '';
+  document.getElementById('new-scene-desc').value = '';
+  document.getElementById('new-scene-world').value = 'afstasia';
+  document.getElementById('add-scene-modal').classList.add('open');
+}
+function confirmAddScene() {
+  const name = document.getElementById('new-scene-name').value.trim();
+  const desc = document.getElementById('new-scene-desc').value.trim();
+  const world = document.getElementById('new-scene-world').value;
+  if (!name) return;
+  const allIds = [...(scenes.afstasia||[]),...(scenes.telostia||[])].map(s=>s.id);
+  const newId = Math.max(...allIds, 100) + 1;
+  if (!scenes[world]) scenes[world] = [];
+  scenes[world].push({id:newId,name,desc:desc||'—',world,lines:[{char:'',charId:null,text:'セリフをここに入力してください。'}]});
+  closeModal('add-scene-modal');
+  renderAdminSceneList();
+  renderSceneList();
+  if (typeof persistScenes === 'function') persistScenes();
+}
+
+function adminEditScene(id) {
+  currentScene = findScene(id);
+  if (!currentScene) return;
+  editingSceneId = id;
+  voiceFiles = {};
+  document.getElementById('edit-overlay-title').textContent = `✦ Script Editor — ${currentScene.name}`;
+  renderLineCards();
+  document.getElementById('edit-overlay').classList.add('show');
+}
+function adminDeleteScene(id, world) {
+  if (!confirm('このシーンを削除しますか？')) return;
+  scenes[world] = (scenes[world] || []).filter(s => s.id !== id);
+  renderAdminSceneList();
+  renderSceneList();
+  if (typeof persistScenes === 'function') persistScenes();
+}
+
+function renderAdminCharList() {
+  const list = document.getElementById('admin-char-list');
+  list.innerHTML = '';
+  ['afstasia','telostia'].forEach(w => {
+    (characters[w] || []).forEach(ch => {
+      const item = document.createElement('div');
+      item.className = 'admin-char-item';
+      item.innerHTML = `
+        <div class="admin-char-dot" style="background:${ch.color}"></div>
+        <div class="admin-char-info">
+          <div class="admin-char-name">${ch.name}</div>
+          <div class="admin-char-world">${w.toUpperCase()} · ${ch.role}</div>
+        </div>
+        <div class="admin-char-btns">
+          <button class="admin-char-btn" onclick="adminEditChar(${ch.id})">編集</button>
+          <button class="admin-char-btn del" onclick="adminDeleteChar(${ch.id},'${w}')">削除</button>
+        </div>`;
+      list.appendChild(item);
+    });
+  });
+}
+
+function adminOpenAddChar() {
+  document.getElementById('char-modal-title').textContent = '— Add Character —';
+  document.getElementById('char-modal-id').value = '';
+  ['cm-name','cm-role','cm-meta','cm-img','cm-color','cm-story'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('cm-world').value = 'afstasia';
+  document.getElementById('char-modal').classList.add('open');
+}
+function adminEditChar(id) {
+  const ch = findCharById(id);
+  if (!ch) return;
+  document.getElementById('char-modal-title').textContent = '— Edit Character —';
+  document.getElementById('char-modal-id').value = id;
+  document.getElementById('cm-name').value = ch.name;
+  document.getElementById('cm-role').value = ch.role;
+  document.getElementById('cm-meta').value = ch.meta;
+  document.getElementById('cm-world').value = ch.world;
+  document.getElementById('cm-img').value = ch.img || '';
+  document.getElementById('cm-color').value = ch.color || '';
+  document.getElementById('cm-story').value = ch.story || '';
+  document.getElementById('char-modal').classList.add('open');
+}
+function confirmSaveChar() {
+  const id = document.getElementById('char-modal-id').value;
+  const name = document.getElementById('cm-name').value.trim();
+  if (!name) return;
+  const data = {
+    name, role: document.getElementById('cm-role').value.trim(),
+    meta: document.getElementById('cm-meta').value.trim(),
+    world: document.getElementById('cm-world').value,
+    img: document.getElementById('cm-img').value.trim(),
+    color: document.getElementById('cm-color').value.trim() || '#c8a84b',
+    color2: '', // auto-lighten not implemented, same color
+    story: document.getElementById('cm-story').value.trim()
+  };
+  if (id) {
+    // Edit existing
+    for (const w of ['afstasia','telostia']) {
+      const idx = (characters[w]||[]).findIndex(c => c.id == id);
+      if (idx !== -1) {
+        characters[w][idx] = {...characters[w][idx], ...data, world: data.world};
+        // If world changed, move
+        if (characters[w][idx].world !== w) {
+          const moved = characters[w].splice(idx,1)[0];
+          if (!characters[moved.world]) characters[moved.world] = [];
+          characters[moved.world].push(moved);
+        }
+        break;
+      }
+    }
+  } else {
+    const allIds = getAllChars().map(c => c.id);
+    const newId = Math.max(...allIds, 0) + 1;
+    if (!characters[data.world]) characters[data.world] = [];
+    characters[data.world].push({id: newId, ...data});
+  }
+  closeModal('char-modal');
+  renderAdminCharList();
+  if (typeof persistCharacters === 'function') persistCharacters();
+}
+function adminDeleteChar(id, world) {
+  if (!confirm('このキャラクターを削除しますか？')) return;
+  characters[world] = (characters[world]||[]).filter(c => c.id !== id);
+  renderAdminCharList();
+  if (typeof persistCharacters === 'function') persistCharacters();
+}
+
+function saveSiteSettings() {
+  siteConfig.title = document.getElementById('site-title-input').value;
+  siteConfig.sub = document.getElementById('site-sub-input').value;
+  siteConfig.afDesc = document.getElementById('site-af-desc-input').value;
+  siteConfig.teDesc = document.getElementById('site-te-desc-input').value;
+  const newPin = document.getElementById('new-pin-input').value.trim();
+  if (newPin && /^\d{4}$/.test(newPin)) siteConfig.pin = newPin;
+  document.getElementById('logo-fallback').textContent = siteConfig.title;
+  if (typeof persistSiteConfig === 'function') persistSiteConfig();
+  alert('保存しました。');
+}
+
+function loadAdminShare() {
+  document.getElementById('admin-share-url').value = siteConfig.shareUrl || '';
+  document.getElementById('admin-share-msg').value = siteConfig.shareMsg || '';
+}
+function saveShareSettings() {
+  siteConfig.shareUrl = document.getElementById('admin-share-url').value.trim();
+  siteConfig.shareMsg = document.getElementById('admin-share-msg').value.trim();
+  updateShareDisplay();
+  if (typeof persistSiteConfig === 'function') persistSiteConfig();
+  alert('共有設定を保存しました。');
+}
+
+// ══════════════════════════════════════════════
+//  SCENE EDIT (inline)
+// ══════════════════════════════════════════════
+function closeSceneEdit() {
+  document.getElementById('edit-overlay').classList.remove('show');
+  if (currentScene && editingSceneId !== null) {
+    // If opened from admin, return to admin; else re-render line
+    if (document.getElementById('admin-overlay').classList.contains('show')) {
+      renderAdminSceneList();
+    }
+  }
+  editingSceneId = null;
+}
+function saveAndCloseEdit() {
+  collectCards();
+  if (typeof persistScenes === 'function') persistScenes();
+  closeSceneEdit();
+  if (currentScene && !document.getElementById('scene-viewer').classList.contains('hidden')) {
+    currentLine = 0; renderCharArea(); renderLine();
+  }
+}
+
+function renderLineCards() {
+  const c = document.getElementById('line-cards');
+  c.innerHTML = '';
+  const allChars = getAllChars();
+  const charOptions = allChars.map(ch => `<option value="${ch.id}" style="color:${ch.color}">${ch.name}</option>`).join('');
+  (currentScene?.lines || []).forEach((line, i) => {
+    const d = document.createElement('div');
+    d.className = 'line-card'; d.dataset.idx = i;
+    d.innerHTML = `
+      <div class="card-num">#${i+1}</div>
+      <button class="card-del" onclick="deleteCard(${i})">✕</button>
+      <div>
+        <div class="field-label">キャラクター（空欄=ナレーション）</div>
+        <select class="field-input char-select-input">
+          <option value="">— ナレーション —</option>
+          ${charOptions}
+        </select>
+      </div>
+      <div>
+        <div class="field-label">キャラ名表示（上書き可）</div>
+        <input class="field-input char-name-input" value="${esc(line.char)}" placeholder="キャラ名（空でキャラ設定から自動）">
+      </div>
+      <div class="line-card-full">
+        <div class="field-label">セリフ（\\n改行OK）</div>
+        <textarea class="field-input text-input" placeholder="セリフを入力">${esc(line.text)}</textarea>
+      </div>
+      <div class="line-card-full">
+        <div class="field-label">音声ファイル</div>
+        <div class="voice-load-row">
+          <label class="voice-load-btn">♪ mp3<input type="file" accept="audio/*" style="display:none" onchange="loadVoiceFile(event,${i})"></label>
+          <span class="voice-badge" id="vb-${i}">${voiceFiles[i]?'✓ 読込済':'—'}</span>
+        </div>
+      </div>`;
+    // Set char select value
+    const sel = d.querySelector('.char-select-input');
+    if (line.charId) sel.value = line.charId;
+    sel.addEventListener('change', () => {
+      const ch = findCharById(parseInt(sel.value));
+      const nameInput = d.querySelector('.char-name-input');
+      if (ch && !nameInput.value) nameInput.value = ch.name;
+    });
+    c.appendChild(d);
+  });
+}
+
+function loadVoiceFile(e, idx) {
+  const f = e.target.files[0]; if (!f) return;
+  voiceFiles[idx] = new Audio(URL.createObjectURL(f));
+  const b = document.getElementById('vb-'+idx); if (b) b.textContent = '✓ 読込済';
+}
+function collectCards() {
+  const cards = document.querySelectorAll('.line-card');
+  currentScene.lines = Array.from(cards).map(c => {
+    const charId = parseInt(c.querySelector('.char-select-input').value) || null;
+    const ch = charId ? findCharById(charId) : null;
+    const nameInput = c.querySelector('.char-name-input').value.trim();
+    return {
+      char: nameInput || (ch ? ch.name : ''),
+      charId,
+      text: c.querySelector('.text-input').value.trim()
+    };
+  }).filter(l => l.text);
+}
+function addLineCard() {
+  collectCards();
+  currentScene.lines.push({char:'',charId:null,text:''});
+  renderLineCards();
+  document.querySelector('.edit-body').scrollTop = 9999;
+}
+function deleteCard(i) {
+  collectCards();
+  currentScene.lines.splice(i,1);
+  delete voiceFiles[i];
+  renderLineCards();
+}
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════════════
+//  MODAL HELPERS
+// ══════════════════════════════════════════════
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ══════════════════════════════════════════════
+//  KEYBOARD
+// ══════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  const viewer = !document.getElementById('scene-viewer').classList.contains('hidden');
+  const noOverlay = !document.getElementById('edit-overlay').classList.contains('show')
+    && !document.getElementById('admin-overlay').classList.contains('show')
+    && !document.getElementById('pin-overlay').classList.contains('open');
+  if (viewer && noOverlay) {
+    if (e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') handleTap();
+    if (e.key === 'ArrowLeft' && currentLine > 0) { currentLine--; renderLine(); }
+    if (e.key === 'Escape') backToSelect();
+  }
+});
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+applyFontSize();
+// Settings corner gear (also show on scene viewer via position:fixed)
+document.querySelectorAll('.settings-corner').forEach(b => b.onclick = openSettings);
+
+// ── セーブ機能初期化 ──────────────────────────
+if (typeof loadReadScenes === 'function') readScenes = loadReadScenes();
+(function() {
+  const s = typeof loadSettings === 'function' ? loadSettings() : null;
+  if (s) Object.assign(settings, s);
+  applyFontSize();
+})();
+if (typeof loadSiteConfig === 'function') {
+  const cfg = loadSiteConfig();
+  if (cfg) {
+    Object.assign(siteConfig, cfg);
+    const lb = document.getElementById('logo-fallback');
+    if (lb && cfg.title) lb.textContent = cfg.title;
+  }
+}
+if (typeof loadCharacters === 'function') {
+  const c = loadCharacters(); if (c) characters = c;
+}
+if (typeof loadScenes === 'function') {
+  const sc = loadScenes(); if (sc) scenes = sc;
+}
+</script>
+<script>
+// ══════════════════════════════════════════════
+//  ArcadicRPG — storage.js
+//  セーブ・ロード・設定管理
+// ══════════════════════════════════════════════
+
+const KEYS = {
+  SAVE:     'arcadic_save',
+  READ:     'arcadic_read',
+  SETTINGS: 'arcadic_settings',
+  CONFIG:   'arcadic_config',
+  CHARS:    'arcadic_characters',
+  SCENES:   'arcadic_scenes',
+};
+
+// ─── セーブデータ ───────────────────────────
+function saveGame(data) {
+  try {
+    localStorage.setItem(KEYS.SAVE, JSON.stringify(data));
+    return true;
+  } catch(e) {
+    console.warn('saveGame failed:', e);
+    return false;
+  }
+}
+
+function loadGame() {
+  try {
+    const raw = localStorage.getItem(KEYS.SAVE);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) {
+    console.warn('loadGame failed:', e);
+    return null;
+  }
+}
+
+// ─── 既読シーン ─────────────────────────────
+function saveReadScenes(set) {
+  try {
+    localStorage.setItem(KEYS.READ, JSON.stringify([...set]));
+  } catch(e) {}
+}
+
+function loadReadScenes() {
+  try {
+    const raw = localStorage.getItem(KEYS.READ);
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch(e) {
+    return new Set();
+  }
+}
+
+// ─── 設定（音量・文字サイズ） ───────────────
+function saveSettings(obj) {
+  try {
+    localStorage.setItem(KEYS.SETTINGS, JSON.stringify(obj));
+  } catch(e) {}
+}
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem(KEYS.SETTINGS);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) {
+    return null;
+  }
+}
+
+// ─── サイト設定（管理者） ───────────────────
+function saveSiteConfig(obj) {
+  try {
+    localStorage.setItem(KEYS.CONFIG, JSON.stringify(obj));
+  } catch(e) {}
+}
+
+function loadSiteConfig() {
+  try {
+    const raw = localStorage.getItem(KEYS.CONFIG);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) {
+    return null;
+  }
+}
+
+// ─── キャラクターデータ ─────────────────────
+function saveCharacters(obj) {
+  try {
+    localStorage.setItem(KEYS.CHARS, JSON.stringify(obj));
+  } catch(e) {}
+}
+
+function loadCharacters() {
+  try {
+    const raw = localStorage.getItem(KEYS.CHARS);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) {
+    return null;
+  }
+}
+
+// ─── シーンデータ ───────────────────────────
+function saveScenes(obj) {
+  try {
+    localStorage.setItem(KEYS.SCENES, JSON.stringify(obj));
+  } catch(e) {}
+}
+
+function loadScenes() {
+  try {
+    const raw = localStorage.getItem(KEYS.SCENES);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) {
+    return null;
+  }
+}
+
+// ─── 全データ削除（リセット） ───────────────
+function clearAllData() {
+  Object.values(KEYS).forEach(k => localStorage.removeItem(k));
+}
+
+// ─── エクスポート（バックアップ） ──────────
+function exportData() {
+  const blob = new Blob([JSON.stringify({
+    save:       loadGame(),
+    read:       [...loadReadScenes()],
+    settings:   loadSettings(),
+    config:     loadSiteConfig(),
+    characters: loadCharacters(),
+    scenes:     loadScenes(),
+    exportedAt: new Date().toISOString(),
+  }, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `arcadic_backup_${Date.now()}.json`;
+  a.click();
+}
+
+// ─── インポート（バックアップ復元） ────────
+function importData(file, callback) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.save)       saveGame(data.save);
+      if (data.read)       saveReadScenes(new Set(data.read));
+      if (data.settings)   saveSettings(data.settings);
+      if (data.config)     saveSiteConfig(data.config);
+      if (data.characters) saveCharacters(data.characters);
+      if (data.scenes)     saveScenes(data.scenes);
+      if (callback) callback(true);
+    } catch(err) {
+      console.warn('import failed:', err);
+      if (callback) callback(false);
+    }
+  };
+  reader.readAsText(file);
+}
+
+</script>
+<script>
+// ══════════════════════════════════════════════
+//  ArcadicRPG — game.js
+//  ゲームロジック補助・データ永続化
+// ══════════════════════════════════════════════
+
+// ─── 起動時：保存データを復元 ──────────────
+function initGameData() {
+  // 既読シーンを復元（storage.jsのloadReadScenesを使用）
+  if (typeof loadReadScenes === 'function') {
+    window.readScenes = loadReadScenes();
+  }
+
+  // 設定を復元
+  if (typeof loadSettings === 'function') {
+    const saved = loadSettings();
+    if (saved) {
+      window.settings = Object.assign(window.settings || {}, saved);
+    }
+  }
+
+  // サイト設定（管理者編集内容）を復元
+  if (typeof loadSiteConfig === 'function') {
+    const cfg = loadSiteConfig();
+    if (cfg) {
+      window.siteConfig = Object.assign(window.siteConfig || {}, cfg);
+      // タイトル反映
+      const logoFb = document.getElementById('logo-fallback');
+      const titleSub = document.querySelector('.title-sub');
+      if (logoFb && cfg.title) logoFb.textContent = cfg.title;
+      if (titleSub && cfg.sub) titleSub.textContent = cfg.sub;
+    }
+  }
+
+  // キャラクターデータを復元（追加分をマージ）
+  if (typeof loadCharacters === 'function') {
+    const savedChars = loadCharacters();
+    if (savedChars) {
+      window.characters = savedChars;
+    }
+  }
+
+  // シーンデータを復元（追加分をマージ）
+  if (typeof loadScenes === 'function') {
+    const savedScenes = loadScenes();
+    if (savedScenes) {
+      window.scenes = savedScenes;
+    }
+  }
+
+  console.log('[ArcadicRPG] Game data initialized.');
+}
+
+// ─── シーンを既読にしてセーブ ───────────────
+function markSceneRead(id) {
+  if (!window.readScenes) window.readScenes = new Set();
+  window.readScenes.add(id);
+  if (typeof saveReadScenes === 'function') {
+    saveReadScenes(window.readScenes);
+  }
+}
+
+// ─── 設定変更時に自動保存 ───────────────────
+function persistSettings() {
+  if (window.settings && typeof saveSettings === 'function') {
+    saveSettings(window.settings);
+  }
+}
+
+// ─── キャラ追加/編集後に自動保存 ────────────
+function persistCharacters() {
+  if (window.characters && typeof saveCharacters === 'function') {
+    saveCharacters(window.characters);
+  }
+}
+
+// ─── シーン追加/編集後に自動保存 ────────────
+function persistScenes() {
+  if (window.scenes && typeof saveScenes === 'function') {
+    saveScenes(window.scenes);
+  }
+}
+
+// ─── サイト設定変更後に自動保存 ─────────────
+function persistSiteConfig() {
+  if (window.siteConfig && typeof saveSiteConfig === 'function') {
+    saveSiteConfig(window.siteConfig);
+  }
+}
+
+// ─── データリセット確認 ──────────────────────
+function resetAllDataConfirm() {
+  if (confirm('全データ（既読・設定・追加キャラ・追加シーン）を削除します。\nよろしいですか？')) {
+    if (typeof clearAllData === 'function') clearAllData();
+    alert('リセットしました。ページをリロードします。');
+    location.reload();
+  }
+}
+
+// ─── バックアップ UI ─────────────────────────
+function openBackupPanel() {
+  const existing = document.getElementById('backup-panel');
+  if (existing) { existing.remove(); return; }
+
+  const panel = document.createElement('div');
+  panel.id = 'backup-panel';
+  panel.style.cssText = `
+    position:fixed;bottom:60px;left:16px;z-index:999;
+    background:rgba(10,6,14,0.97);border:1px solid rgba(200,168,75,0.3);
+    padding:16px;min-width:220px;font-family:'Noto Serif JP',serif;
+  `;
+  panel.innerHTML = `
+    <div style="color:rgba(200,168,75,0.8);font-size:.65rem;letter-spacing:.3em;margin-bottom:12px;">— DATA BACKUP —</div>
+    <button onclick="exportData()" style="display:block;width:100%;padding:8px;margin-bottom:6px;background:none;border:1px solid rgba(200,168,75,0.3);color:rgba(200,168,75,0.7);font-size:.65rem;letter-spacing:.2em;cursor:pointer;">💾 バックアップ保存</button>
+    <label style="display:block;width:100%;padding:8px;margin-bottom:6px;background:none;border:1px solid rgba(200,168,75,0.3);color:rgba(200,168,75,0.7);font-size:.65rem;letter-spacing:.2em;cursor:pointer;text-align:center;">
+      📂 バックアップ読込
+      <input type="file" accept=".json" style="display:none" onchange="handleImport(event)">
+    </label>
+    <button onclick="resetAllDataConfirm()" style="display:block;width:100%;padding:8px;background:none;border:1px solid rgba(122,16,16,0.4);color:rgba(200,80,80,0.6);font-size:.6rem;letter-spacing:.2em;cursor:pointer;">⚠ 全データリセット</button>
+    <button onclick="document.getElementById('backup-panel').remove()" style="display:block;width:100%;padding:6px;margin-top:8px;background:none;border:none;color:rgba(200,168,75,0.3);font-size:.6rem;cursor:pointer;">閉じる</button>
+  `;
+  document.body.appendChild(panel);
+}
+
+function handleImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  importData(file, (ok) => {
+    alert(ok ? 'インポート成功！ページをリロードします。' : 'インポートに失敗しました。');
+    if (ok) location.reload();
+  });
+}
+
+</script>
+</body>
+</html>
