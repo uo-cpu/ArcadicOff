@@ -1738,140 +1738,6 @@ function importData(file, callback) {
 </script>
 <script>
 // ══════════════════════════════════════════════
-//  ArcadicRPG — game.js
-//  ゲームロジック補助・データ永続化
-// ══════════════════════════════════════════════
-
-// ─── 起動時：保存データを復元 ──────────────
-function initGameData() {
-  // 既読シーンを復元（storage.jsのloadReadScenesを使用）
-  if (typeof loadReadScenes === 'function') {
-    window.readScenes = loadReadScenes();
-  }
-
-  // 設定を復元
-  if (typeof loadSettings === 'function') {
-    const saved = loadSettings();
-    if (saved) {
-      window.settings = Object.assign(window.settings || {}, saved);
-    }
-  }
-
-  // サイト設定（管理者編集内容）を復元
-  if (typeof loadSiteConfig === 'function') {
-    const cfg = loadSiteConfig();
-    if (cfg) {
-      window.siteConfig = Object.assign(window.siteConfig || {}, cfg);
-      // タイトル反映
-      const logoFb = document.getElementById('logo-fallback');
-      const titleSub = document.querySelector('.title-sub');
-      if (logoFb && cfg.title) logoFb.textContent = cfg.title;
-      if (titleSub && cfg.sub) titleSub.textContent = cfg.sub;
-    }
-  }
-
-  // キャラクターデータを復元（追加分をマージ）
-  if (typeof loadCharacters === 'function') {
-    const savedChars = loadCharacters();
-    if (savedChars) {
-      window.characters = savedChars;
-    }
-  }
-
-  // シーンデータを復元（追加分をマージ）
-  if (typeof loadScenes === 'function') {
-    const savedScenes = loadScenes();
-    if (savedScenes) {
-      window.scenes = savedScenes;
-    }
-  }
-
-  console.log('[ArcadicRPG] Game data initialized.');
-}
-
-// ─── シーンを既読にしてセーブ ───────────────
-function markSceneRead(id) {
-  if (!window.readScenes) window.readScenes = new Set();
-  window.readScenes.add(id);
-  if (typeof saveReadScenes === 'function') {
-    saveReadScenes(window.readScenes);
-  }
-}
-
-// ─── 設定変更時に自動保存 ───────────────────
-function persistSettings() {
-  if (window.settings && typeof saveSettings === 'function') {
-    saveSettings(window.settings);
-  }
-}
-
-// ─── キャラ追加/編集後に自動保存 ────────────
-function persistCharacters() {
-  if (window.characters && typeof saveCharacters === 'function') {
-    saveCharacters(window.characters);
-  }
-}
-
-// ─── シーン追加/編集後に自動保存 ────────────
-function persistScenes() {
-  if (window.scenes && typeof saveScenes === 'function') {
-    saveScenes(window.scenes);
-  }
-}
-
-// ─── サイト設定変更後に自動保存 ─────────────
-function persistSiteConfig() {
-  if (window.siteConfig && typeof saveSiteConfig === 'function') {
-    saveSiteConfig(window.siteConfig);
-  }
-}
-
-// ─── データリセット確認 ──────────────────────
-function resetAllDataConfirm() {
-  if (confirm('全データ（既読・設定・追加キャラ・追加シーン）を削除します。\nよろしいですか？')) {
-    if (typeof clearAllData === 'function') clearAllData();
-    alert('リセットしました。ページをリロードします。');
-    location.reload();
-  }
-}
-
-// ─── バックアップ UI ─────────────────────────
-function openBackupPanel() {
-  const existing = document.getElementById('backup-panel');
-  if (existing) { existing.remove(); return; }
-
-  const panel = document.createElement('div');
-  panel.id = 'backup-panel';
-  panel.style.cssText = `
-    position:fixed;bottom:60px;left:16px;z-index:999;
-    background:rgba(10,6,14,0.97);border:1px solid rgba(200,168,75,0.3);
-    padding:16px;min-width:220px;font-family:'Noto Serif JP',serif;
-  `;
-  panel.innerHTML = `
-    <div style="color:rgba(200,168,75,0.8);font-size:.65rem;letter-spacing:.3em;margin-bottom:12px;">— DATA BACKUP —</div>
-    <button onclick="exportData()" style="display:block;width:100%;padding:8px;margin-bottom:6px;background:none;border:1px solid rgba(200,168,75,0.3);color:rgba(200,168,75,0.7);font-size:.65rem;letter-spacing:.2em;cursor:pointer;">💾 バックアップ保存</button>
-    <label style="display:block;width:100%;padding:8px;margin-bottom:6px;background:none;border:1px solid rgba(200,168,75,0.3);color:rgba(200,168,75,0.7);font-size:.65rem;letter-spacing:.2em;cursor:pointer;text-align:center;">
-      📂 バックアップ読込
-      <input type="file" accept=".json" style="display:none" onchange="handleImport(event)">
-    </label>
-    <button onclick="resetAllDataConfirm()" style="display:block;width:100%;padding:8px;background:none;border:1px solid rgba(122,16,16,0.4);color:rgba(200,80,80,0.6);font-size:.6rem;letter-spacing:.2em;cursor:pointer;">⚠ 全データリセット</button>
-    <button onclick="document.getElementById('backup-panel').remove()" style="display:block;width:100%;padding:6px;margin-top:8px;background:none;border:none;color:rgba(200,168,75,0.3);font-size:.6rem;cursor:pointer;">閉じる</button>
-  `;
-  document.body.appendChild(panel);
-}
-
-function handleImport(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  importData(file, (ok) => {
-    alert(ok ? 'インポート成功！ページをリロードします。' : 'インポートに失敗しました。');
-    if (ok) location.reload();
-  });
-}
-
-</script>
-<script>
-// ══════════════════════════════════════════════
 //  DATA
 // ══════════════════════════════════════════════
 let siteConfig = {
@@ -1969,7 +1835,7 @@ let currentWorld = 'afstasia';
 let currentScene = null, currentLine = 0, isTyping = false, typeTimer = null;
 let voiceFiles = {}, currentVoice = null;
 let bgmAudio = null, bgmOn = false, useDemoTone = true, demoCtx = null, demoNodes = [];
-let readScenes = (typeof loadReadScenes === 'function') ? loadReadScenes() : new Set(JSON.parse(localStorage.getItem('arcadic_read') || '[]'));
+let readScenes = loadReadScenes();
 let settings = { bgmVol: 28, seVol: 70, fontSize: 'medium' };
 let pinBuffer = '';
 let adminAuthenticated = false;
@@ -2272,8 +2138,7 @@ function handleTap() {
 
 function showEnd() {
   readScenes.add(currentScene.id);
-  if (typeof saveReadScenes === 'function') saveReadScenes(readScenes);
-  else localStorage.setItem('arcadic_read', JSON.stringify([...readScenes]));
+  saveReadScenes(readScenes);
   document.getElementById('dialogue-text').innerHTML =
     `<span style="color:var(--c-dim);font-family:'Cormorant Garamond',serif;letter-spacing:.3em;font-size:.82rem;">— fin —</span>`;
   document.getElementById('name-plate').classList.remove('show');
@@ -2401,7 +2266,7 @@ function setFontSize(size) {
 function resetRead() {
   if (confirm('既読記録をリセットしますか？')) {
     readScenes.clear();
-    localStorage.removeItem('arcadic_read');
+    saveReadScenes(readScenes);
     renderSceneList();
   }
 }
@@ -2540,7 +2405,7 @@ function confirmAddScene() {
   closeModal('add-scene-modal');
   renderAdminSceneList();
   renderSceneList();
-  if (typeof persistScenes === 'function') persistScenes();
+  saveScenes(scenes);
 }
 
 function adminEditScene(id) {
@@ -2557,7 +2422,7 @@ function adminDeleteScene(id, world) {
   scenes[world] = (scenes[world] || []).filter(s => s.id !== id);
   renderAdminSceneList();
   renderSceneList();
-  if (typeof persistScenes === 'function') persistScenes();
+  saveScenes(scenes);
 }
 
 function renderAdminCharList() {
@@ -2639,13 +2504,13 @@ function confirmSaveChar() {
   }
   closeModal('char-modal');
   renderAdminCharList();
-  if (typeof persistCharacters === 'function') persistCharacters();
+  saveCharacters(characters);
 }
 function adminDeleteChar(id, world) {
   if (!confirm('このキャラクターを削除しますか？')) return;
   characters[world] = (characters[world]||[]).filter(c => c.id !== id);
   renderAdminCharList();
-  if (typeof persistCharacters === 'function') persistCharacters();
+  saveCharacters(characters);
 }
 
 function saveSiteSettings() {
@@ -2656,7 +2521,7 @@ function saveSiteSettings() {
   const newPin = document.getElementById('new-pin-input').value.trim();
   if (newPin && /^\d{4}$/.test(newPin)) siteConfig.pin = newPin;
   document.getElementById('logo-fallback').textContent = siteConfig.title;
-  if (typeof persistSiteConfig === 'function') persistSiteConfig();
+  saveSiteConfig(siteConfig);
   alert('保存しました。');
 }
 
@@ -2668,7 +2533,7 @@ function saveShareSettings() {
   siteConfig.shareUrl = document.getElementById('admin-share-url').value.trim();
   siteConfig.shareMsg = document.getElementById('admin-share-msg').value.trim();
   updateShareDisplay();
-  if (typeof persistSiteConfig === 'function') persistSiteConfig();
+  saveSiteConfig(siteConfig);
   alert('共有設定を保存しました。');
 }
 
@@ -2687,7 +2552,7 @@ function closeSceneEdit() {
 }
 function saveAndCloseEdit() {
   collectCards();
-  if (typeof persistScenes === 'function') persistScenes();
+  saveScenes(scenes);
   closeSceneEdit();
   if (currentScene && !document.getElementById('scene-viewer').classList.contains('hidden')) {
     currentLine = 0; renderCharArea(); renderLine();
@@ -2798,21 +2663,62 @@ document.addEventListener('keydown', e => {
 // ══════════════════════════════════════════════
 applyFontSize();
 document.querySelectorAll('.settings-corner').forEach(b => b.onclick = openSettings);
-// 設定復元
+
+// ── 起動時に保存データを復元 ──
 (function() {
-  const savedSettings = typeof loadSettings === 'function' ? loadSettings() : null;
-  if (savedSettings) { Object.assign(settings, savedSettings); applyFontSize(); }
-  const savedChars = typeof loadCharacters === 'function' ? loadCharacters() : null;
-  if (savedChars) characters = savedChars;
-  const savedScenes = typeof loadScenes === 'function' ? loadScenes() : null;
-  if (savedScenes) scenes = savedScenes;
-  const savedConfig = typeof loadSiteConfig === 'function' ? loadSiteConfig() : null;
-  if (savedConfig) {
-    Object.assign(siteConfig, savedConfig);
+  // 設定
+  const s = loadSettings();
+  if (s) { Object.assign(settings, s); applyFontSize(); }
+  // キャラクター
+  const c = loadCharacters();
+  if (c) characters = c;
+  // シーン
+  const sc = loadScenes();
+  if (sc) scenes = sc;
+  // サイト設定
+  const cfg = loadSiteConfig();
+  if (cfg) {
+    Object.assign(siteConfig, cfg);
     const lb = document.getElementById('logo-fallback');
-    if (lb && savedConfig.title) lb.textContent = savedConfig.title;
+    if (lb) lb.textContent = siteConfig.title;
   }
 })();
+</script>
+
+<script>
+function openBackupPanel() {
+  const existing = document.getElementById('backup-panel');
+  if (existing) { existing.remove(); return; }
+  const panel = document.createElement('div');
+  panel.id = 'backup-panel';
+  panel.style.cssText = 'position:fixed;bottom:60px;left:16px;z-index:999;background:rgba(10,6,14,0.97);border:1px solid rgba(200,168,75,0.3);padding:16px;min-width:220px;font-family:Noto Serif JP,serif;';
+  panel.innerHTML = `
+    <div style="color:rgba(200,168,75,0.8);font-size:.65rem;letter-spacing:.3em;margin-bottom:12px;">— DATA BACKUP —</div>
+    <button onclick="exportData()" style="display:block;width:100%;padding:8px;margin-bottom:6px;background:none;border:1px solid rgba(200,168,75,0.3);color:rgba(200,168,75,0.7);font-size:.65rem;letter-spacing:.2em;cursor:pointer;">💾 バックアップ保存</button>
+    <label style="display:block;width:100%;padding:8px;margin-bottom:6px;background:none;border:1px solid rgba(200,168,75,0.3);color:rgba(200,168,75,0.7);font-size:.65rem;letter-spacing:.2em;cursor:pointer;text-align:center;">
+      📂 バックアップ読込
+      <input type="file" accept=".json" style="display:none" onchange="handleImport(event)">
+    </label>
+    <button onclick="resetAllDataConfirm()" style="display:block;width:100%;padding:8px;background:none;border:1px solid rgba(122,16,16,0.4);color:rgba(200,80,80,0.6);font-size:.6rem;letter-spacing:.2em;cursor:pointer;">⚠ 全データリセット</button>
+    <button onclick="document.getElementById('backup-panel').remove()" style="display:block;width:100%;padding:6px;margin-top:8px;background:none;border:none;color:rgba(200,168,75,0.3);font-size:.6rem;cursor:pointer;">閉じる</button>
+  `;
+  document.body.appendChild(panel);
+}
+function handleImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  importData(file, (ok) => {
+    alert(ok ? 'インポート成功！ページをリロードします。' : 'インポートに失敗しました。');
+    if (ok) location.reload();
+  });
+}
+function resetAllDataConfirm() {
+  if (confirm('全データを削除します。よろしいですか？')) {
+    clearAllData();
+    alert('リセットしました。');
+    location.reload();
+  }
+}
 </script>
 </body>
 </html>
