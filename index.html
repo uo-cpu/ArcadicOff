@@ -1576,8 +1576,300 @@ body.world-afstasia{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   </div>
 </div>
 
-<script src="js/storage.js"></script>
-<script src="js/game.js"></script>
+<script>
+// ══════════════════════════════════════════════
+//  ArcadicRPG — storage.js
+//  セーブ・ロード・設定管理
+// ══════════════════════════════════════════════
+
+const KEYS = {
+  SAVE:     'arcadic_save',
+  READ:     'arcadic_read',
+  SETTINGS: 'arcadic_settings',
+  CONFIG:   'arcadic_config',
+  CHARS:    'arcadic_characters',
+  SCENES:   'arcadic_scenes',
+};
+
+// ─── セーブデータ ───────────────────────────
+function saveGame(data) {
+  try {
+    localStorage.setItem(KEYS.SAVE, JSON.stringify(data));
+    return true;
+  } catch(e) {
+    console.warn('saveGame failed:', e);
+    return false;
+  }
+}
+
+function loadGame() {
+  try {
+    const raw = localStorage.getItem(KEYS.SAVE);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) {
+    console.warn('loadGame failed:', e);
+    return null;
+  }
+}
+
+// ─── 既読シーン ─────────────────────────────
+function saveReadScenes(set) {
+  try {
+    localStorage.setItem(KEYS.READ, JSON.stringify([...set]));
+  } catch(e) {}
+}
+
+function loadReadScenes() {
+  try {
+    const raw = localStorage.getItem(KEYS.READ);
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch(e) {
+    return new Set();
+  }
+}
+
+// ─── 設定（音量・文字サイズ） ───────────────
+function saveSettings(obj) {
+  try {
+    localStorage.setItem(KEYS.SETTINGS, JSON.stringify(obj));
+  } catch(e) {}
+}
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem(KEYS.SETTINGS);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) {
+    return null;
+  }
+}
+
+// ─── サイト設定（管理者） ───────────────────
+function saveSiteConfig(obj) {
+  try {
+    localStorage.setItem(KEYS.CONFIG, JSON.stringify(obj));
+  } catch(e) {}
+}
+
+function loadSiteConfig() {
+  try {
+    const raw = localStorage.getItem(KEYS.CONFIG);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) {
+    return null;
+  }
+}
+
+// ─── キャラクターデータ ─────────────────────
+function saveCharacters(obj) {
+  try {
+    localStorage.setItem(KEYS.CHARS, JSON.stringify(obj));
+  } catch(e) {}
+}
+
+function loadCharacters() {
+  try {
+    const raw = localStorage.getItem(KEYS.CHARS);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) {
+    return null;
+  }
+}
+
+// ─── シーンデータ ───────────────────────────
+function saveScenes(obj) {
+  try {
+    localStorage.setItem(KEYS.SCENES, JSON.stringify(obj));
+  } catch(e) {}
+}
+
+function loadScenes() {
+  try {
+    const raw = localStorage.getItem(KEYS.SCENES);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) {
+    return null;
+  }
+}
+
+// ─── 全データ削除（リセット） ───────────────
+function clearAllData() {
+  Object.values(KEYS).forEach(k => localStorage.removeItem(k));
+}
+
+// ─── エクスポート（バックアップ） ──────────
+function exportData() {
+  const blob = new Blob([JSON.stringify({
+    save:       loadGame(),
+    read:       [...loadReadScenes()],
+    settings:   loadSettings(),
+    config:     loadSiteConfig(),
+    characters: loadCharacters(),
+    scenes:     loadScenes(),
+    exportedAt: new Date().toISOString(),
+  }, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `arcadic_backup_${Date.now()}.json`;
+  a.click();
+}
+
+// ─── インポート（バックアップ復元） ────────
+function importData(file, callback) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.save)       saveGame(data.save);
+      if (data.read)       saveReadScenes(new Set(data.read));
+      if (data.settings)   saveSettings(data.settings);
+      if (data.config)     saveSiteConfig(data.config);
+      if (data.characters) saveCharacters(data.characters);
+      if (data.scenes)     saveScenes(data.scenes);
+      if (callback) callback(true);
+    } catch(err) {
+      console.warn('import failed:', err);
+      if (callback) callback(false);
+    }
+  };
+  reader.readAsText(file);
+}
+
+</script>
+<script>
+// ══════════════════════════════════════════════
+//  ArcadicRPG — game.js
+//  ゲームロジック補助・データ永続化
+// ══════════════════════════════════════════════
+
+// ─── 起動時：保存データを復元 ──────────────
+function initGameData() {
+  // 既読シーンを復元（storage.jsのloadReadScenesを使用）
+  if (typeof loadReadScenes === 'function') {
+    window.readScenes = loadReadScenes();
+  }
+
+  // 設定を復元
+  if (typeof loadSettings === 'function') {
+    const saved = loadSettings();
+    if (saved) {
+      window.settings = Object.assign(window.settings || {}, saved);
+    }
+  }
+
+  // サイト設定（管理者編集内容）を復元
+  if (typeof loadSiteConfig === 'function') {
+    const cfg = loadSiteConfig();
+    if (cfg) {
+      window.siteConfig = Object.assign(window.siteConfig || {}, cfg);
+      // タイトル反映
+      const logoFb = document.getElementById('logo-fallback');
+      const titleSub = document.querySelector('.title-sub');
+      if (logoFb && cfg.title) logoFb.textContent = cfg.title;
+      if (titleSub && cfg.sub) titleSub.textContent = cfg.sub;
+    }
+  }
+
+  // キャラクターデータを復元（追加分をマージ）
+  if (typeof loadCharacters === 'function') {
+    const savedChars = loadCharacters();
+    if (savedChars) {
+      window.characters = savedChars;
+    }
+  }
+
+  // シーンデータを復元（追加分をマージ）
+  if (typeof loadScenes === 'function') {
+    const savedScenes = loadScenes();
+    if (savedScenes) {
+      window.scenes = savedScenes;
+    }
+  }
+
+  console.log('[ArcadicRPG] Game data initialized.');
+}
+
+// ─── シーンを既読にしてセーブ ───────────────
+function markSceneRead(id) {
+  if (!window.readScenes) window.readScenes = new Set();
+  window.readScenes.add(id);
+  if (typeof saveReadScenes === 'function') {
+    saveReadScenes(window.readScenes);
+  }
+}
+
+// ─── 設定変更時に自動保存 ───────────────────
+function persistSettings() {
+  if (window.settings && typeof saveSettings === 'function') {
+    saveSettings(window.settings);
+  }
+}
+
+// ─── キャラ追加/編集後に自動保存 ────────────
+function persistCharacters() {
+  if (window.characters && typeof saveCharacters === 'function') {
+    saveCharacters(window.characters);
+  }
+}
+
+// ─── シーン追加/編集後に自動保存 ────────────
+function persistScenes() {
+  if (window.scenes && typeof saveScenes === 'function') {
+    saveScenes(window.scenes);
+  }
+}
+
+// ─── サイト設定変更後に自動保存 ─────────────
+function persistSiteConfig() {
+  if (window.siteConfig && typeof saveSiteConfig === 'function') {
+    saveSiteConfig(window.siteConfig);
+  }
+}
+
+// ─── データリセット確認 ──────────────────────
+function resetAllDataConfirm() {
+  if (confirm('全データ（既読・設定・追加キャラ・追加シーン）を削除します。\nよろしいですか？')) {
+    if (typeof clearAllData === 'function') clearAllData();
+    alert('リセットしました。ページをリロードします。');
+    location.reload();
+  }
+}
+
+// ─── バックアップ UI ─────────────────────────
+function openBackupPanel() {
+  const existing = document.getElementById('backup-panel');
+  if (existing) { existing.remove(); return; }
+
+  const panel = document.createElement('div');
+  panel.id = 'backup-panel';
+  panel.style.cssText = `
+    position:fixed;bottom:60px;left:16px;z-index:999;
+    background:rgba(10,6,14,0.97);border:1px solid rgba(200,168,75,0.3);
+    padding:16px;min-width:220px;font-family:'Noto Serif JP',serif;
+  `;
+  panel.innerHTML = `
+    <div style="color:rgba(200,168,75,0.8);font-size:.65rem;letter-spacing:.3em;margin-bottom:12px;">— DATA BACKUP —</div>
+    <button onclick="exportData()" style="display:block;width:100%;padding:8px;margin-bottom:6px;background:none;border:1px solid rgba(200,168,75,0.3);color:rgba(200,168,75,0.7);font-size:.65rem;letter-spacing:.2em;cursor:pointer;">💾 バックアップ保存</button>
+    <label style="display:block;width:100%;padding:8px;margin-bottom:6px;background:none;border:1px solid rgba(200,168,75,0.3);color:rgba(200,168,75,0.7);font-size:.65rem;letter-spacing:.2em;cursor:pointer;text-align:center;">
+      📂 バックアップ読込
+      <input type="file" accept=".json" style="display:none" onchange="handleImport(event)">
+    </label>
+    <button onclick="resetAllDataConfirm()" style="display:block;width:100%;padding:8px;background:none;border:1px solid rgba(122,16,16,0.4);color:rgba(200,80,80,0.6);font-size:.6rem;letter-spacing:.2em;cursor:pointer;">⚠ 全データリセット</button>
+    <button onclick="document.getElementById('backup-panel').remove()" style="display:block;width:100%;padding:6px;margin-top:8px;background:none;border:none;color:rgba(200,168,75,0.3);font-size:.6rem;cursor:pointer;">閉じる</button>
+  `;
+  document.body.appendChild(panel);
+}
+
+function handleImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  importData(file, (ok) => {
+    alert(ok ? 'インポート成功！ページをリロードします。' : 'インポートに失敗しました。');
+    if (ok) location.reload();
+  });
+}
+
+</script>
 <script>
 // ══════════════════════════════════════════════
 //  DATA
@@ -1677,7 +1969,7 @@ let currentWorld = 'afstasia';
 let currentScene = null, currentLine = 0, isTyping = false, typeTimer = null;
 let voiceFiles = {}, currentVoice = null;
 let bgmAudio = null, bgmOn = false, useDemoTone = true, demoCtx = null, demoNodes = [];
-let readScenes = new Set(JSON.parse(localStorage.getItem('arcadic_read') || '[]'));
+let readScenes = (typeof loadReadScenes === 'function') ? loadReadScenes() : new Set(JSON.parse(localStorage.getItem('arcadic_read') || '[]'));
 let settings = { bgmVol: 28, seVol: 70, fontSize: 'medium' };
 let pinBuffer = '';
 let adminAuthenticated = false;
@@ -1979,12 +2271,9 @@ function handleTap() {
 }
 
 function showEnd() {
-  if (typeof markSceneRead === 'function') {
-    markSceneRead(currentScene.id);
-  } else {
-    readScenes.add(currentScene.id);
-    localStorage.setItem('arcadic_read', JSON.stringify([...readScenes]));
-  }
+  readScenes.add(currentScene.id);
+  if (typeof saveReadScenes === 'function') saveReadScenes(readScenes);
+  else localStorage.setItem('arcadic_read', JSON.stringify([...readScenes]));
   document.getElementById('dialogue-text').innerHTML =
     `<span style="color:var(--c-dim);font-family:'Cormorant Garamond',serif;letter-spacing:.3em;font-size:.82rem;">— fin —</span>`;
   document.getElementById('name-plate').classList.remove('show');
@@ -2508,23 +2797,21 @@ document.addEventListener('keydown', e => {
 //  INIT
 // ══════════════════════════════════════════════
 applyFontSize();
-// Settings corner gear (also show on scene viewer via position:fixed)
 document.querySelectorAll('.settings-corner').forEach(b => b.onclick = openSettings);
-
-// ── storage.js / game.js 統合初期化 ──────────
-// 保存データを読み込む（game.js）
-if (typeof initGameData === 'function') initGameData();
-
-// readScenesをgame.jsの永続化版に差し替え
-if (typeof loadReadScenes === 'function') {
-  readScenes = loadReadScenes();
-}
-
-// 設定の復元
+// 設定復元
 (function() {
   const savedSettings = typeof loadSettings === 'function' ? loadSettings() : null;
-  if (savedSettings) Object.assign(settings, savedSettings);
-  applyFontSize();
+  if (savedSettings) { Object.assign(settings, savedSettings); applyFontSize(); }
+  const savedChars = typeof loadCharacters === 'function' ? loadCharacters() : null;
+  if (savedChars) characters = savedChars;
+  const savedScenes = typeof loadScenes === 'function' ? loadScenes() : null;
+  if (savedScenes) scenes = savedScenes;
+  const savedConfig = typeof loadSiteConfig === 'function' ? loadSiteConfig() : null;
+  if (savedConfig) {
+    Object.assign(siteConfig, savedConfig);
+    const lb = document.getElementById('logo-fallback');
+    if (lb && savedConfig.title) lb.textContent = savedConfig.title;
+  }
 })();
 </script>
 </body>
