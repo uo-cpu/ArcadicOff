@@ -1548,6 +1548,18 @@ body.world-afstasia{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
           <button class="admin-btn primary" onclick="saveSiteSettings()">✓ 保存</button>
         </div>
       </div>
+
+      <div class="admin-section" style="margin-top:16px;">
+        <div class="admin-section-title">制作データ バックアップ</div>
+        <div style="font-size:.6rem;color:rgba(200,168,75,.4);letter-spacing:.15em;margin-bottom:12px;">キャラ・シーン・設定のバックアップ</div>
+        <div class="admin-actions" style="flex-direction:column;gap:8px;">
+          <button class="admin-btn primary" onclick="exportProjectData()">💾 制作データを保存</button>
+          <label class="admin-btn" style="text-align:center;cursor:pointer;">
+            📂 制作データを読込
+            <input type="file" accept=".json" style="display:none" onchange="handleProjectImport(event)">
+          </label>
+        </div>
+      </div>
     </div>
     <!-- SHARE TAB -->
     <div class="admin-tab-content" id="admin-tab-share">
@@ -2934,36 +2946,44 @@ function openBackupPanel() {
   if (existing) { existing.remove(); return; }
   const panel = document.createElement('div');
   panel.id = 'backup-panel';
-  panel.style.cssText = 'position:fixed;bottom:60px;left:16px;z-index:999;background:rgba(10,6,14,0.97);border:1px solid rgba(200,168,75,0.3);padding:16px;min-width:240px;font-family:Noto Serif JP,serif;';
+  panel.style.cssText = 'position:fixed;bottom:60px;left:16px;z-index:999;background:rgba(10,6,14,0.97);border:1px solid rgba(58,176,200,0.3);padding:16px;min-width:240px;font-family:Noto Serif JP,serif;';
   panel.innerHTML = `
-    <div style="color:rgba(200,168,75,0.8);font-size:.65rem;letter-spacing:.3em;margin-bottom:12px;">— DATA BACKUP —</div>
+    <div style="color:rgba(58,176,200,0.8);font-size:.65rem;letter-spacing:.3em;margin-bottom:4px;">— MY DATA —</div>
+    <div style="color:rgba(58,176,200,0.35);font-size:.55rem;letter-spacing:.2em;margin-bottom:14px;">あなたの進行データ</div>
 
-    <div style="color:rgba(200,168,75,0.5);font-size:.58rem;letter-spacing:.2em;margin-bottom:6px;">✦ 制作データ（キャラ・シーン）</div>
-    <button onclick="exportProjectData()" style="display:block;width:100%;padding:8px;margin-bottom:4px;background:none;border:1px solid rgba(200,168,75,0.3);color:rgba(200,168,75,0.7);font-size:.62rem;letter-spacing:.2em;cursor:pointer;">💾 制作データを保存</button>
-    <label style="display:block;width:100%;padding:8px;margin-bottom:10px;background:none;border:1px solid rgba(200,168,75,0.3);color:rgba(200,168,75,0.7);font-size:.62rem;letter-spacing:.2em;cursor:pointer;text-align:center;">
-      📂 制作データを読込
-      <input type="file" accept=".json" style="display:none" onchange="handleImport(event)">
+    <button onclick="exportPlayerData()" style="display:block;width:100%;padding:8px;margin-bottom:6px;background:none;border:1px solid rgba(58,176,200,0.3);color:rgba(58,176,200,0.7);font-size:.62rem;letter-spacing:.2em;cursor:pointer;">💾 データを保存</button>
+    <label style="display:block;width:100%;padding:8px;margin-bottom:12px;background:none;border:1px solid rgba(58,176,200,0.3);color:rgba(58,176,200,0.7);font-size:.62rem;letter-spacing:.2em;cursor:pointer;text-align:center;">
+      📂 データを読込
+      <input type="file" accept=".json" style="display:none" onchange="handlePlayerImport(event)">
     </label>
 
-    <div style="color:rgba(58,176,200,0.5);font-size:.58rem;letter-spacing:.2em;margin-bottom:6px;">◈ プレイヤーデータ（既読・進行）</div>
-    <button onclick="exportPlayerData()" style="display:block;width:100%;padding:8px;margin-bottom:4px;background:none;border:1px solid rgba(58,176,200,0.3);color:rgba(58,176,200,0.7);font-size:.62rem;letter-spacing:.2em;cursor:pointer;">💾 プレイヤーデータを保存</button>
-    <label style="display:block;width:100%;padding:8px;margin-bottom:10px;background:none;border:1px solid rgba(58,176,200,0.3);color:rgba(58,176,200,0.7);font-size:.62rem;letter-spacing:.2em;cursor:pointer;text-align:center;">
-      📂 プレイヤーデータを読込
-      <input type="file" accept=".json" style="display:none" onchange="handleImport(event)">
-    </label>
-
-    <button onclick="resetAllDataConfirm()" style="display:block;width:100%;padding:8px;background:none;border:1px solid rgba(122,16,16,0.4);color:rgba(200,80,80,0.6);font-size:.6rem;letter-spacing:.2em;cursor:pointer;">⚠ 全データリセット</button>
-    <button onclick="document.getElementById('backup-panel').remove()" style="display:block;width:100%;padding:6px;margin-top:8px;background:none;border:none;color:rgba(200,168,75,0.3);font-size:.6rem;cursor:pointer;">閉じる</button>
+    <button onclick="clearPlayerDataConfirm()" style="display:block;width:100%;padding:8px;background:none;border:1px solid rgba(122,16,16,0.4);color:rgba(200,80,80,0.6);font-size:.6rem;letter-spacing:.2em;cursor:pointer;">⚠ 自分のデータをリセット</button>
+    <button onclick="document.getElementById('backup-panel').remove()" style="display:block;width:100%;padding:6px;margin-top:8px;background:none;border:none;color:rgba(58,176,200,0.3);font-size:.6rem;cursor:pointer;">閉じる</button>
   `;
   document.body.appendChild(panel);
 }
-function handleImport(e) {
+function handlePlayerImport(e) {
   const file = e.target.files[0];
   if (!file) return;
   importData(file, (ok) => {
     alert(ok ? 'インポート成功！ページをリロードします。' : 'インポートに失敗しました。');
     if (ok) location.reload();
   });
+}
+function handleProjectImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  importData(file, (ok) => {
+    alert(ok ? '制作データを読み込みました！ページをリロードします。' : 'インポートに失敗しました。');
+    if (ok) location.reload();
+  });
+}
+function clearPlayerDataConfirm() {
+  if (confirm('自分の進行データを削除します。\nよろしいですか？')) {
+    clearPlayerData();
+    alert('リセットしました。');
+    location.reload();
+  }
 }
 function resetAllDataConfirm() {
   if (confirm('全データを削除します。よろしいですか？')) {
