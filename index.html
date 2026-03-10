@@ -1191,7 +1191,77 @@ body.world-afstasia{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <!-- ════════════════════════════════════
   TITLE SCREEN
 ════════════════════════════════════ -->
-<div class="screen" id="title-screen">
+<!-- ════════════════════════════════════
+  PLAYER LOGIN SCREEN
+════════════════════════════════════ -->
+<!-- プレイヤーログイン画面 -->
+<div class="screen" id="player-login-screen">
+  <div style="display:flex;flex-direction:column;align-items:center;width:min(400px,88vw);">
+    <div style="font-family:'Cinzel Decorative',cursive;font-size:clamp(1.2rem,4vw,2rem);color:var(--c-prime2);letter-spacing:.12em;text-shadow:0 0 30px rgba(200,168,75,.4);margin-bottom:8px;animation:logoIn 1.2s cubic-bezier(.16,1,.3,1) forwards;opacity:0;">ArcadicOff</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.65rem;letter-spacing:.4em;color:rgba(200,168,75,.4);margin-bottom:32px;animation:fadeUp 1.5s ease .5s forwards;opacity:0;">— Who are you? —</div>
+
+    <!-- 既存プレイヤー一覧 -->
+    <div id="player-list-wrap" style="width:100%;margin-bottom:20px;animation:fadeUp 1.5s ease .7s forwards;opacity:0;"></div>
+
+    <!-- 区切り -->
+    <div id="player-divider" style="width:100%;display:flex;align-items:center;gap:10px;margin-bottom:20px;animation:fadeUp 1.5s ease .8s forwards;opacity:0;">
+      <div style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(200,168,75,.2));"></div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:.6rem;letter-spacing:.3em;color:rgba(200,168,75,.3);">新規</div>
+      <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(200,168,75,.2),transparent);"></div>
+    </div>
+
+    <!-- 新規プレイヤー入力 -->
+    <div style="width:100%;animation:fadeUp 1.5s ease .9s forwards;opacity:0;">
+      <div style="font-family:'Cinzel',serif;font-size:.52rem;letter-spacing:.35em;color:rgba(200,168,75,.5);margin-bottom:8px;text-transform:uppercase;">New Player Name</div>
+      <input id="player-name-input" type="text" maxlength="20" placeholder="名前を入力"
+        style="width:100%;background:rgba(255,255,255,.04);border:none;border-bottom:1px solid rgba(200,168,75,.35);color:var(--c-text);font-family:'Noto Serif JP',serif;font-size:.95rem;padding:10px 4px;outline:none;letter-spacing:.1em;caret-color:rgba(200,168,75,.8);"
+        onkeydown="if(event.key==='Enter')registerNewPlayer()">
+      <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(200,168,75,.3),transparent);"></div>
+      <div style="font-family:'Cinzel',serif;font-size:.52rem;letter-spacing:.35em;color:rgba(200,168,75,.5);margin:12px 0 8px;text-transform:uppercase;">PIN (4桁)</div>
+      <input id="player-pin-input" type="password" maxlength="4" inputmode="numeric" placeholder="4桁の数字"
+        style="width:100%;background:rgba(255,255,255,.04);border:none;border-bottom:1px solid rgba(200,168,75,.35);color:var(--c-text);font-family:'Share Tech Mono',monospace;font-size:1.2rem;padding:10px 4px;outline:none;letter-spacing:.4em;caret-color:rgba(200,168,75,.8);"
+        onkeydown="if(event.key==='Enter')registerNewPlayer()">
+      <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(200,168,75,.3),transparent);"></div>
+    </div>
+
+    <button onclick="registerNewPlayer()"
+      style="margin-top:24px;background:none;border:1px solid rgba(200,168,75,.35);color:rgba(200,168,75,.8);font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.5em;text-transform:uppercase;padding:11px 44px;cursor:pointer;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);transition:all .4s;animation:fadeUp 1.5s ease 1s forwards;opacity:0;">
+      ▷ &nbsp;はじめる
+    </button>
+    <div id="player-name-error" style="color:rgba(200,80,80,.7);font-size:.6rem;letter-spacing:.2em;margin-top:12px;min-height:16px;text-align:center;"></div>
+  </div>
+</div>
+
+<!-- プレイヤーPINログインオーバーレイ -->
+<div class="modal-bg" id="player-pin-overlay" style="z-index:200;">
+  <div class="modal" style="max-width:300px;">
+    <div class="modal-title" id="player-pin-title">— Login —</div>
+    <div style="display:flex;justify-content:center;gap:10px;margin:16px 0;">
+      <div id="ppd0" style="width:12px;height:12px;border:1px solid rgba(200,168,75,.4);border-radius:50%;transition:all .2s;"></div>
+      <div id="ppd1" style="width:12px;height:12px;border:1px solid rgba(200,168,75,.4);border-radius:50%;transition:all .2s;"></div>
+      <div id="ppd2" style="width:12px;height:12px;border:1px solid rgba(200,168,75,.4);border-radius:50%;transition:all .2s;"></div>
+      <div id="ppd3" style="width:12px;height:12px;border:1px solid rgba(200,168,75,.4);border-radius:50%;transition:all .2s;"></div>
+    </div>
+    <div class="pin-keypad">
+      <button class="pin-key" onclick="playerPinInput('1')">1</button>
+      <button class="pin-key" onclick="playerPinInput('2')">2</button>
+      <button class="pin-key" onclick="playerPinInput('3')">3</button>
+      <button class="pin-key" onclick="playerPinInput('4')">4</button>
+      <button class="pin-key" onclick="playerPinInput('5')">5</button>
+      <button class="pin-key" onclick="playerPinInput('6')">6</button>
+      <button class="pin-key" onclick="playerPinInput('7')">7</button>
+      <button class="pin-key" onclick="playerPinInput('8')">8</button>
+      <button class="pin-key" onclick="playerPinInput('9')">9</button>
+      <button class="pin-key clear" onclick="playerPinClear()">CLR</button>
+      <button class="pin-key" onclick="playerPinInput('0')">0</button>
+      <button class="pin-key" onclick="playerPinBackspace()">⌫</button>
+    </div>
+    <div class="pin-error" id="player-pin-error"></div>
+    <button class="pin-cancel" onclick="closePlayerPinOverlay()">キャンセル</button>
+  </div>
+</div>
+
+<div class="screen hidden" id="title-screen">
   <div style="display:flex;flex-direction:column;align-items:center;">
     <div class="title-logo-wrap">
       <img class="title-logo" id="logo-img" src="1000016486.png" alt="ArcadicOff"
@@ -1212,6 +1282,7 @@ body.world-afstasia{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
       <button class="title-menu-btn" onclick="showSceneSelect()">▷ &nbsp;SCENE</button>
       <button class="title-menu-btn secondary" onclick="showCharSelect()">◆ &nbsp;CHARACTERS</button>
       <button class="title-menu-btn secondary" onclick="showShare()">⟁ &nbsp;SHARE</button>
+      <button class="title-menu-btn secondary" onclick="logoutPlayer()" style="margin-top:8px;font-size:.55rem;opacity:.6;">← ログアウト</button>
     </div>
   </div>
   <div class="v-tag">— version 0.2 —</div>
@@ -2151,7 +2222,7 @@ function handleTap() {
 
 function showEnd() {
   readScenes.add(currentScene.id);
-  saveReadScenes(readScenes);
+  saveCurrentPlayerRead();
   document.getElementById('dialogue-text').innerHTML =
     `<span style="color:var(--c-dim);font-family:'Cormorant Garamond',serif;letter-spacing:.3em;font-size:.82rem;">— fin —</span>`;
   document.getElementById('name-plate').classList.remove('show');
@@ -2677,24 +2748,183 @@ document.addEventListener('keydown', e => {
 applyFontSize();
 document.querySelectorAll('.settings-corner').forEach(b => b.onclick = openSettings);
 
-// ── 起動時に保存データを復元 ──
+// ── 起動時に制作データを復元 ──
 (function() {
-  // 設定
   const s = loadSettings();
   if (s) { Object.assign(settings, s); applyFontSize(); }
-  // キャラクター
   const c = loadCharacters();
   if (c) characters = c;
-  // シーン
   const sc = loadScenes();
   if (sc) scenes = sc;
-  // サイト設定
   const cfg = loadSiteConfig();
   if (cfg) {
     Object.assign(siteConfig, cfg);
     const lb = document.getElementById('logo-fallback');
     if (lb) lb.textContent = siteConfig.title;
   }
+})();
+
+// ══════════════════════════════════════════════
+//  プレイヤーシステム
+// ══════════════════════════════════════════════
+let currentPlayer = null;  // { name, pin }
+let playerPinBuffer = '';
+let loginTargetName = '';
+
+// ─── プレイヤー一覧をlocalStorageから取得 ────
+function getPlayerList() {
+  try {
+    const raw = localStorage.getItem('arcadic_player_list');
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+function savePlayerList(list) {
+  localStorage.setItem('arcadic_player_list', JSON.stringify(list));
+}
+
+// ─── プレイヤーデータのキー ───────────────────
+function playerKey(name) {
+  return 'arcadic_player_' + encodeURIComponent(name);
+}
+function savePlayerData(name, data) {
+  localStorage.setItem(playerKey(name), JSON.stringify(data));
+}
+function loadPlayerData(name) {
+  try {
+    const raw = localStorage.getItem(playerKey(name));
+    return raw ? JSON.parse(raw) : { read: [], name };
+  } catch(e) { return { read: [], name }; }
+}
+
+// ─── ログイン処理 ────────────────────────────
+function loginAsPlayer(name) {
+  currentPlayer = name;
+  const data = loadPlayerData(name);
+  readScenes = new Set(data.read || []);
+  // タイトル画面へ
+  document.getElementById('player-login-screen').classList.add('hidden');
+  document.getElementById('title-screen').classList.remove('hidden');
+}
+
+// ─── ログアウト ──────────────────────────────
+function logoutPlayer() {
+  if (!confirm('ログアウトしますか？\nデータは保存されています。')) return;
+  currentPlayer = null;
+  readScenes = new Set();
+  // ログイン画面へ戻る
+  ['title-screen','scene-select','char-select','scene-viewer','share-screen']
+    .forEach(s => document.getElementById(s).classList.add('hidden'));
+  document.getElementById('player-login-screen').classList.remove('hidden');
+  renderPlayerList();
+}
+
+// ─── 既読保存（プレイヤー別） ────────────────
+function saveCurrentPlayerRead() {
+  if (!currentPlayer) return;
+  const data = loadPlayerData(currentPlayer);
+  data.read = [...readScenes];
+  savePlayerData(currentPlayer, data);
+}
+
+// ─── 新規プレイヤー登録 ──────────────────────
+function registerNewPlayer() {
+  const name = document.getElementById('player-name-input').value.trim();
+  const pin  = document.getElementById('player-pin-input').value.trim();
+  const err  = document.getElementById('player-name-error');
+
+  if (!name) { err.textContent = '— 名前を入力してください —'; return; }
+  if (!/^\d{4}$/.test(pin)) { err.textContent = '— PINは4桁の数字です —'; return; }
+
+  const list = getPlayerList();
+  if (list.find(p => p.name === name)) {
+    err.textContent = '— その名前はすでに登録されています —'; return;
+  }
+
+  // 登録
+  list.push({ name, pin });
+  savePlayerList(list);
+  savePlayerData(name, { name, read: [] });
+  err.textContent = '';
+  document.getElementById('player-name-input').value = '';
+  document.getElementById('player-pin-input').value = '';
+  loginAsPlayer(name);
+}
+
+// ─── 既存プレイヤー一覧を描画 ────────────────
+function renderPlayerList() {
+  const wrap = document.getElementById('player-list-wrap');
+  const divider = document.getElementById('player-divider');
+  const list = getPlayerList();
+  if (!list.length) {
+    wrap.innerHTML = '';
+    if (divider) divider.style.display = 'none';
+    return;
+  }
+  if (divider) divider.style.display = 'flex';
+  wrap.innerHTML = `
+    <div style="font-family:'Cinzel',serif;font-size:.52rem;letter-spacing:.35em;color:rgba(200,168,75,.5);margin-bottom:10px;text-transform:uppercase;">Select Player</div>
+    ${list.map(p => `
+      <div onclick="openPlayerPinLogin('${p.name}')"
+        style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;margin-bottom:6px;border:1px solid rgba(200,168,75,.15);background:rgba(255,255,255,.02);cursor:pointer;transition:all .25s;"
+        onmouseover="this.style.borderColor='rgba(200,168,75,.45)';this.style.background='rgba(200,168,75,.04)'"
+        onmouseout="this.style.borderColor='rgba(200,168,75,.15)';this.style.background='rgba(255,255,255,.02)'">
+        <div style="font-family:'Noto Serif JP',serif;font-size:.85rem;color:var(--c-text);letter-spacing:.1em;">${p.name}</div>
+        <div style="font-family:'Cinzel',serif;font-size:.5rem;letter-spacing:.3em;color:rgba(200,168,75,.4);">LOGIN ▷</div>
+      </div>
+    `).join('')}
+  `;
+}
+
+// ─── 既存プレイヤーPINログイン ───────────────
+function openPlayerPinLogin(name) {
+  loginTargetName = name;
+  playerPinBuffer = '';
+  updatePlayerPinDisplay();
+  document.getElementById('player-pin-title').textContent = `— ${name} —`;
+  document.getElementById('player-pin-error').textContent = '';
+  document.getElementById('player-pin-overlay').classList.add('open');
+}
+function closePlayerPinOverlay() {
+  document.getElementById('player-pin-overlay').classList.remove('open');
+  playerPinBuffer = '';
+  loginTargetName = '';
+}
+function updatePlayerPinDisplay() {
+  for (let i = 0; i < 4; i++) {
+    const d = document.getElementById(`ppd${i}`);
+    if (d) d.style.background = i < playerPinBuffer.length ? 'rgba(200,168,75,.8)' : 'transparent';
+  }
+}
+function playerPinInput(v) {
+  if (playerPinBuffer.length >= 4) return;
+  playerPinBuffer += v;
+  updatePlayerPinDisplay();
+  if (playerPinBuffer.length === 4) checkPlayerPin();
+}
+function playerPinBackspace() {
+  if (playerPinBuffer.length > 0) { playerPinBuffer = playerPinBuffer.slice(0,-1); updatePlayerPinDisplay(); }
+}
+function playerPinClear() { playerPinBuffer = ''; updatePlayerPinDisplay(); }
+function checkPlayerPin() {
+  const list = getPlayerList();
+  const player = list.find(p => p.name === loginTargetName);
+  if (player && player.pin === playerPinBuffer) {
+    closePlayerPinOverlay();
+    loginAsPlayer(loginTargetName);
+  } else {
+    const err = document.getElementById('player-pin-error');
+    err.textContent = '— PINが違います —';
+    playerPinBuffer = ''; updatePlayerPinDisplay();
+    setTimeout(() => { err.textContent = ''; }, 2000);
+  }
+}
+
+// ─── 起動時：ログイン画面を表示 ─────────────
+(function() {
+  // title-screenを隠してlogin画面を表示
+  document.getElementById('title-screen').classList.add('hidden');
+  document.getElementById('player-login-screen').classList.remove('hidden');
+  renderPlayerList();
 })();
 </script>
 
