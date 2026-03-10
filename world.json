@@ -1,0 +1,18 @@
+{
+  "_comment": "このファイルはArcadicRPGの世界設定データです。game.jsから参照できます。",
+  "worlds": {
+    "afstasia": {
+      "name": "Afstasia",
+      "nameJa": "アフスタシア",
+      "desc": "地上世界。貴族社会と古き血脈が支配する王国。",
+      "theme": "gothic"
+    },
+    "telostia": {
+      "name": "Telostia",
+      "nameJa": "テロスティア",
+      "desc": "地下世界。魔法陣と錬金術の研究施設が広がる迷宮。",
+      "theme": "alchemical"
+    }
+  },
+  "version": "1.0.0"
+}
