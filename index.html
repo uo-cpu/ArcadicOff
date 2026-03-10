@@ -1560,6 +1560,29 @@ body.world-afstasia{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
           </label>
         </div>
       </div>
+
+      <div class="admin-section" style="margin-top:16px;">
+        <div class="admin-section-title">GitHub 自動保存</div>
+        <div style="font-size:.6rem;color:rgba(200,168,75,.4);letter-spacing:.15em;margin-bottom:12px;">制作データをGitHubに直接保存→全端末に即反映</div>
+        <div class="admin-field">
+          <label class="admin-label">GitHubユーザー名</label>
+          <input class="admin-input" id="gh-user" placeholder="例: uo-cpu">
+        </div>
+        <div class="admin-field">
+          <label class="admin-label">リポジトリ名</label>
+          <input class="admin-input" id="gh-repo" placeholder="例: ArcadicOff">
+        </div>
+        <div class="admin-field">
+          <label class="admin-label">GitHubトークン</label>
+          <input class="admin-input" id="gh-token" type="password" placeholder="ghp_xxxxxxxxxxxx">
+          <div style="font-size:.55rem;color:rgba(200,168,75,.3);margin-top:4px;letter-spacing:.1em;">※ このトークンはこの端末にのみ保存されます</div>
+        </div>
+        <div class="admin-actions" style="flex-direction:column;gap:8px;">
+          <button class="admin-btn primary" onclick="saveGitHubSettings()">✓ GitHub設定を保存</button>
+          <button class="admin-btn primary" onclick="pushToGitHub()" style="background:rgba(200,168,75,.15);">🚀 GitHubに今すぐ保存</button>
+        </div>
+        <div id="gh-status" style="font-size:.6rem;color:rgba(200,168,75,.5);letter-spacing:.15em;margin-top:8px;min-height:16px;"></div>
+      </div>
     </div>
     <!-- SHARE TAB -->
     <div class="admin-tab-content" id="admin-tab-share">
@@ -2449,6 +2472,7 @@ function openAdmin() {
   renderAdminSceneList();
   renderAdminCharList();
   loadAdminShare();
+  loadGitHubSettings();
   document.getElementById('admin-overlay').classList.add('show');
 }
 function closeAdmin() { document.getElementById('admin-overlay').classList.remove('show'); }
@@ -2931,11 +2955,14 @@ function checkPlayerPin() {
   }
 }
 
-// ─── 起動時：ログイン画面を表示 ─────────────
+// ─── 起動時：GitHubから制作データを読み込む ─
 (function() {
-  // title-screenを隠してlogin画面を表示
-  document.getElementById('title-screen').classList.add('hidden');
-  document.getElementById('player-login-screen').classList.remove('hidden');
+  loadWorldFromGitHub().then(ok => {
+    if (ok) {
+      // データ更新後にシーン一覧を再描画
+      if (typeof renderSceneList === 'function') renderSceneList();
+    }
+  });
   renderPlayerList();
 })();
 </script>
@@ -2962,6 +2989,135 @@ function openBackupPanel() {
   `;
   document.body.appendChild(panel);
 }
+// ══════════════════════════════════════════════
+//  GitHub API 自動保存
+// ══════════════════════════════════════════════
+function saveGitHubSettings() {
+  const user  = document.getElementById('gh-user').value.trim();
+  const repo  = document.getElementById('gh-repo').value.trim();
+  const token = document.getElementById('gh-token').value.trim();
+  if (!user || !repo || !token) {
+    document.getElementById('gh-status').textContent = '— 全項目を入力してください —';
+    return;
+  }
+  // トークンはこの端末のlocalStorageにのみ保存
+  localStorage.setItem('arcadic_gh_user', user);
+  localStorage.setItem('arcadic_gh_repo', repo);
+  localStorage.setItem('arcadic_gh_token', token);
+  document.getElementById('gh-status').textContent = '✓ GitHub設定を保存しました';
+  setTimeout(() => { document.getElementById('gh-status').textContent = ''; }, 3000);
+}
+
+function loadGitHubSettings() {
+  const user  = localStorage.getItem('arcadic_gh_user') || '';
+  const repo  = localStorage.getItem('arcadic_gh_repo') || '';
+  const token = localStorage.getItem('arcadic_gh_token') || '';
+  if (document.getElementById('gh-user'))  document.getElementById('gh-user').value  = user;
+  if (document.getElementById('gh-repo'))  document.getElementById('gh-repo').value  = repo;
+  if (document.getElementById('gh-token')) document.getElementById('gh-token').value = token;
+  return { user, repo, token };
+}
+
+async function pushToGitHub() {
+  const { user, repo, token } = loadGitHubSettings();
+  const status = document.getElementById('gh-status');
+
+  if (!user || !repo || !token) {
+    status.textContent = '— GitHub設定を先に入力してください —';
+    return;
+  }
+
+  status.textContent = '⏳ GitHubに保存中...';
+
+  // 制作データをまとめる
+  const projectData = {
+    version: '1.0.0',
+    updatedAt: new Date().toISOString(),
+    siteConfig: loadSiteConfig() || siteConfig,
+    characters: loadCharacters() || characters,
+    scenes: loadScenes() || scenes,
+  };
+
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(projectData, null, 2))));
+  const apiUrl = `https://api.github.com/repos/${user}/${repo}/contents/data/world.json`;
+
+  try {
+    // まず現在のファイルのSHAを取得
+    let sha = null;
+    const getRes = await fetch(apiUrl, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    if (getRes.ok) {
+      const getJson = await getRes.json();
+      sha = getJson.sha;
+    }
+
+    // ファイルを更新（または作成）
+    const putRes = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: `制作データ更新 ${new Date().toLocaleString('ja-JP')}`,
+        content,
+        ...(sha ? { sha } : {})
+      })
+    });
+
+    if (putRes.ok) {
+      status.style.color = 'rgba(80,200,120,.8)';
+      status.textContent = '✓ GitHubに保存しました！全端末に反映されます';
+      setTimeout(() => {
+        status.textContent = '';
+        status.style.color = 'rgba(200,168,75,.5)';
+      }, 4000);
+    } else {
+      const err = await putRes.json();
+      status.style.color = 'rgba(200,80,80,.8)';
+      status.textContent = `— エラー: ${err.message} —`;
+    }
+  } catch(e) {
+    status.style.color = 'rgba(200,80,80,.8)';
+    status.textContent = '— 通信エラーが発生しました —';
+  }
+}
+
+// 起動時にGitHubのworld.jsonから制作データを読み込む
+async function loadWorldFromGitHub() {
+  try {
+    const user = localStorage.getItem('arcadic_gh_user');
+    const repo = localStorage.getItem('arcadic_gh_repo');
+    if (!user || !repo) return false;
+
+    const res = await fetch(
+      `https://raw.githubusercontent.com/${user}/${repo}/main/data/world.json`,
+      { cache: 'no-cache' }
+    );
+    if (!res.ok) return false;
+
+    const data = await res.json();
+    if (data.characters) { characters = data.characters; saveCharacters(characters); }
+    if (data.scenes)     { scenes = data.scenes; saveScenes(scenes); }
+    if (data.siteConfig) {
+      Object.assign(siteConfig, data.siteConfig);
+      saveSiteConfig(siteConfig);
+      const lb = document.getElementById('logo-fallback');
+      if (lb) lb.textContent = siteConfig.title;
+    }
+    console.log('[ArcadicRPG] GitHubからデータを読み込みました');
+    return true;
+  } catch(e) {
+    console.log('[ArcadicRPG] GitHub読み込みスキップ:', e.message);
+    return false;
+  }
+}
+
 function handlePlayerImport(e) {
   const file = e.target.files[0];
   if (!file) return;
