@@ -710,7 +710,7 @@ body.world-te .main-footer{border-color:var(--te-border);color:var(--te-dim);}
   <div class="admin-panel">
     <div class="admin-header">
       <div class="admin-title">✦ Voice Admin</div>
-      <div class="admin-save-status" id="admin-save-status" style="color: rgba(80, 200, 120, 0.8);">Last saved: 18:50</div>
+      <div class="admin-save-status" id="admin-save-status" style="color: rgba(80, 200, 120, 0.8);">Last saved: 18:51</div>
     </div>
     <div class="admin-body">
 
@@ -740,13 +740,6 @@ body.world-te .main-footer{border-color:var(--te-border);color:var(--te-dim);}
         </div>
         <button class="admin-btn" onclick="adminEditChar('afstasia',0)" style="font-size:.48rem;padding:6px 12px;">編集</button>
         <button class="admin-btn" onclick="adminDeleteChar('afstasia',0)" style="font-size:.48rem;padding:6px 12px;border-color:rgba(200,80,80,.3);color:rgba(200,80,80,.6);">削除</button>
-      </div><div class="admin-char-item">
-        <div style="flex:1;">
-          <div style="font-family:'Noto Serif JP',serif;font-size:.85rem;">テラミー</div>
-          <div style="font-size:.58rem;opacity:.5;letter-spacing:.1em;"> · 0 voices</div>
-        </div>
-        <button class="admin-btn" onclick="adminEditChar('afstasia',1)" style="font-size:.48rem;padding:6px 12px;">編集</button>
-        <button class="admin-btn" onclick="adminDeleteChar('afstasia',1)" style="font-size:.48rem;padding:6px 12px;border-color:rgba(200,80,80,.3);color:rgba(200,80,80,.6);">削除</button>
       </div><div style="font-family: Cinzel, serif; font-size: 0.48rem; letter-spacing: 0.4em; opacity: 0.5; margin: 12px 0px 6px;">TELOSTIA</div><div class="admin-char-item">
         <div style="flex:1;">
           <div style="font-family:'Noto Serif JP',serif;font-size:.85rem;">スファレー</div>
@@ -754,6 +747,13 @@ body.world-te .main-footer{border-color:var(--te-border);color:var(--te-dim);}
         </div>
         <button class="admin-btn" onclick="adminEditChar('telostia',0)" style="font-size:.48rem;padding:6px 12px;">編集</button>
         <button class="admin-btn" onclick="adminDeleteChar('telostia',0)" style="font-size:.48rem;padding:6px 12px;border-color:rgba(200,80,80,.3);color:rgba(200,80,80,.6);">削除</button>
+      </div><div class="admin-char-item">
+        <div style="flex:1;">
+          <div style="font-family:'Noto Serif JP',serif;font-size:.85rem;">ティラミー</div>
+          <div style="font-size:.58rem;opacity:.5;letter-spacing:.1em;"> · 1 voices</div>
+        </div>
+        <button class="admin-btn" onclick="adminEditChar('telostia',1)" style="font-size:.48rem;padding:6px 12px;">編集</button>
+        <button class="admin-btn" onclick="adminDeleteChar('telostia',1)" style="font-size:.48rem;padding:6px 12px;border-color:rgba(200,80,80,.3);color:rgba(200,80,80,.6);">削除</button>
       </div></div>
         <div class="admin-btn-row">
           <button class="admin-btn primary" onclick="adminAddChar()">＋ キャラ追加</button>
@@ -783,7 +783,7 @@ body.world-te .main-footer{border-color:var(--te-border);color:var(--te-dim);}
           <button class="admin-btn primary" onclick="saveGHSettings()">✓ 設定保存</button>
           <button class="admin-btn primary" onclick="pushToGitHub()">🚀 GitHubに保存</button>
         </div>
-        <div id="gh-status" style="font-size:.58rem;letter-spacing:.15em;margin-top:8px;min-height:14px;">⏳ 保存中...</div>
+        <div id="gh-status" style="font-size: 0.58rem; letter-spacing: 0.15em; margin-top: 8px; min-height: 14px;">⏳ 保存中...</div>
       </div>
 
       <div class="admin-btn-row" style="margin-top:8px;">
@@ -818,13 +818,6 @@ let voiceData = {
           "url": ""
         }
       ]
-    },
-    {
-      "id": "テラミー_1773222623339",
-      "name": "テラミー",
-      "role": "",
-      "world": "afstasia",
-      "voices": []
     }
   ],
   "telostia": [
@@ -840,6 +833,18 @@ let voiceData = {
         },
         {
           "text": "セリフをここに入力してください。",
+          "url": ""
+        }
+      ]
+    },
+    {
+      "id": "テラミー_1773222623339",
+      "name": "ティラミー",
+      "role": "",
+      "world": "telostia",
+      "voices": [
+        {
+          "text": "僕ティラミーっていうんだ",
           "url": ""
         }
       ]
