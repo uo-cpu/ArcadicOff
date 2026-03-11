@@ -1489,7 +1489,8 @@ body.world-afstasia{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <div class="admin-overlay" id="admin-overlay">
   <div class="admin-header">
     <div class="admin-title">✦ Admin Panel</div>
-    <div class="admin-header-btns">
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
+      <div id="auto-save-status" style="font-family:'Share Tech Mono',monospace;font-size:.52rem;letter-spacing:.15em;color:rgba(200,168,75,.35);">— 未保存 —</div>
       <button class="admin-btn" onclick="closeAdmin()">× 閉じる</button>
     </div>
   </div>
@@ -1553,7 +1554,7 @@ body.world-afstasia{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         <div class="admin-section-title">制作データ バックアップ</div>
         <div style="font-size:.6rem;color:rgba(200,168,75,.4);letter-spacing:.15em;margin-bottom:12px;">キャラ・シーン・設定のバックアップ</div>
         <div class="admin-actions" style="flex-direction:column;gap:8px;">
-          <button class="admin-btn primary" onclick="exportProjectData()">💾 制作データを保存</button>
+          <button class="admin-btn primary" onclick="exportProjectDataOverwrite()">💾 制作データを保存（上書き）</button>
           <label class="admin-btn" style="text-align:center;cursor:pointer;">
             📂 制作データを読込
             <input type="file" accept=".json" style="display:none" onchange="handleProjectImport(event)">
@@ -2526,6 +2527,7 @@ function confirmAddScene() {
   renderAdminSceneList();
   renderSceneList();
   saveScenes(scenes);
+  updateAutoSaveStatus();
 }
 
 function adminEditScene(id) {
@@ -2625,12 +2627,14 @@ function confirmSaveChar() {
   closeModal('char-modal');
   renderAdminCharList();
   saveCharacters(characters);
+  updateAutoSaveStatus();
 }
 function adminDeleteChar(id, world) {
   if (!confirm('このキャラクターを削除しますか？')) return;
   characters[world] = (characters[world]||[]).filter(c => c.id !== id);
   renderAdminCharList();
   saveCharacters(characters);
+  updateAutoSaveStatus();
 }
 
 function saveSiteSettings() {
@@ -2642,7 +2646,7 @@ function saveSiteSettings() {
   if (newPin && /^\d{4}$/.test(newPin)) siteConfig.pin = newPin;
   document.getElementById('logo-fallback').textContent = siteConfig.title;
   saveSiteConfig(siteConfig);
-  alert('保存しました。');
+  updateAutoSaveStatus();
 }
 
 function loadAdminShare() {
@@ -2654,7 +2658,7 @@ function saveShareSettings() {
   siteConfig.shareMsg = document.getElementById('admin-share-msg').value.trim();
   updateShareDisplay();
   saveSiteConfig(siteConfig);
-  alert('共有設定を保存しました。');
+  updateAutoSaveStatus();
 }
 
 // ══════════════════════════════════════════════
@@ -2673,6 +2677,7 @@ function closeSceneEdit() {
 function saveAndCloseEdit() {
   collectCards();
   saveScenes(scenes);
+  updateAutoSaveStatus();
   closeSceneEdit();
   if (currentScene && !document.getElementById('scene-viewer').classList.contains('hidden')) {
     currentLine = 0; renderCharArea(); renderLine();
@@ -3119,6 +3124,101 @@ async function loadWorldFromGitHub() {
     console.log('[ArcadicRPG] GitHub読み込みスキップ:', e.message);
     return false;
   }
+}
+
+// ══════════════════════════════════════════════
+//  Auto Save 表示
+// ══════════════════════════════════════════════
+function updateAutoSaveStatus(msg) {
+  const el = document.getElementById('auto-save-status');
+  if (!el) return;
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  el.textContent = msg || `Last saved: ${time}`;
+  el.style.color = 'rgba(80,200,120,.7)';
+  setTimeout(() => {
+    if (el) el.style.color = 'rgba(200,168,75,.35)';
+  }, 3000);
+}
+
+// バックアップ上書き保存用のファイルハンドル
+let projectFileHandle = null;
+let playerFileHandle = null;
+
+// ─── バックアップ上書き保存（制作データ）───
+async function exportProjectDataOverwrite() {
+  const data = {
+    type:       'project',
+    config:     loadSiteConfig(),
+    characters: loadCharacters(),
+    scenes:     loadScenes(),
+    exportedAt: new Date().toISOString(),
+  };
+  const json = JSON.stringify(data, null, 2);
+
+  // File System Access API対応ブラウザの場合は上書き
+  if (projectFileHandle) {
+    try {
+      const writable = await projectFileHandle.createWritable();
+      await writable.write(json);
+      await writable.close();
+      updateAutoSaveStatus('制作データ上書き保存完了');
+      return;
+    } catch(e) {}
+  }
+
+  // 初回または非対応の場合は新規保存
+  if ('showSaveFilePicker' in window) {
+    try {
+      projectFileHandle = await window.showSaveFilePicker({
+        suggestedName: 'arcadic_project.json',
+        types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }]
+      });
+      const writable = await projectFileHandle.createWritable();
+      await writable.write(json);
+      await writable.close();
+      updateAutoSaveStatus('制作データ保存完了');
+      return;
+    } catch(e) {}
+  }
+
+  // フォールバック：通常ダウンロード
+  exportProjectData();
+}
+
+async function exportPlayerDataOverwrite() {
+  const data = {
+    type:      'player',
+    save:      loadGame(),
+    read:      [...loadReadScenes()],
+    settings:  loadSettings(),
+    exportedAt: new Date().toISOString(),
+  };
+  const json = JSON.stringify(data, null, 2);
+
+  if (playerFileHandle) {
+    try {
+      const writable = await playerFileHandle.createWritable();
+      await writable.write(json);
+      await writable.close();
+      return;
+    } catch(e) {}
+  }
+
+  if ('showSaveFilePicker' in window) {
+    try {
+      playerFileHandle = await window.showSaveFilePicker({
+        suggestedName: 'arcadic_player.json',
+        types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }]
+      });
+      const writable = await playerFileHandle.createWritable();
+      await writable.write(json);
+      await writable.close();
+      return;
+    } catch(e) {}
+  }
+
+  exportPlayerData();
 }
 
 function handlePlayerImport(e) {
