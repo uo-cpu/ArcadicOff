@@ -5,566 +5,1858 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ArcadicOff — Voice Archive</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cinzel+Decorative:wght@400&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Serif+JP:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cinzel+Decorative:wght@400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Noto+Serif+JP:wght@300;400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
+/* ══════════════════════════════════════════════
+   VARIABLES
+══════════════════════════════════════════════ */
 :root {
-  --af-bg: #f7f5f0;
-  --af-bg2: #eeebe3;
-  --af-text: #2a2318;
-  --af-dim: #8a7d6a;
-  --af-gold: #9a7d3a;
-  --af-gold2: #c8a84b;
-  --af-border: rgba(154,125,58,.18);
-  --af-grid: rgba(154,125,58,.07);
+  --af-bg:#f6f3ec;--af-bg2:#eee9de;--af-text:#241e14;--af-dim:#8a7a5e;
+  --af-gold:#9a7d3a;--af-gold2:#c8a84b;--af-border:rgba(154,125,58,.15);
+  --af-grid:rgba(154,125,58,.06);--af-shadow:rgba(154,125,58,.08);
 
-  --te-bg: #080c14;
-  --te-bg2: #0d1220;
-  --te-text: #c8d8e8;
-  --te-dim: #4a6880;
-  --te-blue: #3ab0c8;
-  --te-blue2: #5ac8e0;
-  --te-border: rgba(58,176,200,.18);
-  --te-grid: rgba(58,176,200,.05);
+  --te-bg:#070b12;--te-bg2:#0b1018;--te-text:#b8cede;--te-dim:#3d5e74;
+  --te-blue:#3ab0c8;--te-blue2:#60c8e0;--te-border:rgba(58,176,200,.15);
+  --te-grid:rgba(58,176,200,.04);--te-shadow:rgba(58,176,200,.06);
+
+  --radius:2px;
+  --transition:.45s cubic-bezier(.16,1,.3,1);
 }
 
-* { margin:0; padding:0; box-sizing:border-box; }
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
 
-body {
-  font-family: 'Noto Serif JP', serif;
-  transition: background .6s, color .6s;
-  min-height: 100vh;
+body{
+  font-family:'Noto Serif JP',serif;
+  min-height:100vh;
+  transition:background var(--transition),color var(--transition);
+  overflow-x:hidden;
 }
+body.world-af{background:var(--af-bg);color:var(--af-text);}
+body.world-te{background:var(--te-bg);color:var(--te-text);}
 
-/* ── WORLD STATES ── */
-body.world-af {
-  background: var(--af-bg);
-  color: var(--af-text);
-}
-body.world-te {
-  background: var(--te-bg);
-  color: var(--te-text);
-}
+/* ── SCREENS ── */
+.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:100;transition:opacity .5s,transform .5s;}
+.screen.hidden{opacity:0;pointer-events:none;transform:translateY(8px);}
 
-/* ── GRID BACKGROUND ── */
-.grid-bg {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  transition: opacity .6s;
+/* ── GRID BG ── */
+.grid-bg{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  transition:opacity .6s;
 }
-body.world-af .grid-bg {
-  background-image:
-    linear-gradient(var(--af-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--af-grid) 1px, transparent 1px);
-  background-size: 32px 32px;
+body.world-af .grid-bg{
+  background-image:linear-gradient(var(--af-grid) 1px,transparent 1px),linear-gradient(90deg,var(--af-grid) 1px,transparent 1px);
+  background-size:28px 28px;
 }
-body.world-te .grid-bg {
-  background-image:
-    linear-gradient(var(--te-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--te-grid) 1px, transparent 1px);
-  background-size: 32px 32px;
+body.world-te .grid-bg{
+  background-image:linear-gradient(var(--te-grid) 1px,transparent 1px),linear-gradient(90deg,var(--te-grid) 1px,transparent 1px);
+  background-size:28px 28px;
 }
 
-/* ── LAYOUT ── */
-.container {
-  position: relative;
-  z-index: 1;
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 0 24px 80px;
+/* ══════════════════════════════════════════════
+   TITLE SCREEN
+══════════════════════════════════════════════ */
+#title-screen{
+  flex-direction:column;
+  align-items:center;
+  background:inherit;
+}
+body.world-af #title-screen{background:var(--af-bg);}
+body.world-te #title-screen{background:var(--te-bg);}
+
+.title-logo{
+  font-family:'Cinzel Decorative',cursive;
+  font-size:clamp(1.6rem,6vw,3rem);
+  letter-spacing:.12em;
+  margin-bottom:8px;
+  animation:logoIn 1.4s cubic-bezier(.16,1,.3,1) forwards;
+  opacity:0;
+  cursor:pointer;
+  user-select:none;
+}
+body.world-af .title-logo{color:var(--af-gold);}
+body.world-te .title-logo{color:var(--te-blue);}
+
+@keyframes logoIn{
+  from{opacity:0;letter-spacing:.4em;}
+  to{opacity:1;letter-spacing:.12em;}
+}
+
+.title-sub{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:.72rem;
+  letter-spacing:.45em;
+  margin-bottom:52px;
+  animation:fadeUp 1.6s ease .4s forwards;
+  opacity:0;
+}
+body.world-af .title-sub{color:var(--af-dim);}
+body.world-te .title-sub{color:var(--te-dim);}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(10px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+.world-select{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  width:min(280px,80vw);
+  animation:fadeUp 1.6s ease .7s forwards;
+  opacity:0;
+}
+
+.world-btn{
+  font-family:'Cinzel',serif;
+  font-size:.65rem;
+  letter-spacing:.55em;
+  text-transform:uppercase;
+  padding:14px 0;
+  border:1px solid;
+  background:transparent;
+  cursor:pointer;
+  transition:all .35s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+}
+body.world-af .world-btn{border-color:var(--af-border);color:var(--af-dim);}
+body.world-te .world-btn{border-color:var(--te-border);color:var(--te-dim);}
+body.world-af .world-btn:hover{border-color:var(--af-gold);color:var(--af-gold);background:rgba(154,125,58,.05);}
+body.world-te .world-btn:hover{border-color:var(--te-blue);color:var(--te-blue);background:rgba(58,176,200,.05);}
+body.world-af .world-btn.af-btn{border-color:var(--af-gold2);color:var(--af-gold);}
+body.world-te .world-btn.te-btn{border-color:var(--te-blue);color:var(--te-blue);}
+
+.title-settings-btn{
+  margin-top:20px;
+  background:none;
+  border:none;
+  cursor:pointer;
+  font-size:.6rem;
+  letter-spacing:.3em;
+  font-family:'Cinzel',serif;
+  transition:color .3s;
+  animation:fadeUp 1.6s ease 1s forwards;
+  opacity:0;
+}
+body.world-af .title-settings-btn{color:rgba(154,125,58,.35);}
+body.world-te .title-settings-btn{color:rgba(58,176,200,.25);}
+body.world-af .title-settings-btn:hover{color:var(--af-gold);}
+body.world-te .title-settings-btn:hover{color:var(--te-blue);}
+
+/* ══════════════════════════════════════════════
+   MAIN LAYOUT
+══════════════════════════════════════════════ */
+#main-screen{
+  position:relative;
+  z-index:1;
+  display:block;
+}
+#main-screen.hidden{display:none;}
+
+.main-container{
+  max-width:720px;
+  margin:0 auto;
+  padding:0 20px 100px;
 }
 
 /* ── HEADER ── */
-.site-header {
-  padding: 48px 0 40px;
-  border-bottom: 1px solid;
-  margin-bottom: 40px;
-  transition: border-color .6s;
+.main-header{
+  padding:36px 0 28px;
+  border-bottom:1px solid;
+  margin-bottom:32px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  transition:border-color .6s;
 }
-body.world-af .site-header { border-color: var(--af-border); }
-body.world-te .site-header { border-color: var(--te-border); }
+body.world-af .main-header{border-color:var(--af-border);}
+body.world-te .main-header{border-color:var(--te-border);}
 
-.site-title {
-  font-family: 'Cinzel Decorative', cursive;
-  font-size: clamp(1.4rem, 5vw, 2.2rem);
-  letter-spacing: .1em;
-  margin-bottom: 6px;
-  transition: color .6s;
+.header-left{}
+.header-title{
+  font-family:'Cinzel Decorative',cursive;
+  font-size:clamp(1rem,3.5vw,1.5rem);
+  letter-spacing:.1em;
+  cursor:pointer;
+  user-select:none;
+  transition:color .3s;
 }
-body.world-af .site-title { color: var(--af-gold); }
-body.world-te .site-title { color: var(--te-blue); }
+body.world-af .header-title{color:var(--af-gold);}
+body.world-te .header-title{color:var(--te-blue);}
 
-.site-sub {
-  font-family: 'Cormorant Garamond', serif;
-  font-style: italic;
-  font-size: .75rem;
-  letter-spacing: .4em;
-  transition: color .6s;
+.header-world{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:.65rem;
+  letter-spacing:.35em;
+  margin-top:4px;
+  transition:color .6s;
 }
-body.world-af .site-sub { color: var(--af-dim); }
-body.world-te .site-sub { color: var(--te-dim); }
+body.world-af .header-world{color:var(--af-dim);}
+body.world-te .header-world{color:var(--te-dim);}
 
-/* ── WORLD TOGGLE ── */
-.world-toggle {
-  display: flex;
-  gap: 2px;
-  margin-top: 28px;
-  width: fit-content;
-  border: 1px solid;
-  padding: 2px;
-  transition: border-color .6s;
-}
-body.world-af .world-toggle { border-color: var(--af-border); }
-body.world-te .world-toggle { border-color: var(--te-border); }
+.header-btns{display:flex;gap:8px;align-items:center;}
 
-.w-btn {
-  font-family: 'Cinzel', serif;
-  font-size: .58rem;
-  letter-spacing: .4em;
-  text-transform: uppercase;
-  padding: 8px 22px;
-  border: none;
-  cursor: pointer;
-  transition: all .35s;
-  background: transparent;
+.icon-btn{
+  width:34px;height:34px;
+  border:1px solid;
+  background:transparent;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.75rem;
+  transition:all .25s;
 }
-body.world-af .w-btn { color: var(--af-dim); }
-body.world-te .w-btn { color: var(--te-dim); }
+body.world-af .icon-btn{border-color:var(--af-border);color:var(--af-dim);}
+body.world-te .icon-btn{border-color:var(--te-border);color:var(--te-dim);}
+body.world-af .icon-btn:hover{border-color:var(--af-gold);color:var(--af-gold);}
+body.world-te .icon-btn:hover{border-color:var(--te-blue);color:var(--te-blue);}
 
-body.world-af .w-btn.active {
-  background: var(--af-gold);
-  color: #f7f5f0;
+.back-btn{
+  font-family:'Cinzel',serif;
+  font-size:.5rem;
+  letter-spacing:.3em;
+  padding:7px 16px;
+  border:1px solid;
+  background:transparent;
+  cursor:pointer;
+  transition:all .25s;
 }
-body.world-te .w-btn.active {
-  background: var(--te-blue);
-  color: #080c14;
-}
+body.world-af .back-btn{border-color:var(--af-border);color:var(--af-dim);}
+body.world-te .back-btn{border-color:var(--te-border);color:var(--te-dim);}
+body.world-af .back-btn:hover{border-color:var(--af-gold);color:var(--af-gold);}
+body.world-te .back-btn:hover{border-color:var(--te-blue);color:var(--te-blue);}
 
 /* ── TOC ── */
-.toc {
-  padding: 24px 28px;
-  margin-bottom: 40px;
-  border: 1px solid;
-  transition: border-color .6s, background .6s;
+.toc{
+  padding:20px 22px;
+  margin-bottom:32px;
+  border:1px solid;
+  transition:border-color .6s,background .6s;
 }
-body.world-af .toc {
-  border-color: var(--af-border);
-  background: rgba(154,125,58,.04);
-}
-body.world-te .toc {
-  border-color: var(--te-border);
-  background: rgba(58,176,200,.03);
-}
+body.world-af .toc{border-color:var(--af-border);background:rgba(154,125,58,.03);}
+body.world-te .toc{border-color:var(--te-border);background:rgba(58,176,200,.02);}
 
-.toc-title {
-  font-family: 'Cinzel', serif;
-  font-size: .55rem;
-  letter-spacing: .5em;
-  text-transform: uppercase;
-  margin-bottom: 14px;
-  transition: color .6s;
+.toc-label{
+  font-family:'Cinzel',serif;
+  font-size:.5rem;
+  letter-spacing:.5em;
+  text-transform:uppercase;
+  margin-bottom:12px;
+  transition:color .6s;
 }
-body.world-af .toc-title { color: var(--af-gold); }
-body.world-te .toc-title { color: var(--te-blue); }
+body.world-af .toc-label{color:var(--af-gold);}
+body.world-te .toc-label{color:var(--te-blue);}
 
-.toc-list {
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 20px;
+.toc-links{display:flex;flex-wrap:wrap;gap:6px 18px;}
+.toc-link{
+  font-family:'Cormorant Garamond',serif;
+  font-size:.88rem;
+  letter-spacing:.06em;
+  text-decoration:none;
+  transition:color .25s;
 }
-.toc-item a {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: .9rem;
-  letter-spacing: .08em;
-  text-decoration: none;
-  transition: color .3s;
-}
-body.world-af .toc-item a { color: var(--af-dim); }
-body.world-te .toc-item a { color: var(--te-dim); }
-body.world-af .toc-item a:hover { color: var(--af-gold); }
-body.world-te .toc-item a:hover { color: var(--te-blue); }
-.toc-item a::before { content: '— '; opacity: .4; }
+body.world-af .toc-link{color:var(--af-dim);}
+body.world-te .toc-link{color:var(--te-dim);}
+body.world-af .toc-link:hover{color:var(--af-gold);}
+body.world-te .toc-link:hover{color:var(--te-blue);}
+.toc-link::before{content:'— ';opacity:.4;}
 
-/* ── CHARACTER SECTION ── */
-.char-section {
-  margin-bottom: 56px;
-  animation: fadeUp .6s ease both;
-}
-@keyframes fadeUp {
-  from { opacity:0; transform:translateY(16px); }
-  to   { opacity:1; transform:translateY(0); }
-}
+/* ── CHAR SECTION ── */
+.char-section{margin-bottom:48px;}
 
-.char-header {
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid;
-  margin-bottom: 24px;
-  transition: border-color .6s;
+.char-header{
+  display:flex;align-items:baseline;gap:14px;
+  padding-bottom:12px;border-bottom:1px solid;margin-bottom:20px;
+  transition:border-color .6s;
 }
-body.world-af .char-header { border-color: var(--af-border); }
-body.world-te .char-header { border-color: var(--te-border); }
+body.world-af .char-header{border-color:var(--af-border);}
+body.world-te .char-header{border-color:var(--te-border);}
 
-.char-name {
-  font-family: 'Cinzel', serif;
-  font-size: 1.1rem;
-  letter-spacing: .15em;
-  transition: color .6s;
+.char-name{
+  font-family:'Cinzel',serif;
+  font-size:1rem;letter-spacing:.15em;
+  transition:color .6s;
 }
-body.world-af .char-name { color: var(--af-gold); }
-body.world-te .char-name { color: var(--te-blue); }
+body.world-af .char-name{color:var(--af-gold);}
+body.world-te .char-name{color:var(--te-blue);}
 
-.char-role {
-  font-family: 'Cormorant Garamond', serif;
-  font-style: italic;
-  font-size: .78rem;
-  letter-spacing: .2em;
-  transition: color .6s;
+.char-role{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;font-size:.75rem;letter-spacing:.2em;
+  transition:color .6s;
 }
-body.world-af .char-role { color: var(--af-dim); }
-body.world-te .char-role { color: var(--te-dim); }
+body.world-af .char-role{color:var(--af-dim);}
+body.world-te .char-role{color:var(--te-dim);}
 
-.char-count {
-  margin-left: auto;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: .65rem;
-  letter-spacing: .2em;
-  transition: color .6s;
+.char-count{
+  margin-left:auto;
+  font-family:'Share Tech Mono',monospace;
+  font-size:.55rem;letter-spacing:.15em;
+  transition:color .6s;
 }
-body.world-af .char-count { color: rgba(154,125,58,.4); }
-body.world-te .char-count { color: rgba(58,176,200,.3); }
+body.world-af .char-count{color:rgba(154,125,58,.35);}
+body.world-te .char-count{color:rgba(58,176,200,.25);}
 
 /* ── VOICE ITEMS ── */
-.voice-list {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.voice-item{
+  display:flex;align-items:center;gap:14px;
+  padding:12px 14px;
+  border-bottom:1px solid;
+  transition:all .2s;
+}
+body.world-af .voice-item{border-color:rgba(154,125,58,.07);}
+body.world-te .voice-item{border-color:rgba(58,176,200,.05);}
+body.world-af .voice-item:hover{background:rgba(154,125,58,.03);}
+body.world-te .voice-item:hover{background:rgba(58,176,200,.02);}
+
+.voice-text{
+  flex:1;
+  font-family:'Noto Serif JP',serif;
+  font-size:.85rem;line-height:1.75;letter-spacing:.04em;
+  transition:color .6s;
+}
+body.world-af .voice-text{color:var(--af-text);}
+body.world-te .voice-text{color:var(--te-text);}
+
+.play-btn{
+  flex-shrink:0;width:30px;height:30px;
+  border-radius:50%;border:1px solid;
+  background:transparent;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.65rem;transition:all .22s;
+}
+body.world-af .play-btn{border-color:var(--af-gold);color:var(--af-gold);}
+body.world-te .play-btn{border-color:var(--te-blue);color:var(--te-blue);}
+body.world-af .play-btn:hover:not(.no-audio){background:var(--af-gold);color:#f6f3ec;}
+body.world-te .play-btn:hover:not(.no-audio){background:var(--te-blue);color:#070b12;}
+.play-btn.playing{animation:pulse .9s ease infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
+.play-btn.no-audio{opacity:.18;cursor:not-allowed;}
+
+.section-divider{
+  height:1px;margin:40px 0;
+  transition:background .6s;
+}
+body.world-af .section-divider{background:linear-gradient(90deg,transparent,rgba(200,168,75,.15),transparent);}
+body.world-te .section-divider{background:linear-gradient(90deg,transparent,rgba(58,176,200,.1),transparent);}
+
+/* ══════════════════════════════════════════════
+   SETTINGS PANEL
+══════════════════════════════════════════════ */
+.panel-overlay{
+  position:fixed;inset:0;z-index:200;
+  display:flex;align-items:flex-end;
+  background:rgba(0,0,0,.4);
+  opacity:0;pointer-events:none;
+  transition:opacity .35s;
+}
+.panel-overlay.open{opacity:1;pointer-events:all;}
+
+.panel{
+  width:100%;max-width:480px;margin:0 auto;
+  padding:28px 24px 40px;
+  border-top:1px solid;
+  transform:translateY(100%);
+  transition:transform .4s cubic-bezier(.16,1,.3,1);
+}
+.panel-overlay.open .panel{transform:translateY(0);}
+body.world-af .panel{background:var(--af-bg2);border-color:var(--af-border);}
+body.world-te .panel{background:var(--te-bg2);border-color:var(--te-border);}
+
+.panel-title{
+  font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.5em;
+  text-transform:uppercase;margin-bottom:24px;
+  transition:color .6s;
+}
+body.world-af .panel-title{color:var(--af-gold);}
+body.world-te .panel-title{color:var(--te-blue);}
+
+.panel-row{
+  display:flex;align-items:center;gap:14px;
+  margin-bottom:20px;
+}
+.panel-label{
+  font-family:'Cinzel',serif;font-size:.52rem;letter-spacing:.3em;
+  width:80px;flex-shrink:0;
+  transition:color .6s;
+}
+body.world-af .panel-label{color:var(--af-dim);}
+body.world-te .panel-label{color:var(--te-dim);}
+
+/* slider */
+input[type=range]{
+  flex:1;-webkit-appearance:none;height:2px;outline:none;border:none;
+  background:rgba(128,128,128,.2);cursor:pointer;
+}
+body.world-af input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--af-gold);cursor:pointer;}
+body.world-te input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--te-blue);cursor:pointer;}
+
+.toggle-btn{
+  width:42px;height:22px;border-radius:11px;border:1px solid;
+  background:transparent;cursor:pointer;
+  position:relative;transition:all .3s;
+}
+body.world-af .toggle-btn{border-color:var(--af-border);}
+body.world-te .toggle-btn{border-color:var(--te-border);}
+body.world-af .toggle-btn.on{background:var(--af-gold);border-color:var(--af-gold);}
+body.world-te .toggle-btn.on{background:var(--te-blue);border-color:var(--te-blue);}
+.toggle-btn::after{
+  content:'';position:absolute;top:3px;left:3px;
+  width:14px;height:14px;border-radius:50%;background:#fff;
+  transition:left .3s;
+}
+.toggle-btn.on::after{left:23px;}
+
+.panel-close{
+  display:block;width:100%;margin-top:24px;
+  font-family:'Cinzel',serif;font-size:.55rem;letter-spacing:.4em;
+  text-transform:uppercase;padding:10px;
+  background:transparent;border:1px solid;cursor:pointer;
+  transition:all .25s;
+}
+body.world-af .panel-close{border-color:var(--af-border);color:var(--af-dim);}
+body.world-te .panel-close{border-color:var(--te-border);color:var(--te-dim);}
+
+/* ══════════════════════════════════════════════
+   ADMIN PANEL
+══════════════════════════════════════════════ */
+.admin-overlay{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(0,0,0,.7);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .35s;
+}
+.admin-overlay.open{opacity:1;pointer-events:all;}
+
+.admin-panel{
+  width:min(520px,94vw);max-height:88vh;
+  overflow-y:auto;
+  border:1px solid;
+  padding:0;
+}
+body.world-af .admin-panel{background:var(--af-bg2);border-color:rgba(154,125,58,.3);}
+body.world-te .admin-panel{background:var(--te-bg2);border-color:rgba(58,176,200,.25);}
+
+.admin-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;border-bottom:1px solid;
+  position:sticky;top:0;
+  transition:border-color .6s,background .6s;
+}
+body.world-af .admin-header{background:var(--af-bg2);border-color:var(--af-border);}
+body.world-te .admin-header{background:var(--te-bg2);border-color:var(--te-border);}
+
+.admin-title{
+  font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.5em;
+  transition:color .6s;
+}
+body.world-af .admin-title{color:var(--af-gold);}
+body.world-te .admin-title{color:var(--te-blue);}
+
+.admin-save-status{
+  font-family:'Share Tech Mono',monospace;font-size:.5rem;letter-spacing:.1em;
+  transition:color .3s;
+}
+body.world-af .admin-save-status{color:rgba(154,125,58,.35);}
+body.world-te .admin-save-status{color:rgba(58,176,200,.25);}
+
+.admin-body{padding:20px;}
+
+.admin-section{margin-bottom:24px;}
+.admin-section-title{
+  font-family:'Cinzel',serif;font-size:.52rem;letter-spacing:.4em;
+  text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;
+  border-bottom:1px solid;transition:color .6s,border-color .6s;
+}
+body.world-af .admin-section-title{color:var(--af-gold);border-color:var(--af-border);}
+body.world-te .admin-section-title{color:var(--te-blue);border-color:var(--te-border);}
+
+.admin-field{margin-bottom:12px;}
+.admin-label{
+  display:block;font-family:'Cinzel',serif;font-size:.48rem;letter-spacing:.3em;
+  text-transform:uppercase;margin-bottom:5px;transition:color .6s;
+}
+body.world-af .admin-label{color:var(--af-dim);}
+body.world-te .admin-label{color:var(--te-dim);}
+
+.admin-input{
+  width:100%;background:rgba(128,128,128,.07);
+  border:none;border-bottom:1px solid;
+  font-family:'Noto Serif JP',serif;font-size:.82rem;
+  padding:7px 4px;outline:none;letter-spacing:.05em;
+  transition:border-color .3s,color .6s,background .6s;
+}
+body.world-af .admin-input{border-color:rgba(154,125,58,.25);color:var(--af-text);}
+body.world-te .admin-input{border-color:rgba(58,176,200,.2);color:var(--te-text);}
+
+.admin-btn{
+  font-family:'Cinzel',serif;font-size:.52rem;letter-spacing:.35em;
+  text-transform:uppercase;padding:9px 18px;
+  background:transparent;border:1px solid;cursor:pointer;
+  transition:all .25s;
+}
+body.world-af .admin-btn{border-color:var(--af-border);color:var(--af-dim);}
+body.world-te .admin-btn{border-color:var(--te-border);color:var(--te-dim);}
+body.world-af .admin-btn.primary{border-color:var(--af-gold2);color:var(--af-gold);}
+body.world-te .admin-btn.primary{border-color:var(--te-blue);color:var(--te-blue);}
+
+.admin-btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+
+/* char list in admin */
+.admin-char-item{
+  border:1px solid;padding:10px 14px;margin-bottom:6px;
+  display:flex;align-items:center;gap:10px;
+  transition:border-color .3s;cursor:pointer;
+}
+body.world-af .admin-char-item{border-color:var(--af-border);}
+body.world-te .admin-char-item{border-color:var(--te-border);}
+
+/* voice rows in admin */
+.admin-voice-row{
+  display:flex;gap:6px;align-items:flex-start;margin-bottom:6px;
+}
+.admin-voice-row .admin-input{flex:1;}
+.admin-voice-del{
+  flex-shrink:0;width:26px;height:26px;
+  background:none;border:1px solid rgba(200,80,80,.3);
+  color:rgba(200,80,80,.6);cursor:pointer;font-size:.7rem;
+  display:flex;align-items:center;justify-content:center;
+  margin-top:18px;
 }
 
-.voice-item {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 16px;
-  padding: 14px 18px;
-  border: 1px solid transparent;
-  transition: all .25s;
-  cursor: default;
+/* PIN overlay */
+.pin-overlay{
+  position:fixed;inset:0;z-index:400;
+  background:rgba(0,0,0,.8);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .3s;
 }
-body.world-af .voice-item:hover {
-  border-color: var(--af-border);
-  background: rgba(154,125,58,.04);
-}
-body.world-te .voice-item:hover {
-  border-color: var(--te-border);
-  background: rgba(58,176,200,.03);
-}
+.pin-overlay.open{opacity:1;pointer-events:all;}
+.pin-box{width:min(280px,88vw);padding:32px 24px;border:1px solid;transition:border-color .6s,background .6s;}
+body.world-af .pin-box{background:var(--af-bg2);border-color:rgba(154,125,58,.3);}
+body.world-te .pin-box{background:var(--te-bg2);border-color:rgba(58,176,200,.25);}
 
-.voice-text {
-  font-family: 'Noto Serif JP', serif;
-  font-size: .88rem;
-  line-height: 1.7;
-  letter-spacing: .05em;
-  transition: color .6s;
-}
-body.world-af .voice-text { color: var(--af-text); }
-body.world-te .voice-text { color: var(--te-text); }
+.pin-title{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.5em;text-align:center;margin-bottom:20px;transition:color .6s;}
+body.world-af .pin-title{color:var(--af-gold);}
+body.world-te .pin-title{color:var(--te-blue);}
 
-.voice-empty {
-  font-style: italic;
-  transition: color .6s;
-}
-body.world-af .voice-empty { color: rgba(154,125,58,.3); }
-body.world-te .voice-empty { color: rgba(58,176,200,.2); }
+.pin-dots{display:flex;justify-content:center;gap:10px;margin-bottom:20px;}
+.pin-dot{width:10px;height:10px;border-radius:50%;border:1px solid;transition:background .2s,border-color .6s;}
+body.world-af .pin-dot{border-color:rgba(154,125,58,.4);}
+body.world-te .pin-dot{border-color:rgba(58,176,200,.3);}
+body.world-af .pin-dot.filled{background:var(--af-gold);border-color:var(--af-gold);}
+body.world-te .pin-dot.filled{background:var(--te-blue);border-color:var(--te-blue);}
 
-/* ── PLAY BUTTON ── */
-.play-btn {
-  flex-shrink: 0;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 1px solid;
-  background: transparent;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all .25s;
-  font-size: .7rem;
+.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.pin-key{
+  font-family:'Share Tech Mono',monospace;font-size:1rem;
+  padding:13px;background:transparent;border:1px solid;cursor:pointer;
+  transition:all .2s;
 }
-body.world-af .play-btn {
-  border-color: var(--af-gold);
-  color: var(--af-gold);
-}
-body.world-te .play-btn {
-  border-color: var(--te-blue);
-  color: var(--te-blue);
-}
-body.world-af .play-btn:hover {
-  background: var(--af-gold);
-  color: #f7f5f0;
-}
-body.world-te .play-btn:hover {
-  background: var(--te-blue);
-  color: #080c14;
-}
-.play-btn.playing {
-  animation: pulse 1s ease infinite;
-}
-@keyframes pulse {
-  0%,100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-}
-.play-btn.no-audio {
-  opacity: .25;
-  cursor: not-allowed;
-}
+body.world-af .pin-key{border-color:var(--af-border);color:var(--af-text);}
+body.world-te .pin-key{border-color:var(--te-border);color:var(--te-text);}
+body.world-af .pin-key:hover{background:rgba(154,125,58,.08);}
+body.world-te .pin-key:hover{background:rgba(58,176,200,.06);}
 
-/* ── DIVIDER ── */
-.section-divider {
-  height: 1px;
-  margin: 48px 0;
-  transition: background .6s;
+.pin-error{font-family:'Cinzel',serif;font-size:.5rem;letter-spacing:.2em;text-align:center;color:rgba(200,80,80,.7);margin-top:10px;min-height:14px;}
+.pin-cancel{display:block;width:100%;margin-top:10px;padding:8px;background:none;border:none;font-family:'Cinzel',serif;font-size:.5rem;letter-spacing:.3em;cursor:pointer;transition:color .3s;}
+body.world-af .pin-cancel{color:rgba(154,125,58,.3);}
+body.world-te .pin-cancel{color:rgba(58,176,200,.2);}
+
+/* ── BGM indicator ── */
+.bgm-indicator{
+  position:fixed;bottom:20px;right:20px;z-index:50;
+  font-family:'Share Tech Mono',monospace;font-size:.5rem;letter-spacing:.2em;
+  padding:5px 10px;border:1px solid;
+  opacity:.4;transition:opacity .3s,border-color .6s,color .6s;
+  pointer-events:none;
 }
-body.world-af .section-divider {
-  background: linear-gradient(90deg, transparent, var(--af-gold2), transparent);
-  opacity: .2;
-}
-body.world-te .section-divider {
-  background: linear-gradient(90deg, transparent, var(--te-blue), transparent);
-  opacity: .15;
-}
+body.world-af .bgm-indicator{border-color:var(--af-border);color:var(--af-dim);}
+body.world-te .bgm-indicator{border-color:var(--te-border);color:var(--te-dim);}
+.bgm-indicator.active{opacity:.7;}
 
 /* ── FOOTER ── */
-.site-footer {
-  padding: 32px 0;
-  border-top: 1px solid;
-  text-align: center;
-  font-family: 'Cormorant Garamond', serif;
-  font-style: italic;
-  font-size: .7rem;
-  letter-spacing: .3em;
-  transition: border-color .6s, color .6s;
+.main-footer{
+  padding:28px 0;border-top:1px solid;text-align:center;
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:.65rem;letter-spacing:.3em;
+  transition:border-color .6s,color .6s;
 }
-body.world-af .site-footer { border-color: var(--af-border); color: var(--af-dim); }
-body.world-te .site-footer { border-color: var(--te-border); color: var(--te-dim); }
-
-/* ── WORLD CONTENT ── */
-.world-content { display: none; }
-.world-content.active { display: block; }
-
-/* ── NO AUDIO MSG ── */
-.no-audio-note {
-  font-family: 'Cormorant Garamond', serif;
-  font-style: italic;
-  font-size: .7rem;
-  letter-spacing: .2em;
-  text-align: center;
-  padding: 8px;
-  margin-top: 4px;
-  transition: color .6s;
-}
-body.world-af .no-audio-note { color: rgba(154,125,58,.35); }
-body.world-te .no-audio-note { color: rgba(58,176,200,.25); }
+body.world-af .main-footer{border-color:var(--af-border);color:var(--af-dim);}
+body.world-te .main-footer{border-color:var(--te-border);color:var(--te-dim);}
 </style>
 </head>
 <body class="world-af">
-
 <div class="grid-bg"></div>
 
-<div class="container">
+<!-- ══════════════════
+  TITLE SCREEN
+══════════════════ -->
+<!-- エフェクト Canvas（背面） -->
+<canvas id="fx-canvas" style="position:fixed;inset:0;z-index:1;pointer-events:none;transition:opacity .8s;"></canvas>
 
-  <!-- HEADER -->
-  <header class="site-header">
-    <div class="site-title">ArcadicOff</div>
-    <div class="site-sub">— Voice Archive —</div>
-
-    <div class="world-toggle" style="margin-top:28px;">
-      <button class="w-btn active" id="btn-af" onclick="switchWorld('af')">☀ Afstasia</button>
-      <button class="w-btn" id="btn-te" onclick="switchWorld('te')">◈ Telostia</button>
+<div class="screen" id="title-screen" style="z-index:10;">
+  <div style="display:flex;flex-direction:column;align-items:center;position:relative;z-index:2;">
+    <div class="title-logo" id="title-logo-tap">ArcadicOff</div>
+    <div class="title-sub">— Voice Archive —</div>
+    <div class="world-select">
+      <button class="world-btn af-btn" onclick="enterWorldWithFX('af')">☀ &nbsp;Afstasia</button>
+      <button class="world-btn te-btn" onclick="enterWorldWithFX('te')">◈ &nbsp;Telostia</button>
     </div>
-  </header>
+    <button class="title-settings-btn" onclick="openSettings()">⚙ Settings</button>
+  </div>
+</div>
 
-  <!-- AFSTASIA -->
-  <div class="world-content active" id="content-af">
+<!-- ══════════════════
+  MAIN SCREEN
+══════════════════ -->
+<div id="main-screen" class="hidden">
+  <div class="main-container">
+    <header class="main-header">
+      <div class="header-left">
+        <div class="header-title" id="header-title-tap">ArcadicOff</div>
+        <div class="header-world" id="header-world-label">— Voice Archive —</div>
+      </div>
+      <div class="header-btns">
+        <button class="icon-btn" onclick="openSettings()" title="設定">⚙</button>
+        <button class="back-btn" onclick="backToTitle()">← TOP</button>
+      </div>
+    </header>
 
     <nav class="toc">
-      <div class="toc-title">目次</div>
-      <ul class="toc-list" id="toc-af"></ul>
+      <div class="toc-label">目次</div>
+      <div class="toc-links" id="toc-links"></div>
     </nav>
 
-    <div id="chars-af"></div>
+    <div id="char-body"></div>
 
+    <footer class="main-footer">— ArcadicOff Voice Archive —</footer>
   </div>
+</div>
 
-  <!-- TELOSTIA -->
-  <div class="world-content" id="content-te">
+<!-- BGM indicator -->
+<div class="bgm-indicator" id="bgm-indicator">♪ BGM</div>
 
-    <nav class="toc">
-      <div class="toc-title">目次</div>
-      <ul class="toc-list" id="toc-te"></ul>
-    </nav>
-
-    <div id="chars-te"></div>
-
+<!-- ══════════════════
+  SETTINGS PANEL
+══════════════════ -->
+<div class="panel-overlay" id="settings-overlay" onclick="closeSettings(event)">
+  <div class="panel">
+    <div class="panel-title">— Settings —</div>
+    <div class="panel-row">
+      <div class="panel-label">音量</div>
+      <input type="range" id="vol-slider" min="0" max="100" value="80" oninput="setVolume(this.value)">
+      <span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;width:30px;text-align:right;" id="vol-num">80</span>
+    </div>
+    <div class="panel-row">
+      <div class="panel-label">BGM</div>
+      <button class="toggle-btn on" id="bgm-toggle" onclick="toggleBGM()"></button>
+      <span style="font-family:'Cinzel',serif;font-size:.5rem;letter-spacing:.2em;" id="bgm-label">ON</span>
+    </div>
+    <button class="panel-close" onclick="closeSettings()">閉じる</button>
   </div>
+</div>
 
-  <footer class="site-footer">— ArcadicOff Voice Archive —</footer>
+<!-- ══════════════════
+  PIN OVERLAY
+══════════════════ -->
+<div class="pin-overlay" id="pin-overlay">
+  <div class="pin-box">
+    <div class="pin-title">— Admin —</div>
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-keypad">
+      <button class="pin-key" onclick="pinInput('1')">1</button>
+      <button class="pin-key" onclick="pinInput('2')">2</button>
+      <button class="pin-key" onclick="pinInput('3')">3</button>
+      <button class="pin-key" onclick="pinInput('4')">4</button>
+      <button class="pin-key" onclick="pinInput('5')">5</button>
+      <button class="pin-key" onclick="pinInput('6')">6</button>
+      <button class="pin-key" onclick="pinInput('7')">7</button>
+      <button class="pin-key" onclick="pinInput('8')">8</button>
+      <button class="pin-key" onclick="pinInput('9')">9</button>
+      <button class="pin-key" onclick="pinClear()" style="font-size:.6rem;letter-spacing:.1em;">CLR</button>
+      <button class="pin-key" onclick="pinInput('0')">0</button>
+      <button class="pin-key" onclick="pinBack()">⌫</button>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
+    <button class="pin-cancel" onclick="closePinOverlay()">キャンセル</button>
+  </div>
+</div>
 
+<!-- ══════════════════
+  ADMIN PANEL
+══════════════════ -->
+<div class="admin-overlay" id="admin-overlay">
+  <div class="admin-panel">
+    <div class="admin-header">
+      <div class="admin-title">✦ Voice Admin</div>
+      <div class="admin-save-status" id="admin-save-status">—</div>
+    </div>
+    <div class="admin-body">
+
+      <!-- BGM設定 -->
+      <div class="admin-section">
+        <div class="admin-section-title">BGM</div>
+        <div class="admin-field">
+          <label class="admin-label">Afstasia BGM URL</label>
+          <input class="admin-input" id="bgm-af-url" placeholder="https://...mp3">
+        </div>
+        <div class="admin-field">
+          <label class="admin-label">Telostia BGM URL</label>
+          <input class="admin-input" id="bgm-te-url" placeholder="https://...mp3">
+        </div>
+        <div class="admin-btn-row">
+          <button class="admin-btn primary" onclick="saveBGMSettings()">✓ BGM保存</button>
+        </div>
+      </div>
+
+      <!-- キャラ管理 -->
+      <div class="admin-section">
+        <div class="admin-section-title">キャラクター管理</div>
+        <div id="admin-char-list"></div>
+        <div class="admin-btn-row">
+          <button class="admin-btn primary" onclick="adminAddChar()">＋ キャラ追加</button>
+        </div>
+      </div>
+
+      <!-- GitHub保存 -->
+      <div class="admin-section">
+        <div class="admin-section-title">GitHub 自動保存</div>
+        <div class="admin-field">
+          <label class="admin-label">GitHubユーザー名</label>
+          <input class="admin-input" id="gh-user" placeholder="例: uo-cpu">
+        </div>
+        <div class="admin-field">
+          <label class="admin-label">リポジトリ名</label>
+          <input class="admin-input" id="gh-repo" placeholder="例: ArcadicOff">
+        </div>
+        <div class="admin-field">
+          <label class="admin-label">ファイルパス</label>
+          <input class="admin-input" id="gh-path" placeholder="例: voice.html" value="voice.html">
+        </div>
+        <div class="admin-field">
+          <label class="admin-label">GitHubトークン</label>
+          <input class="admin-input" id="gh-token" type="password" placeholder="ghp_xxxx">
+        </div>
+        <div class="admin-btn-row">
+          <button class="admin-btn primary" onclick="saveGHSettings()">✓ 設定保存</button>
+          <button class="admin-btn primary" onclick="pushToGitHub()">🚀 GitHubに保存</button>
+        </div>
+        <div id="gh-status" style="font-size:.58rem;letter-spacing:.15em;margin-top:8px;min-height:14px;"></div>
+      </div>
+
+      <div class="admin-btn-row" style="margin-top:8px;">
+        <button class="admin-btn" onclick="closeAdmin()">× 閉じる</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
 // ══════════════════════════════════════════════
 //  DATA
-//  音声URLは "" のままにしておくと再生ボタンが無効になります
-//  URLを入れると再生できます（SoundCloud埋め込みURL、GitHubのrawファイル等）
 // ══════════════════════════════════════════════
-
-const voiceData = {
+let voiceData = {
+  bgm: { af: '', te: '' },
   afstasia: [
     {
       id: 'milan',
       name: 'ミラン・レスファイファー',
       role: '第一王子',
+      world: 'afstasia',
       voices: [
-        { text: 'セリフをここに入力してください。', url: '' },
         { text: 'セリフをここに入力してください。', url: '' },
         { text: 'セリフをここに入力してください。', url: '' },
       ]
     },
-    // キャラを追加する場合はここに追記
   ],
   telostia: [
     {
       id: 'sfale',
       name: 'スファレー',
       role: '錬金術師',
+      world: 'telostia',
       voices: [
-        { text: 'セリフをここに入力してください。', url: '' },
         { text: 'セリフをここに入力してください。', url: '' },
         { text: 'セリフをここに入力してください。', url: '' },
       ]
     },
-    // キャラを追加する場合はここに追記
   ]
 };
+
+let currentWorld = 'af';
+let currentAudio = null;
+let currentPlayBtn = null;
+let bgmAudio = null;
+let bgmOn = true;
+let volume = 0.8;
+let pinBuffer = '';
+let titleTapCount = 0;
+let titleTapTimer = null;
+const ADMIN_PIN = '0000'; // 変更する場合はここを書き換える
+
+// ══════════════════════════════════════════════
+//  WORLD / NAVIGATION
+// ══════════════════════════════════════════════
+function enterWorld(w) {
+  currentWorld = w;
+  document.body.className = `world-${w}`;
+  document.getElementById('title-screen').classList.add('hidden');
+  document.getElementById('main-screen').classList.remove('hidden');
+  document.getElementById('header-world-label').textContent =
+    w === 'af' ? '— Afstasia —' : '— Telostia —';
+  renderCharacters();
+  startBGM(w);
+}
+
+function backToTitle() {
+  stopVoice();
+  stopBGM();
+  document.getElementById('main-screen').classList.add('hidden');
+  document.getElementById('title-screen').classList.remove('hidden');
+  startFX(currentWorld === 'af' ? 'af' : 'te');
+}
 
 // ══════════════════════════════════════════════
 //  RENDER
 // ══════════════════════════════════════════════
-let currentAudio = null;
-let currentBtn   = null;
+function renderCharacters() {
+  const worldKey = currentWorld === 'af' ? 'afstasia' : 'telostia';
+  const chars = voiceData[worldKey] || [];
+  const toc  = document.getElementById('toc-links');
+  const body = document.getElementById('char-body');
 
-function renderWorld(world) {
-  const chars  = voiceData[world] || [];
-  const tocEl  = document.getElementById(`toc-${world === 'afstasia' ? 'af' : 'te'}`);
-  const bodyEl = document.getElementById(`chars-${world === 'afstasia' ? 'af' : 'te'}`);
-
-  tocEl.innerHTML  = '';
-  bodyEl.innerHTML = '';
+  toc.innerHTML = '';
+  body.innerHTML = '';
 
   chars.forEach((char, ci) => {
     // TOC
-    const li = document.createElement('li');
-    li.className = 'toc-item';
-    li.innerHTML = `<a href="#char-${char.id}">${char.name}</a>`;
-    tocEl.appendChild(li);
+    const a = document.createElement('a');
+    a.className = 'toc-link';
+    a.href = `#char-${char.id}`;
+    a.textContent = char.name;
+    toc.appendChild(a);
 
     // Section
     const sec = document.createElement('section');
     sec.className = 'char-section';
     sec.id = `char-${char.id}`;
-    sec.style.animationDelay = `${ci * .08}s`;
+    sec.style.animationDelay = `${ci * .07}s`;
 
     const voiceCount = char.voices.filter(v => v.url).length;
-
     sec.innerHTML = `
       <div class="char-header">
         <div class="char-name">${char.name}</div>
         <div class="char-role">${char.role}</div>
-        <div class="char-count">${voiceCount} / ${char.voices.length} voices</div>
+        <div class="char-count">${voiceCount}/${char.voices.length}</div>
       </div>
-      <div class="voice-list" id="vlist-${char.id}"></div>
+      <div class="voice-list" id="vl-${char.id}"></div>
       ${ci < chars.length - 1 ? '<div class="section-divider"></div>' : ''}
     `;
-    bodyEl.appendChild(sec);
+    body.appendChild(sec);
 
-    // Voice items
-    const vlist = document.getElementById(`vlist-${char.id}`);
-    char.voices.forEach((v, vi) => {
+    const vl = document.getElementById(`vl-${char.id}`);
+    char.voices.forEach((v) => {
       const item = document.createElement('div');
       item.className = 'voice-item';
       item.innerHTML = `
-        <div class="voice-text">${v.text || '<span class="voice-empty">— セリフ未設定 —</span>'}</div>
+        <div class="voice-text">${v.text || '—'}</div>
         <button class="play-btn ${v.url ? '' : 'no-audio'}"
-          onclick="${v.url ? `playVoice(this, '${v.url}')` : 'void(0)'}"
-          title="${v.url ? '再生' : '音声未設定'}">
-          ▷
-        </button>
+          onclick="${v.url ? `playVoice(this,'${v.url.replace(/'/g,"\\'")}')` : 'void(0)'}">▷</button>
       `;
-      vlist.appendChild(item);
+      vl.appendChild(item);
     });
   });
 }
 
+// ══════════════════════════════════════════════
+//  AUDIO
+// ══════════════════════════════════════════════
 function playVoice(btn, url) {
-  // 同じボタンを押したら停止
-  if (currentBtn === btn && currentAudio && !currentAudio.paused) {
-    currentAudio.pause();
-    currentAudio.currentTime = 0;
-    btn.textContent = '▷';
-    btn.classList.remove('playing');
-    currentAudio = null;
-    currentBtn   = null;
-    return;
+  if (currentPlayBtn === btn && currentAudio && !currentAudio.paused) {
+    stopVoice(); return;
   }
-  // 前の音声を停止
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio.currentTime = 0;
-    if (currentBtn) { currentBtn.textContent = '▷'; currentBtn.classList.remove('playing'); }
-  }
+  stopVoice();
   const audio = new Audio(url);
-  audio.play().catch(() => {
-    btn.textContent = '▷';
-    btn.classList.remove('playing');
-  });
+  audio.volume = volume;
+  audio.play().catch(() => {});
   btn.textContent = '■';
   btn.classList.add('playing');
   currentAudio = audio;
-  currentBtn   = btn;
-  audio.onended = () => {
-    btn.textContent = '▷';
-    btn.classList.remove('playing');
-    currentAudio = null;
-    currentBtn   = null;
-  };
+  currentPlayBtn = btn;
+  audio.onended = () => { btn.textContent = '▷'; btn.classList.remove('playing'); currentAudio = null; currentPlayBtn = null; };
+}
+
+function stopVoice() {
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  if (currentPlayBtn) { currentPlayBtn.textContent = '▷'; currentPlayBtn.classList.remove('playing'); currentPlayBtn = null; }
+}
+
+function startBGM(w) {
+  stopBGM();
+  if (!bgmOn) return;
+  const url = w === 'af' ? voiceData.bgm.af : voiceData.bgm.te;
+  if (!url) return;
+  bgmAudio = new Audio(url);
+  bgmAudio.loop = true;
+  bgmAudio.volume = volume * 0.4;
+  bgmAudio.play().catch(() => {});
+  document.getElementById('bgm-indicator').classList.add('active');
+}
+
+function stopBGM() {
+  if (bgmAudio) { bgmAudio.pause(); bgmAudio = null; }
+  document.getElementById('bgm-indicator').classList.remove('active');
+}
+
+function setVolume(v) {
+  volume = v / 100;
+  document.getElementById('vol-num').textContent = v;
+  if (currentAudio) currentAudio.volume = volume;
+  if (bgmAudio) bgmAudio.volume = volume * 0.4;
+  localStorage.setItem('voice_volume', v);
+}
+
+function toggleBGM() {
+  bgmOn = !bgmOn;
+  document.getElementById('bgm-toggle').classList.toggle('on', bgmOn);
+  document.getElementById('bgm-label').textContent = bgmOn ? 'ON' : 'OFF';
+  if (bgmOn) startBGM(currentWorld);
+  else stopBGM();
+  localStorage.setItem('voice_bgm', bgmOn ? '1' : '0');
 }
 
 // ══════════════════════════════════════════════
-//  WORLD SWITCH
+//  SETTINGS
 // ══════════════════════════════════════════════
-function switchWorld(w) {
-  // 音声停止
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio = null;
-    if (currentBtn) { currentBtn.textContent = '▷'; currentBtn.classList.remove('playing'); currentBtn = null; }
+function openSettings() {
+  document.getElementById('settings-overlay').classList.add('open');
+}
+function closeSettings(e) {
+  if (e && e.target !== document.getElementById('settings-overlay')) return;
+  document.getElementById('settings-overlay').classList.remove('open');
+}
+
+// ══════════════════════════════════════════════
+//  TITLE TAP (5回でPIN画面)
+// ══════════════════════════════════════════════
+function handleTitleTap() {
+  titleTapCount++;
+  clearTimeout(titleTapTimer);
+  if (titleTapCount >= 5) {
+    titleTapCount = 0;
+    openPinOverlay();
+    return;
   }
-  document.body.className = `world-${w}`;
-  document.getElementById('btn-af').classList.toggle('active', w === 'af');
-  document.getElementById('btn-te').classList.toggle('active', w === 'te');
-  document.getElementById('content-af').classList.toggle('active', w === 'af');
-  document.getElementById('content-te').classList.toggle('active', w === 'te');
+  titleTapTimer = setTimeout(() => { titleTapCount = 0; }, 1500);
+}
+document.getElementById('title-logo-tap').addEventListener('click', handleTitleTap);
+document.getElementById('header-title-tap').addEventListener('click', handleTitleTap);
+
+// ══════════════════════════════════════════════
+//  PIN
+// ══════════════════════════════════════════════
+function openPinOverlay() {
+  pinBuffer = '';
+  updatePinDots();
+  document.getElementById('pin-error').textContent = '';
+  document.getElementById('pin-overlay').classList.add('open');
+}
+function closePinOverlay() {
+  document.getElementById('pin-overlay').classList.remove('open');
+  pinBuffer = '';
+}
+function updatePinDots() {
+  for (let i = 0; i < 4; i++) {
+    document.getElementById(`pd${i}`).classList.toggle('filled', i < pinBuffer.length);
+  }
+}
+function pinInput(v) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += v;
+  updatePinDots();
+  if (pinBuffer.length === 4) checkPin();
+}
+function pinBack() { if (pinBuffer.length) { pinBuffer = pinBuffer.slice(0,-1); updatePinDots(); } }
+function pinClear() { pinBuffer = ''; updatePinDots(); }
+function checkPin() {
+  const pin = localStorage.getItem('voice_admin_pin') || ADMIN_PIN;
+  if (pinBuffer === pin) {
+    closePinOverlay();
+    openAdmin();
+  } else {
+    document.getElementById('pin-error').textContent = '— PINが違います —';
+    pinBuffer = ''; updatePinDots();
+    setTimeout(() => { document.getElementById('pin-error').textContent = ''; }, 2000);
+  }
 }
 
-// ── INIT ──
-renderWorld('afstasia');
-renderWorld('telostia');
+// ══════════════════════════════════════════════
+//  ADMIN
+// ══════════════════════════════════════════════
+function openAdmin() {
+  loadGHSettings();
+  document.getElementById('bgm-af-url').value = voiceData.bgm.af || '';
+  document.getElementById('bgm-te-url').value = voiceData.bgm.te || '';
+  renderAdminCharList();
+  document.getElementById('admin-overlay').classList.add('open');
+}
+function closeAdmin() {
+  document.getElementById('admin-overlay').classList.remove('open');
+}
+
+function updateAdminSaveStatus() {
+  const el = document.getElementById('admin-save-status');
+  const now = new Date();
+  const t = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  el.textContent = `Last saved: ${t}`;
+  el.style.color = 'rgba(80,200,120,.8)';
+  setTimeout(() => { el.style.color = ''; }, 3000);
+}
+
+function saveBGMSettings() {
+  voiceData.bgm.af = document.getElementById('bgm-af-url').value.trim();
+  voiceData.bgm.te = document.getElementById('bgm-te-url').value.trim();
+  saveLocal();
+  updateAdminSaveStatus();
+}
+
+// ── CHAR LIST ──
+function renderAdminCharList() {
+  const el = document.getElementById('admin-char-list');
+  el.innerHTML = '';
+  ['afstasia','telostia'].forEach(w => {
+    const chars = voiceData[w] || [];
+    if (!chars.length) return;
+    const wLabel = document.createElement('div');
+    wLabel.style.cssText = 'font-family:Cinzel,serif;font-size:.48rem;letter-spacing:.4em;opacity:.5;margin:12px 0 6px;';
+    wLabel.textContent = w.toUpperCase();
+    el.appendChild(wLabel);
+    chars.forEach((char, idx) => {
+      const item = document.createElement('div');
+      item.className = 'admin-char-item';
+      item.innerHTML = `
+        <div style="flex:1;">
+          <div style="font-family:'Noto Serif JP',serif;font-size:.85rem;">${char.name}</div>
+          <div style="font-size:.58rem;opacity:.5;letter-spacing:.1em;">${char.role} · ${char.voices.length} voices</div>
+        </div>
+        <button class="admin-btn" onclick="adminEditChar('${w}',${idx})" style="font-size:.48rem;padding:6px 12px;">編集</button>
+        <button class="admin-btn" onclick="adminDeleteChar('${w}',${idx})" style="font-size:.48rem;padding:6px 12px;border-color:rgba(200,80,80,.3);color:rgba(200,80,80,.6);">削除</button>
+      `;
+      el.appendChild(item);
+    });
+  });
+}
+
+function adminAddChar() {
+  showCharEditor(null, null, null);
+}
+function adminEditChar(world, idx) {
+  showCharEditor(world, idx, voiceData[world][idx]);
+}
+function adminDeleteChar(world, idx) {
+  if (!confirm('削除しますか？')) return;
+  voiceData[world].splice(idx, 1);
+  renderAdminCharList();
+  saveLocal();
+  updateAdminSaveStatus();
+  if (document.getElementById('main-screen').classList.contains('hidden') === false) renderCharacters();
+}
+
+// ── CHAR EDITOR ──
+let editingWorld = null, editingIdx = null;
+function showCharEditor(world, idx, char) {
+  editingWorld = world;
+  editingIdx   = idx;
+  const isNew  = !char;
+  char = char || { id: '', name: '', role: '', world: 'afstasia', voices: [{ text:'', url:'' }] };
+
+  // inline editor inside admin
+  const existing = document.getElementById('char-editor');
+  if (existing) existing.remove();
+
+  const ed = document.createElement('div');
+  ed.id = 'char-editor';
+  ed.style.cssText = 'position:fixed;inset:0;z-index:500;overflow-y:auto;display:flex;align-items:flex-start;justify-content:center;padding:20px;';
+  ed.style.background = 'rgba(0,0,0,.85)';
+
+  ed.innerHTML = `
+    <div style="width:min(500px,94vw);border:1px solid rgba(200,168,75,.25);padding:0;" id="ced-box">
+      <div style="padding:14px 18px;border-bottom:1px solid rgba(200,168,75,.15);display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.4em;color:rgba(200,168,75,.8);">${isNew ? '✦ NEW CHARACTER' : '✦ EDIT CHARACTER'}</span>
+        <button onclick="closeCharEditor()" style="background:none;border:none;color:rgba(200,168,75,.5);cursor:pointer;font-size:.8rem;">×</button>
+      </div>
+      <div style="padding:18px;background:rgba(10,8,6,.95);">
+        <div style="margin-bottom:10px;">
+          <label style="display:block;font-family:Cinzel,serif;font-size:.46rem;letter-spacing:.3em;color:rgba(200,168,75,.5);margin-bottom:4px;">NAME</label>
+          <input id="ced-name" class="admin-input" value="${char.name}" placeholder="キャラ名">
+        </div>
+        <div style="margin-bottom:10px;">
+          <label style="display:block;font-family:Cinzel,serif;font-size:.46rem;letter-spacing:.3em;color:rgba(200,168,75,.5);margin-bottom:4px;">ROLE</label>
+          <input id="ced-role" class="admin-input" value="${char.role}" placeholder="役割・肩書き">
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="display:block;font-family:Cinzel,serif;font-size:.46rem;letter-spacing:.3em;color:rgba(200,168,75,.5);margin-bottom:4px;">WORLD</label>
+          <select id="ced-world" class="admin-input" style="background:transparent;">
+            <option value="afstasia" ${char.world==='afstasia'?'selected':''}>Afstasia</option>
+            <option value="telostia" ${char.world==='telostia'?'selected':''}>Telostia</option>
+          </select>
+        </div>
+        <div style="font-family:Cinzel,serif;font-size:.46rem;letter-spacing:.3em;color:rgba(200,168,75,.5);margin-bottom:8px;">VOICES</div>
+        <div id="ced-voices">
+          ${char.voices.map((v,i) => `
+            <div class="admin-voice-row" id="ced-vrow-${i}">
+              <div style="flex:1;">
+                <label style="display:block;font-family:Cinzel,serif;font-size:.4rem;letter-spacing:.2em;color:rgba(200,168,75,.35);margin-bottom:3px;">SERIF</label>
+                <input class="admin-input ced-vtext" data-i="${i}" value="${v.text.replace(/"/g,'&quot;')}" placeholder="セリフ">
+                <label style="display:block;font-family:Cinzel,serif;font-size:.4rem;letter-spacing:.2em;color:rgba(200,168,75,.35);margin:5px 0 3px;">URL</label>
+                <input class="admin-input ced-vurl" data-i="${i}" value="${v.url}" placeholder="https://...">
+              </div>
+              <button class="admin-voice-del" onclick="cedDelVoice(${i})">✕</button>
+            </div>
+          `).join('')}
+        </div>
+        <button onclick="cedAddVoice()" class="admin-btn" style="width:100%;margin-top:8px;font-size:.48rem;">＋ セリフ追加</button>
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <button onclick="saveCharEditor()" class="admin-btn primary" style="flex:1;">✓ 保存</button>
+          <button onclick="closeCharEditor()" class="admin-btn" style="flex:1;">キャンセル</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(ed);
+}
+
+function cedAddVoice() {
+  const container = document.getElementById('ced-voices');
+  const i = container.querySelectorAll('.admin-voice-row').length;
+  const row = document.createElement('div');
+  row.className = 'admin-voice-row';
+  row.id = `ced-vrow-${i}`;
+  row.innerHTML = `
+    <div style="flex:1;">
+      <label style="display:block;font-family:Cinzel,serif;font-size:.4rem;letter-spacing:.2em;color:rgba(200,168,75,.35);margin-bottom:3px;">SERIF</label>
+      <input class="admin-input ced-vtext" data-i="${i}" value="" placeholder="セリフ">
+      <label style="display:block;font-family:Cinzel,serif;font-size:.4rem;letter-spacing:.2em;color:rgba(200,168,75,.35);margin:5px 0 3px;">URL</label>
+      <input class="admin-input ced-vurl" data-i="${i}" value="" placeholder="https://...">
+    </div>
+    <button class="admin-voice-del" onclick="cedDelVoice(${i})">✕</button>
+  `;
+  container.appendChild(row);
+}
+
+function cedDelVoice(i) {
+  const row = document.getElementById(`ced-vrow-${i}`);
+  if (row) row.remove();
+}
+
+function saveCharEditor() {
+  const name  = document.getElementById('ced-name').value.trim();
+  const role  = document.getElementById('ced-role').value.trim();
+  const world = document.getElementById('ced-world').value;
+  if (!name) { alert('名前を入力してください'); return; }
+
+  const texts = [...document.querySelectorAll('.ced-vtext')].map(el => el.value.trim());
+  const urls  = [...document.querySelectorAll('.ced-vurl')].map(el => el.value.trim());
+  const voices = texts.map((t, i) => ({ text: t, url: urls[i] || '' })).filter(v => v.text);
+
+  const isNew = editingWorld === null;
+  const id    = isNew ? name.toLowerCase().replace(/\s+/g,'_') + '_' + Date.now() : voiceData[editingWorld][editingIdx].id;
+  const charData = { id, name, role, world, voices };
+
+  if (isNew) {
+    if (!voiceData[world]) voiceData[world] = [];
+    voiceData[world].push(charData);
+  } else {
+    // worldが変わった場合は移動
+    if (editingWorld !== world) {
+      voiceData[editingWorld].splice(editingIdx, 1);
+      if (!voiceData[world]) voiceData[world] = [];
+      voiceData[world].push(charData);
+    } else {
+      voiceData[world][editingIdx] = charData;
+    }
+  }
+
+  closeCharEditor();
+  renderAdminCharList();
+  saveLocal();
+  updateAdminSaveStatus();
+  if (!document.getElementById('main-screen').classList.contains('hidden')) renderCharacters();
+}
+
+function closeCharEditor() {
+  const ed = document.getElementById('char-editor');
+  if (ed) ed.remove();
+}
+
+// ══════════════════════════════════════════════
+//  LOCAL STORAGE
+// ══════════════════════════════════════════════
+function saveLocal() {
+  try { localStorage.setItem('voice_data', JSON.stringify(voiceData)); } catch(e) {}
+}
+function loadLocal() {
+  try {
+    const raw = localStorage.getItem('voice_data');
+    if (raw) voiceData = JSON.parse(raw);
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════════════
+//  GITHUB SAVE
+// ══════════════════════════════════════════════
+function saveGHSettings() {
+  localStorage.setItem('voice_gh_user',  document.getElementById('gh-user').value.trim());
+  localStorage.setItem('voice_gh_repo',  document.getElementById('gh-repo').value.trim());
+  localStorage.setItem('voice_gh_path',  document.getElementById('gh-path').value.trim());
+  localStorage.setItem('voice_gh_token', document.getElementById('gh-token').value.trim());
+  updateAdminSaveStatus();
+}
+function loadGHSettings() {
+  document.getElementById('gh-user').value  = localStorage.getItem('voice_gh_user')  || '';
+  document.getElementById('gh-repo').value  = localStorage.getItem('voice_gh_repo')  || '';
+  document.getElementById('gh-path').value  = localStorage.getItem('voice_gh_path')  || 'voice.html';
+  document.getElementById('gh-token').value = localStorage.getItem('voice_gh_token') || '';
+}
+
+async function pushToGitHub() {
+  const user  = localStorage.getItem('voice_gh_user');
+  const repo  = localStorage.getItem('voice_gh_repo');
+  const path  = localStorage.getItem('voice_gh_path') || 'voice.html';
+  const token = localStorage.getItem('voice_gh_token');
+  const status = document.getElementById('gh-status');
+
+  if (!user || !repo || !token) { status.textContent = '— GitHub設定を入力してください —'; return; }
+  status.textContent = '⏳ 保存中...';
+
+  // 現在のHTMLを取得してvoiceDataを埋め込んだ新しいHTMLを生成
+  const newHTML = document.documentElement.outerHTML.replace(
+    /let voiceData = \{[\s\S]*?\};/,
+    `let voiceData = ${JSON.stringify(voiceData, null, 2)};`
+  );
+  const content = btoa(unescape(encodeURIComponent(newHTML)));
+  const apiUrl  = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
+
+  try {
+    let sha = null;
+    const getRes = await fetch(apiUrl, { headers:{ 'Authorization':`token ${token}`,'Accept':'application/vnd.github.v3+json' } });
+    if (getRes.ok) sha = (await getRes.json()).sha;
+
+    const putRes = await fetch(apiUrl, {
+      method: 'PUT',
+      headers:{ 'Authorization':`token ${token}`,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json' },
+      body: JSON.stringify({ message:`voice data updated ${new Date().toLocaleString('ja-JP')}`, content, ...(sha?{sha}:{}) })
+    });
+
+    if (putRes.ok) {
+      status.style.color = 'rgba(80,200,120,.8)';
+      status.textContent = '✓ GitHubに保存しました！';
+      setTimeout(() => { status.textContent=''; status.style.color=''; }, 4000);
+    } else {
+      const err = await putRes.json();
+      status.style.color = 'rgba(200,80,80,.8)';
+      status.textContent = `— エラー: ${err.message} —`;
+    }
+  } catch(e) {
+    status.style.color = 'rgba(200,80,80,.8)';
+    status.textContent = '— 通信エラー —';
+  }
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+loadLocal();
+
+// 設定復元
+const savedVol = localStorage.getItem('voice_volume');
+if (savedVol) { volume = savedVol/100; document.getElementById('vol-slider').value = savedVol; document.getElementById('vol-num').textContent = savedVol; }
+const savedBGM = localStorage.getItem('voice_bgm');
+if (savedBGM === '0') { bgmOn = false; document.getElementById('bgm-toggle').classList.remove('on'); document.getElementById('bgm-label').textContent = 'OFF'; }
+
+// ══════════════════════════════════════════════
+//  CANVAS EFFECTS（常時・背景）
+// ══════════════════════════════════════════════
+const fxCanvas = document.getElementById('fx-canvas');
+const fxCtx    = fxCanvas.getContext('2d');
+let fxMode     = 'af';
+let fxAnim     = null;
+
+function resizeFX() {
+  fxCanvas.width  = window.innerWidth;
+  fxCanvas.height = window.innerHeight;
+  positionCircles();
+}
+window.addEventListener('resize', resizeFX);
+resizeFX();
+
+// ── AF: 金貨（控えめ・常時） ────────────────
+class Coin {
+  constructor() { this.reset(true); }
+  reset(init) {
+    this.x  = Math.random() * fxCanvas.width;
+    this.y  = init ? Math.random() * fxCanvas.height : -40;
+    this.r  = 4 + Math.random() * 7;
+    this.vy = 0.25 + Math.random() * 0.5;
+    this.vx = (Math.random() - 0.5) * 0.4;
+    this.wobble = Math.random() * Math.PI * 2;
+    this.wobbleSpeed = 0.018 + Math.random() * 0.015;
+    this.angle = 0;
+    this.flipDir = Math.random() > 0.5 ? 1 : -1;
+    this.flipSpeed = 0.025 + Math.random() * 0.02;
+    this.glint = Math.random() * Math.PI * 2;
+    this.glintSpeed = 0.035 + Math.random() * 0.03;
+    this.alpha = init ? Math.random() * 0.3 : 0;
+    this.maxAlpha = 0.18 + Math.random() * 0.15; // 薄め
+    this.fadeIn = true;
+  }
+  update() {
+    this.wobble += this.wobbleSpeed;
+    this.x += this.vx + Math.sin(this.wobble) * 0.35;
+    this.y += this.vy;
+    this.angle += this.flipDir * this.flipSpeed;
+    this.glint += this.glintSpeed;
+    if (this.fadeIn) { this.alpha = Math.min(this.maxAlpha, this.alpha + 0.008); if (this.alpha >= this.maxAlpha) this.fadeIn = false; }
+    if (this.y > fxCanvas.height + 50) this.reset(false);
+  }
+  draw(ctx) {
+    const scaleX = Math.cos(this.angle);
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.scale(Math.abs(scaleX), 1);
+    ctx.globalAlpha = this.alpha;
+
+    const grad = ctx.createRadialGradient(0, -this.r*0.3, this.r*0.1, 0, 0, this.r);
+    grad.addColorStop(0, 'rgba(255,235,140,0.95)');
+    grad.addColorStop(0.5,'rgba(200,168,75,0.9)');
+    grad.addColorStop(1,  'rgba(140,100,30,0.8)');
+    ctx.beginPath();
+    ctx.ellipse(0, 0, this.r, this.r * 0.9, 0, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    ctx.strokeStyle = `rgba(255,220,80,${0.3 + (Math.sin(this.glint)+1)*0.2})`;
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    const g = (Math.sin(this.glint)+1)*0.5;
+    if (g > 0.65) {
+      ctx.beginPath();
+      ctx.ellipse(-this.r*0.2, -this.r*0.25, this.r*0.15, this.r*0.08, -0.5, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(255,255,220,${(g-0.65)*1.2})`;
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+
+// ── TE: 魔法陣（控えめ・常時回転） ──────────
+class MagicCircle {
+  constructor(x, y, r, speed, maxAlpha, segments) {
+    this.x = x; this.y = y; this.r = r;
+    this.angle = Math.random() * Math.PI * 2;
+    this.speed = speed;
+    this.maxAlpha = maxAlpha;
+    this.alpha = 0;
+    this.fadeIn = true;
+    this.segments = segments || Math.floor(5 + Math.random() * 3);
+    this.innerR = r * (0.45 + Math.random() * 0.2);
+    this.dashOffset = 0;
+  }
+  update() {
+    this.angle += this.speed;
+    this.dashOffset -= 0.4;
+    if (this.fadeIn) { this.alpha = Math.min(this.maxAlpha, this.alpha + 0.003); if (this.alpha >= this.maxAlpha) this.fadeIn = false; }
+  }
+  draw(ctx) {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
+    ctx.globalAlpha = this.alpha;
+
+    // outer ring
+    ctx.beginPath();
+    ctx.arc(0, 0, this.r, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(58,176,200,0.55)';
+    ctx.lineWidth = 0.8;
+    ctx.setLineDash([5, 5]);
+    ctx.lineDashOffset = this.dashOffset;
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // inner ring
+    ctx.beginPath();
+    ctx.arc(0, 0, this.innerR, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(96,200,224,0.35)';
+    ctx.lineWidth = 0.6;
+    ctx.stroke();
+
+    // polygon
+    ctx.beginPath();
+    for (let i = 0; i < this.segments; i++) {
+      const a = (i / this.segments) * Math.PI * 2;
+      i === 0
+        ? ctx.moveTo(Math.cos(a)*this.r*0.82, Math.sin(a)*this.r*0.82)
+        : ctx.lineTo(Math.cos(a)*this.r*0.82, Math.sin(a)*this.r*0.82);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(58,176,200,0.25)';
+    ctx.lineWidth = 0.6;
+    ctx.stroke();
+
+    // center
+    ctx.beginPath();
+    ctx.arc(0, 0, 2, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(96,200,224,0.55)';
+    ctx.fill();
+
+    // soft glow
+    const grd = ctx.createRadialGradient(0,0,0,0,0,this.r*0.45);
+    grd.addColorStop(0,'rgba(58,176,200,0.06)');
+    grd.addColorStop(1,'rgba(58,176,200,0)');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.arc(0,0,this.r*0.45,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+}
+
+// ── TE: ランタン（右下1つ固定・揺れるのみ） ──
+class FixedLantern {
+  constructor() {
+    this.wobble = 0;
+    this.wobbleSpeed = 0.012;
+    this.pulsePhase = 0;
+    this.pulseSpeed = 0.025;
+    this.alpha = 0;
+    this.w = 18; this.h = 27;
+    this.hue = 200;
+  }
+  get x() { return fxCanvas.width  - 60; }
+  get y() { return fxCanvas.height - 70; }
+  update() {
+    this.wobble += this.wobbleSpeed;
+    this.pulsePhase += this.pulseSpeed;
+    if (this.alpha < 0.65) this.alpha = Math.min(0.65, this.alpha + 0.004);
+  }
+  draw(ctx) {
+    const pulse = (Math.sin(this.pulsePhase) + 1) * 0.5;
+    const brightness = 0.5 + pulse * 0.5;
+    const tilt = Math.sin(this.wobble) * 0.06;
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(tilt);
+    ctx.globalAlpha = this.alpha;
+
+    // aura glow
+    const grd = ctx.createRadialGradient(0, 0, 0, 0, 0, this.w * 3);
+    grd.addColorStop(0, `hsla(${this.hue},80%,60%,${0.12 * brightness})`);
+    grd.addColorStop(1, 'hsla(0,0%,0%,0)');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.arc(0, 0, this.w * 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // body
+    ctx.beginPath();
+    ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 4);
+    ctx.fillStyle = `hsla(${this.hue},50%,10%,0.88)`;
+    ctx.fill();
+    ctx.strokeStyle = `hsla(${this.hue},65%,50%,${0.45 + pulse * 0.3})`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // inner light
+    const innerGrd = ctx.createRadialGradient(0,0,0,0,0,this.w*0.5);
+    innerGrd.addColorStop(0, `hsla(${this.hue},90%,72%,${0.6 * brightness})`);
+    innerGrd.addColorStop(1, `hsla(${this.hue},70%,45%,0)`);
+    ctx.fillStyle = innerGrd;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, this.w*0.38, this.h*0.32, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // top hook + chain
+    ctx.beginPath();
+    ctx.moveTo(0, -this.h/2);
+    ctx.lineTo(0, -this.h/2 - 14);
+    ctx.strokeStyle = `hsla(${this.hue},40%,45%,0.4)`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // bars
+    [-0.28, 0, 0.28].forEach(f => {
+      ctx.beginPath();
+      ctx.moveTo(-this.w/2, f * this.h);
+      ctx.lineTo( this.w/2, f * this.h);
+      ctx.strokeStyle = `hsla(${this.hue},50%,40%,0.25)`;
+      ctx.lineWidth = 0.6;
+      ctx.stroke();
+    });
+
+    ctx.restore();
+  }
+}
+
+// ── INSTANCES ───────────────────────────────
+const AF_COINS    = Array.from({length: 22}, () => new Coin());
+const TE_LANTERN  = new FixedLantern();
+let   TE_CIRCLES  = [];
+
+function positionCircles() {
+  const cx = fxCanvas.width / 2;
+  const cy = fxCanvas.height / 2;
+  TE_CIRCLES = [
+    new MagicCircle(cx, cy, Math.min(fxCanvas.width, fxCanvas.height) * 0.28,  0.0025, 0.14, 6),
+    new MagicCircle(cx, cy, Math.min(fxCanvas.width, fxCanvas.height) * 0.18, -0.004,  0.20, 5),
+    new MagicCircle(cx, cy, Math.min(fxCanvas.width, fxCanvas.height) * 0.10,  0.007,  0.24, 7),
+  ];
+}
+positionCircles();
+
+// ── DRAW LOOPS ───────────────────────────────
+function drawAF() {
+  fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+  AF_COINS.forEach(c => { c.update(); c.draw(fxCtx); });
+}
+
+function drawTE() {
+  fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+  TE_CIRCLES.forEach(c => { c.update(); c.draw(fxCtx); });
+  TE_LANTERN.update();
+  TE_LANTERN.draw(fxCtx);
+}
+
+function startFX(mode) {
+  fxMode = mode;
+  if (fxAnim) cancelAnimationFrame(fxAnim);
+  fxCanvas.style.opacity = '1';
+  const loop = () => {
+    if (fxMode === 'af') drawAF(); else drawTE();
+    fxAnim = requestAnimationFrame(loop);
+  };
+  loop();
+}
+
+// enterWorldでエフェクト切り替え
+const _origEnterWorld = enterWorld;
+function enterWorldWithFX(w) {
+  startFX(w);
+  _origEnterWorld(w);
+}
+
+// タイトルに戻るときもエフェクト継続
+const _origBackToTitle = backToTitle;
+// backToTitleはすでに定義済みなので直接上書き
+window._backToTitleOrig = backToTitle;
+backToTitle = function() {
+  window._backToTitleOrig();
+  startFX(currentWorld === 'af' ? 'af' : 'te');
+};
+
+// 常時エフェクト開始
+startFX('af');
+
+// ══════════════════════════════════════════════
+//  CANVAS EFFECTS
+// ══════════════════════════════════════════════
+const fxCanvas = document.getElementById('fx-canvas');
+const fxCtx    = fxCanvas.getContext('2d');
+let fxMode     = 'af'; // 'af' | 'te'
+let fxAnim     = null;
+
+function resizeFX() {
+  fxCanvas.width  = window.innerWidth;
+  fxCanvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeFX);
+resizeFX();
+
+// ── AF: 金貨エフェクト ──────────────────────
+class Coin {
+  constructor() { this.reset(true); }
+  reset(init) {
+    this.x  = Math.random() * fxCanvas.width;
+    this.y  = init ? Math.random() * fxCanvas.height : -40;
+    this.r  = 6 + Math.random() * 10;
+    this.vy = 0.4 + Math.random() * 0.8;
+    this.vx = (Math.random() - 0.5) * 0.6;
+    this.wobble = Math.random() * Math.PI * 2;
+    this.wobbleSpeed = 0.02 + Math.random() * 0.02;
+    this.scaleX = 1;
+    this.flipDir = Math.random() > 0.5 ? 1 : -1;
+    this.flipSpeed = 0.03 + Math.random() * 0.03;
+    this.angle = 0;
+    this.alpha = 0;
+    this.fadeIn = true;
+    this.glint  = 0;
+    this.glintSpeed = 0.04 + Math.random() * 0.04;
+  }
+  update() {
+    this.wobble += this.wobbleSpeed;
+    this.x += this.vx + Math.sin(this.wobble) * 0.4;
+    this.y += this.vy;
+    this.angle += this.flipDir * this.flipSpeed;
+    this.scaleX = Math.cos(this.angle);
+    this.glint = (Math.sin(this.glint + this.glintSpeed) + 1) * 0.5;
+    if (this.fadeIn) { this.alpha = Math.min(1, this.alpha + 0.03); if (this.alpha >= 1) this.fadeIn = false; }
+    if (this.y > fxCanvas.height + 50) this.reset(false);
+  }
+  draw(ctx) {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.scale(Math.abs(this.scaleX), 1);
+    ctx.globalAlpha = this.alpha * 0.75;
+
+    // coin body
+    const grad = ctx.createRadialGradient(0, -this.r*0.3, this.r*0.1, 0, 0, this.r);
+    grad.addColorStop(0, `rgba(255,235,140,${0.9 + this.glint*0.1})`);
+    grad.addColorStop(0.5, `rgba(200,168,75,0.9)`);
+    grad.addColorStop(1, `rgba(140,100,30,0.8)`);
+    ctx.beginPath();
+    ctx.ellipse(0, 0, this.r, this.r * 0.92, 0, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // rim
+    ctx.strokeStyle = `rgba(255,220,80,${0.4 + this.glint * 0.4})`;
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // glint
+    if (this.glint > 0.6) {
+      ctx.beginPath();
+      ctx.ellipse(-this.r*0.2, -this.r*0.25, this.r*0.18, this.r*0.1, -0.5, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(255,255,220,${(this.glint-0.6)*1.5})`;
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+
+// ── TE: 魔法陣＋ランタン ─────────────────────
+class MagicCircle {
+  constructor(x, y, r, speed, alpha) {
+    this.x = x; this.y = y; this.r = r;
+    this.angle = Math.random() * Math.PI * 2;
+    this.speed = speed;
+    this.baseAlpha = alpha;
+    this.alpha = 0;
+    this.fadeIn = true;
+    this.segments = Math.floor(5 + Math.random() * 4);
+    this.innerR = r * (0.4 + Math.random() * 0.3);
+    this.dashOffset = 0;
+  }
+  update() {
+    this.angle += this.speed;
+    this.dashOffset -= 0.5;
+    if (this.fadeIn) { this.alpha = Math.min(this.baseAlpha, this.alpha + 0.005); if (this.alpha >= this.baseAlpha) this.fadeIn = false; }
+  }
+  draw(ctx) {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
+    ctx.globalAlpha = this.alpha;
+
+    // outer ring
+    ctx.beginPath();
+    ctx.arc(0, 0, this.r, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(58,176,200,0.6)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([6, 4]);
+    ctx.lineDashOffset = this.dashOffset;
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // inner ring
+    ctx.beginPath();
+    ctx.arc(0, 0, this.innerR, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(100,210,240,0.4)';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    // polygon
+    ctx.beginPath();
+    for (let i = 0; i < this.segments; i++) {
+      const a = (i / this.segments) * Math.PI * 2;
+      const px = Math.cos(a) * this.r * 0.85;
+      const py = Math.sin(a) * this.r * 0.85;
+      i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(58,176,200,0.35)';
+    ctx.lineWidth = 0.7;
+    ctx.stroke();
+
+    // center dot
+    ctx.beginPath();
+    ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(100,210,240,0.7)';
+    ctx.fill();
+
+    // glow
+    const grd = ctx.createRadialGradient(0,0,0,0,0,this.r*0.5);
+    grd.addColorStop(0,'rgba(58,176,200,0.08)');
+    grd.addColorStop(1,'rgba(58,176,200,0)');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.arc(0,0,this.r*0.5,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+}
+
+class Lantern {
+  constructor() { this.reset(true); }
+  reset(init) {
+    this.x  = Math.random() * fxCanvas.width;
+    this.y  = init ? fxCanvas.height * (0.3 + Math.random() * 0.6) : fxCanvas.height + 60;
+    this.vy = -(0.3 + Math.random() * 0.5);
+    this.vx = (Math.random() - 0.5) * 0.3;
+    this.wobble = Math.random() * Math.PI * 2;
+    this.wobbleSpeed = 0.015 + Math.random() * 0.01;
+    this.w  = 10 + Math.random() * 8;
+    this.h  = this.w * 1.5;
+    this.pulsePhase = Math.random() * Math.PI * 2;
+    this.pulseSpeed = 0.03 + Math.random() * 0.02;
+    this.alpha = init ? Math.random() * 0.6 : 0;
+    this.fadeIn = !init;
+    this.hue = 190 + Math.random() * 30;
+  }
+  update() {
+    this.wobble += this.wobbleSpeed;
+    this.x += this.vx + Math.sin(this.wobble) * 0.3;
+    this.y += this.vy;
+    this.pulsePhase += this.pulseSpeed;
+    if (this.fadeIn) { this.alpha = Math.min(0.7, this.alpha + 0.01); if (this.alpha >= 0.7) this.fadeIn = false; }
+    if (this.y < -80) this.reset(false);
+  }
+  draw(ctx) {
+    const pulse = (Math.sin(this.pulsePhase) + 1) * 0.5;
+    const brightness = 0.5 + pulse * 0.5;
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(Math.sin(this.wobble) * 0.08);
+    ctx.globalAlpha = this.alpha;
+
+    // glow aura
+    const grd = ctx.createRadialGradient(0, 0, 0, 0, 0, this.w * 2.5);
+    grd.addColorStop(0, `hsla(${this.hue},80%,65%,${0.3 * brightness})`);
+    grd.addColorStop(1, 'hsla(0,0%,0%,0)');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.arc(0, 0, this.w * 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // lantern body
+    ctx.beginPath();
+    ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 3);
+    ctx.fillStyle = `hsla(${this.hue},60%,12%,0.85)`;
+    ctx.fill();
+    ctx.strokeStyle = `hsla(${this.hue},70%,55%,${0.6 + pulse*0.3})`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // inner glow
+    const innerGrd = ctx.createRadialGradient(0, 0, 0, 0, 0, this.w * 0.5);
+    innerGrd.addColorStop(0, `hsla(${this.hue},90%,75%,${0.8 * brightness})`);
+    innerGrd.addColorStop(1, `hsla(${this.hue},70%,50%,0)`);
+    ctx.fillStyle = innerGrd;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, this.w*0.4, this.h*0.35, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // top hook
+    ctx.beginPath();
+    ctx.moveTo(0, -this.h/2);
+    ctx.lineTo(0, -this.h/2 - 8);
+    ctx.strokeStyle = `hsla(${this.hue},50%,50%,0.5)`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // horizontal bars
+    for (let i = -1; i <= 1; i++) {
+      ctx.beginPath();
+      ctx.moveTo(-this.w/2, i * this.h * 0.22);
+      ctx.lineTo( this.w/2, i * this.h * 0.22);
+      ctx.strokeStyle = `hsla(${this.hue},60%,45%,0.3)`;
+      ctx.lineWidth = 0.6;
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+}
+
+// ── PARTICLE SYSTEMS ────────────────────────
+const AF_COINS   = Array.from({length: 28}, () => new Coin());
+const TE_CIRCLES = [
+  new MagicCircle(0, 0, 180, 0.003, 0.18),
+  new MagicCircle(0, 0, 120, -0.005, 0.25),
+  new MagicCircle(0, 0,  70,  0.008, 0.3),
+];
+const TE_LANTERNS = Array.from({length: 12}, () => new Lantern());
+
+function positionCircles() {
+  const cx = fxCanvas.width / 2;
+  const cy = fxCanvas.height / 2;
+  TE_CIRCLES.forEach(c => { c.x = cx; c.y = cy; });
+}
+positionCircles();
+window.addEventListener('resize', positionCircles);
+
+// ── DRAW LOOPS ───────────────────────────────
+function drawAF() {
+  fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+  AF_COINS.forEach(c => { c.update(); c.draw(fxCtx); });
+}
+
+function drawTE() {
+  fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+  TE_CIRCLES.forEach(c => { c.update(); c.draw(fxCtx); });
+  TE_LANTERNS.forEach(l => { l.update(); l.draw(fxCtx); });
+}
+
+function startFX(mode) {
+  fxMode = mode;
+  if (fxAnim) cancelAnimationFrame(fxAnim);
+  fxCanvas.style.opacity = '1';
+  const loop = () => {
+    if (fxMode === 'af') drawAF();
+    else drawTE();
+    fxAnim = requestAnimationFrame(loop);
+  };
+  loop();
+}
+
+function stopFX() {
+  if (fxAnim) cancelAnimationFrame(fxAnim);
+  fxCanvas.style.opacity = '0';
+  setTimeout(() => fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height), 800);
+}
+
+// ── 切り替え時にエフェクト ─────────────────
+const _origEnterWorld = enterWorld;
+function enterWorldWithFX(w) {
+  startFX(w);
+  setTimeout(stopFX, 2200);
+  _origEnterWorld(w);
+}
+
+// ── タイトル画面では常時エフェクト ──────────
+startFX('af');
 </script>
 </body>
 </html>
