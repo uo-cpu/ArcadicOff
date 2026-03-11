@@ -59,10 +59,8 @@ body.world-te .grid-bg{
 #title-screen{
   flex-direction:column;
   align-items:center;
-  background:inherit;
+  background:transparent !important;
 }
-body.world-af #title-screen{background:var(--af-bg);}
-body.world-te #title-screen{background:var(--te-bg);}
 
 .title-logo{
   font-family:'Cinzel Decorative',cursive;
@@ -604,8 +602,8 @@ body.world-te .main-footer{border-color:var(--te-border);color:var(--te-dim);}
     <div class="title-logo" id="title-logo-tap">ArcadicOff</div>
     <div class="title-sub">— Voice Archive —</div>
     <div class="world-select">
-      <button class="world-btn af-btn" onclick="enterWorldWithFX('af')">☀ &nbsp;Afstasia</button>
-      <button class="world-btn te-btn" onclick="enterWorldWithFX('te')">◈ &nbsp;Telostia</button>
+      <button class="world-btn af-btn" onclick="enterWorldWithTransition('af')">☀ &nbsp;Afstasia</button>
+      <button class="world-btn te-btn" onclick="enterWorldWithTransition('te')">◈ &nbsp;Telostia</button>
     </div>
     <button class="title-settings-btn" onclick="openSettings()">⚙ Settings</button>
   </div>
@@ -622,6 +620,7 @@ body.world-te .main-footer{border-color:var(--te-border);color:var(--te-dim);}
         <div class="header-world" id="header-world-label">— Voice Archive —</div>
       </div>
       <div class="header-btns">
+        <button class="icon-btn" onclick="enterWorldWithTransition(currentWorld==='af'?'te':'af')" id="world-switch-btn" title="世界を切り替え">⇄</button>
         <button class="icon-btn" onclick="openSettings()" title="設定">⚙</button>
         <button class="back-btn" onclick="backToTitle()">← TOP</button>
       </div>
@@ -1285,290 +1284,6 @@ const savedBGM = localStorage.getItem('voice_bgm');
 if (savedBGM === '0') { bgmOn = false; document.getElementById('bgm-toggle').classList.remove('on'); document.getElementById('bgm-label').textContent = 'OFF'; }
 
 // ══════════════════════════════════════════════
-//  CANVAS EFFECTS（常時・背景）
-// ══════════════════════════════════════════════
-const fxCanvas = document.getElementById('fx-canvas');
-const fxCtx    = fxCanvas.getContext('2d');
-let fxMode     = 'af';
-let fxAnim     = null;
-
-function resizeFX() {
-  fxCanvas.width  = window.innerWidth;
-  fxCanvas.height = window.innerHeight;
-  positionCircles();
-}
-window.addEventListener('resize', resizeFX);
-resizeFX();
-
-// ── AF: 金貨（控えめ・常時） ────────────────
-class Coin {
-  constructor() { this.reset(true); }
-  reset(init) {
-    this.x  = Math.random() * fxCanvas.width;
-    this.y  = init ? Math.random() * fxCanvas.height : -40;
-    this.r  = 4 + Math.random() * 7;
-    this.vy = 0.25 + Math.random() * 0.5;
-    this.vx = (Math.random() - 0.5) * 0.4;
-    this.wobble = Math.random() * Math.PI * 2;
-    this.wobbleSpeed = 0.018 + Math.random() * 0.015;
-    this.angle = 0;
-    this.flipDir = Math.random() > 0.5 ? 1 : -1;
-    this.flipSpeed = 0.025 + Math.random() * 0.02;
-    this.glint = Math.random() * Math.PI * 2;
-    this.glintSpeed = 0.035 + Math.random() * 0.03;
-    this.alpha = init ? Math.random() * 0.3 : 0;
-    this.maxAlpha = 0.18 + Math.random() * 0.15; // 薄め
-    this.fadeIn = true;
-  }
-  update() {
-    this.wobble += this.wobbleSpeed;
-    this.x += this.vx + Math.sin(this.wobble) * 0.35;
-    this.y += this.vy;
-    this.angle += this.flipDir * this.flipSpeed;
-    this.glint += this.glintSpeed;
-    if (this.fadeIn) { this.alpha = Math.min(this.maxAlpha, this.alpha + 0.008); if (this.alpha >= this.maxAlpha) this.fadeIn = false; }
-    if (this.y > fxCanvas.height + 50) this.reset(false);
-  }
-  draw(ctx) {
-    const scaleX = Math.cos(this.angle);
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    ctx.scale(Math.abs(scaleX), 1);
-    ctx.globalAlpha = this.alpha;
-
-    const grad = ctx.createRadialGradient(0, -this.r*0.3, this.r*0.1, 0, 0, this.r);
-    grad.addColorStop(0, 'rgba(255,235,140,0.95)');
-    grad.addColorStop(0.5,'rgba(200,168,75,0.9)');
-    grad.addColorStop(1,  'rgba(140,100,30,0.8)');
-    ctx.beginPath();
-    ctx.ellipse(0, 0, this.r, this.r * 0.9, 0, 0, Math.PI * 2);
-    ctx.fillStyle = grad;
-    ctx.fill();
-
-    ctx.strokeStyle = `rgba(255,220,80,${0.3 + (Math.sin(this.glint)+1)*0.2})`;
-    ctx.lineWidth = 0.8;
-    ctx.stroke();
-
-    const g = (Math.sin(this.glint)+1)*0.5;
-    if (g > 0.65) {
-      ctx.beginPath();
-      ctx.ellipse(-this.r*0.2, -this.r*0.25, this.r*0.15, this.r*0.08, -0.5, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(255,255,220,${(g-0.65)*1.2})`;
-      ctx.fill();
-    }
-    ctx.restore();
-  }
-}
-
-// ── TE: 魔法陣（控えめ・常時回転） ──────────
-class MagicCircle {
-  constructor(x, y, r, speed, maxAlpha, segments) {
-    this.x = x; this.y = y; this.r = r;
-    this.angle = Math.random() * Math.PI * 2;
-    this.speed = speed;
-    this.maxAlpha = maxAlpha;
-    this.alpha = 0;
-    this.fadeIn = true;
-    this.segments = segments || Math.floor(5 + Math.random() * 3);
-    this.innerR = r * (0.45 + Math.random() * 0.2);
-    this.dashOffset = 0;
-  }
-  update() {
-    this.angle += this.speed;
-    this.dashOffset -= 0.4;
-    if (this.fadeIn) { this.alpha = Math.min(this.maxAlpha, this.alpha + 0.003); if (this.alpha >= this.maxAlpha) this.fadeIn = false; }
-  }
-  draw(ctx) {
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    ctx.rotate(this.angle);
-    ctx.globalAlpha = this.alpha;
-
-    // outer ring
-    ctx.beginPath();
-    ctx.arc(0, 0, this.r, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(58,176,200,0.55)';
-    ctx.lineWidth = 0.8;
-    ctx.setLineDash([5, 5]);
-    ctx.lineDashOffset = this.dashOffset;
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // inner ring
-    ctx.beginPath();
-    ctx.arc(0, 0, this.innerR, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(96,200,224,0.35)';
-    ctx.lineWidth = 0.6;
-    ctx.stroke();
-
-    // polygon
-    ctx.beginPath();
-    for (let i = 0; i < this.segments; i++) {
-      const a = (i / this.segments) * Math.PI * 2;
-      i === 0
-        ? ctx.moveTo(Math.cos(a)*this.r*0.82, Math.sin(a)*this.r*0.82)
-        : ctx.lineTo(Math.cos(a)*this.r*0.82, Math.sin(a)*this.r*0.82);
-    }
-    ctx.closePath();
-    ctx.strokeStyle = 'rgba(58,176,200,0.25)';
-    ctx.lineWidth = 0.6;
-    ctx.stroke();
-
-    // center
-    ctx.beginPath();
-    ctx.arc(0, 0, 2, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(96,200,224,0.55)';
-    ctx.fill();
-
-    // soft glow
-    const grd = ctx.createRadialGradient(0,0,0,0,0,this.r*0.45);
-    grd.addColorStop(0,'rgba(58,176,200,0.06)');
-    grd.addColorStop(1,'rgba(58,176,200,0)');
-    ctx.fillStyle = grd;
-    ctx.beginPath();
-    ctx.arc(0,0,this.r*0.45,0,Math.PI*2);
-    ctx.fill();
-
-    ctx.restore();
-  }
-}
-
-// ── TE: ランタン（右下1つ固定・揺れるのみ） ──
-class FixedLantern {
-  constructor() {
-    this.wobble = 0;
-    this.wobbleSpeed = 0.012;
-    this.pulsePhase = 0;
-    this.pulseSpeed = 0.025;
-    this.alpha = 0;
-    this.w = 18; this.h = 27;
-    this.hue = 200;
-  }
-  get x() { return fxCanvas.width  - 60; }
-  get y() { return fxCanvas.height - 70; }
-  update() {
-    this.wobble += this.wobbleSpeed;
-    this.pulsePhase += this.pulseSpeed;
-    if (this.alpha < 0.65) this.alpha = Math.min(0.65, this.alpha + 0.004);
-  }
-  draw(ctx) {
-    const pulse = (Math.sin(this.pulsePhase) + 1) * 0.5;
-    const brightness = 0.5 + pulse * 0.5;
-    const tilt = Math.sin(this.wobble) * 0.06;
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    ctx.rotate(tilt);
-    ctx.globalAlpha = this.alpha;
-
-    // aura glow
-    const grd = ctx.createRadialGradient(0, 0, 0, 0, 0, this.w * 3);
-    grd.addColorStop(0, `hsla(${this.hue},80%,60%,${0.12 * brightness})`);
-    grd.addColorStop(1, 'hsla(0,0%,0%,0)');
-    ctx.fillStyle = grd;
-    ctx.beginPath();
-    ctx.arc(0, 0, this.w * 3, 0, Math.PI * 2);
-    ctx.fill();
-
-    // body
-    ctx.beginPath();
-    ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 4);
-    ctx.fillStyle = `hsla(${this.hue},50%,10%,0.88)`;
-    ctx.fill();
-    ctx.strokeStyle = `hsla(${this.hue},65%,50%,${0.45 + pulse * 0.3})`;
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // inner light
-    const innerGrd = ctx.createRadialGradient(0,0,0,0,0,this.w*0.5);
-    innerGrd.addColorStop(0, `hsla(${this.hue},90%,72%,${0.6 * brightness})`);
-    innerGrd.addColorStop(1, `hsla(${this.hue},70%,45%,0)`);
-    ctx.fillStyle = innerGrd;
-    ctx.beginPath();
-    ctx.ellipse(0, 0, this.w*0.38, this.h*0.32, 0, 0, Math.PI*2);
-    ctx.fill();
-
-    // top hook + chain
-    ctx.beginPath();
-    ctx.moveTo(0, -this.h/2);
-    ctx.lineTo(0, -this.h/2 - 14);
-    ctx.strokeStyle = `hsla(${this.hue},40%,45%,0.4)`;
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // bars
-    [-0.28, 0, 0.28].forEach(f => {
-      ctx.beginPath();
-      ctx.moveTo(-this.w/2, f * this.h);
-      ctx.lineTo( this.w/2, f * this.h);
-      ctx.strokeStyle = `hsla(${this.hue},50%,40%,0.25)`;
-      ctx.lineWidth = 0.6;
-      ctx.stroke();
-    });
-
-    ctx.restore();
-  }
-}
-
-// ── INSTANCES ───────────────────────────────
-const AF_COINS    = Array.from({length: 22}, () => new Coin());
-const TE_LANTERN  = new FixedLantern();
-let   TE_CIRCLES  = [];
-
-function positionCircles() {
-  const cx = fxCanvas.width / 2;
-  const cy = fxCanvas.height / 2;
-  TE_CIRCLES = [
-    new MagicCircle(cx, cy, Math.min(fxCanvas.width, fxCanvas.height) * 0.28,  0.0025, 0.14, 6),
-    new MagicCircle(cx, cy, Math.min(fxCanvas.width, fxCanvas.height) * 0.18, -0.004,  0.20, 5),
-    new MagicCircle(cx, cy, Math.min(fxCanvas.width, fxCanvas.height) * 0.10,  0.007,  0.24, 7),
-  ];
-}
-positionCircles();
-
-// ── DRAW LOOPS ───────────────────────────────
-function drawAF() {
-  fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
-  AF_COINS.forEach(c => { c.update(); c.draw(fxCtx); });
-}
-
-function drawTE() {
-  fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
-  TE_CIRCLES.forEach(c => { c.update(); c.draw(fxCtx); });
-  TE_LANTERN.update();
-  TE_LANTERN.draw(fxCtx);
-}
-
-function startFX(mode) {
-  fxMode = mode;
-  if (fxAnim) cancelAnimationFrame(fxAnim);
-  fxCanvas.style.opacity = '1';
-  const loop = () => {
-    if (fxMode === 'af') drawAF(); else drawTE();
-    fxAnim = requestAnimationFrame(loop);
-  };
-  loop();
-}
-
-// enterWorldでエフェクト切り替え
-const _origEnterWorld = enterWorld;
-function enterWorldWithFX(w) {
-  startFX(w);
-  _origEnterWorld(w);
-}
-
-// タイトルに戻るときもエフェクト継続
-const _origBackToTitle = backToTitle;
-// backToTitleはすでに定義済みなので直接上書き
-window._backToTitleOrig = backToTitle;
-backToTitle = function() {
-  window._backToTitleOrig();
-  startFX(currentWorld === 'af' ? 'af' : 'te');
-};
-
-// 常時エフェクト開始
-startFX('af');
-
-// ══════════════════════════════════════════════
 //  CANVAS EFFECTS
 // ══════════════════════════════════════════════
 const fxCanvas = document.getElementById('fx-canvas');
@@ -1588,57 +1303,93 @@ class Coin {
   constructor() { this.reset(true); }
   reset(init) {
     this.x  = Math.random() * fxCanvas.width;
-    this.y  = init ? Math.random() * fxCanvas.height : -40;
-    this.r  = 6 + Math.random() * 10;
-    this.vy = 0.4 + Math.random() * 0.8;
-    this.vx = (Math.random() - 0.5) * 0.6;
+    this.y  = init ? Math.random() * fxCanvas.height : -30;
+    this.r  = 3 + Math.random() * 5; // 小さめ
+    this.vy = 0.3 + Math.random() * 0.6;
+    this.vx = (Math.random() - 0.5) * 0.4;
     this.wobble = Math.random() * Math.PI * 2;
-    this.wobbleSpeed = 0.02 + Math.random() * 0.02;
-    this.scaleX = 1;
-    this.flipDir = Math.random() > 0.5 ? 1 : -1;
-    this.flipSpeed = 0.03 + Math.random() * 0.03;
+    this.wobbleSpeed = 0.018 + Math.random() * 0.018;
     this.angle = 0;
-    this.alpha = 0;
+    this.flipDir = Math.random() > 0.5 ? 1 : -1;
+    this.flipSpeed = 0.025 + Math.random() * 0.025;
+    this.glint = Math.random() * Math.PI * 2;
+    this.glintSpeed = 0.035 + Math.random() * 0.03;
+    this.alpha = init ? Math.random() * 0.25 : 0;
+    this.maxAlpha = 0.15 + Math.random() * 0.12;
     this.fadeIn = true;
-    this.glint  = 0;
-    this.glintSpeed = 0.04 + Math.random() * 0.04;
+    this.runeAngle = Math.random() * Math.PI * 2; // 魔法陣の回転角
   }
   update() {
     this.wobble += this.wobbleSpeed;
-    this.x += this.vx + Math.sin(this.wobble) * 0.4;
+    this.x += this.vx + Math.sin(this.wobble) * 0.3;
     this.y += this.vy;
     this.angle += this.flipDir * this.flipSpeed;
-    this.scaleX = Math.cos(this.angle);
-    this.glint = (Math.sin(this.glint + this.glintSpeed) + 1) * 0.5;
-    if (this.fadeIn) { this.alpha = Math.min(1, this.alpha + 0.03); if (this.alpha >= 1) this.fadeIn = false; }
-    if (this.y > fxCanvas.height + 50) this.reset(false);
+    this.glint += this.glintSpeed;
+    this.runeAngle += 0.008;
+    if (this.fadeIn) { this.alpha = Math.min(this.maxAlpha, this.alpha + 0.006); if (this.alpha >= this.maxAlpha) this.fadeIn = false; }
+    if (this.y > fxCanvas.height + 40) this.reset(false);
   }
   draw(ctx) {
+    const scaleX = Math.cos(this.angle);
+    if (Math.abs(scaleX) < 0.05) return; // 薄すぎる時はスキップ
     ctx.save();
     ctx.translate(this.x, this.y);
-    ctx.scale(Math.abs(this.scaleX), 1);
-    ctx.globalAlpha = this.alpha * 0.75;
+    ctx.scale(Math.abs(scaleX), 1);
+    ctx.globalAlpha = this.alpha;
 
     // coin body
-    const grad = ctx.createRadialGradient(0, -this.r*0.3, this.r*0.1, 0, 0, this.r);
-    grad.addColorStop(0, `rgba(255,235,140,${0.9 + this.glint*0.1})`);
-    grad.addColorStop(0.5, `rgba(200,168,75,0.9)`);
-    grad.addColorStop(1, `rgba(140,100,30,0.8)`);
+    const grad = ctx.createRadialGradient(0, -this.r*0.3, this.r*0.08, 0, 0, this.r);
+    grad.addColorStop(0, 'rgba(255,238,148,0.95)');
+    grad.addColorStop(0.45,'rgba(200,168,75,0.9)');
+    grad.addColorStop(1,  'rgba(130,90,20,0.85)');
     ctx.beginPath();
     ctx.ellipse(0, 0, this.r, this.r * 0.92, 0, 0, Math.PI * 2);
     ctx.fillStyle = grad;
     ctx.fill();
 
     // rim
-    ctx.strokeStyle = `rgba(255,220,80,${0.4 + this.glint * 0.4})`;
-    ctx.lineWidth = 1.2;
+    ctx.strokeStyle = `rgba(255,218,70,${0.35 + (Math.sin(this.glint)+1)*0.15})`;
+    ctx.lineWidth = 0.7;
     ctx.stroke();
 
-    // glint
-    if (this.glint > 0.6) {
+    // 魔法陣模様（表面の刻印）
+    ctx.save();
+    ctx.rotate(this.runeAngle);
+    ctx.strokeStyle = 'rgba(140,100,20,0.45)';
+    ctx.lineWidth = 0.4;
+
+    // 内側の小円
+    ctx.beginPath();
+    ctx.arc(0, 0, this.r * 0.55, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // 六芒星風の線
+    const pts = 6;
+    for (let i = 0; i < pts; i++) {
+      const a1 = (i / pts) * Math.PI * 2;
+      const a2 = ((i + pts/2) / pts) * Math.PI * 2;
       ctx.beginPath();
-      ctx.ellipse(-this.r*0.2, -this.r*0.25, this.r*0.18, this.r*0.1, -0.5, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(255,255,220,${(this.glint-0.6)*1.5})`;
+      ctx.moveTo(Math.cos(a1)*this.r*0.52, Math.sin(a1)*this.r*0.52);
+      ctx.lineTo(Math.cos(a2)*this.r*0.52, Math.sin(a2)*this.r*0.52);
+      ctx.stroke();
+    }
+
+    // 外周の小さなドット
+    for (let i = 0; i < pts; i++) {
+      const a = (i / pts) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.arc(Math.cos(a)*this.r*0.75, Math.sin(a)*this.r*0.75, 0.5, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(140,100,20,0.5)';
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // glint highlight
+    const g = (Math.sin(this.glint)+1)*0.5;
+    if (g > 0.62) {
+      ctx.beginPath();
+      ctx.ellipse(-this.r*0.18, -this.r*0.22, this.r*0.13, this.r*0.07, -0.5, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(255,255,220,${(g-0.62)*1.1})`;
       ctx.fill();
     }
     ctx.restore();
@@ -1718,101 +1469,94 @@ class MagicCircle {
   }
 }
 
-class Lantern {
-  constructor() { this.reset(true); }
-  reset(init) {
-    this.x  = Math.random() * fxCanvas.width;
-    this.y  = init ? fxCanvas.height * (0.3 + Math.random() * 0.6) : fxCanvas.height + 60;
-    this.vy = -(0.3 + Math.random() * 0.5);
-    this.vx = (Math.random() - 0.5) * 0.3;
-    this.wobble = Math.random() * Math.PI * 2;
-    this.wobbleSpeed = 0.015 + Math.random() * 0.01;
-    this.w  = 10 + Math.random() * 8;
-    this.h  = this.w * 1.5;
-    this.pulsePhase = Math.random() * Math.PI * 2;
-    this.pulseSpeed = 0.03 + Math.random() * 0.02;
-    this.alpha = init ? Math.random() * 0.6 : 0;
-    this.fadeIn = !init;
-    this.hue = 190 + Math.random() * 30;
+class FixedLantern {
+  constructor() {
+    this.wobble = 0;
+    this.wobbleSpeed = 0.012;
+    this.pulsePhase = 0;
+    this.pulseSpeed = 0.025;
+    this.alpha = 0;
+    this.w = 18; this.h = 27;
+    this.hue = 200;
   }
+  get x() { return fxCanvas.width  - 60; }
+  get y() { return fxCanvas.height - 70; }
   update() {
     this.wobble += this.wobbleSpeed;
-    this.x += this.vx + Math.sin(this.wobble) * 0.3;
-    this.y += this.vy;
     this.pulsePhase += this.pulseSpeed;
-    if (this.fadeIn) { this.alpha = Math.min(0.7, this.alpha + 0.01); if (this.alpha >= 0.7) this.fadeIn = false; }
-    if (this.y < -80) this.reset(false);
+    if (this.alpha < 0.65) this.alpha = Math.min(0.65, this.alpha + 0.004);
   }
   draw(ctx) {
     const pulse = (Math.sin(this.pulsePhase) + 1) * 0.5;
     const brightness = 0.5 + pulse * 0.5;
     ctx.save();
     ctx.translate(this.x, this.y);
-    ctx.rotate(Math.sin(this.wobble) * 0.08);
+    ctx.rotate(Math.sin(this.wobble) * 0.06);
     ctx.globalAlpha = this.alpha;
 
-    // glow aura
-    const grd = ctx.createRadialGradient(0, 0, 0, 0, 0, this.w * 2.5);
-    grd.addColorStop(0, `hsla(${this.hue},80%,65%,${0.3 * brightness})`);
+    // aura glow
+    const grd = ctx.createRadialGradient(0, 0, 0, 0, 0, this.w * 3);
+    grd.addColorStop(0, `hsla(${this.hue},80%,60%,${0.12 * brightness})`);
     grd.addColorStop(1, 'hsla(0,0%,0%,0)');
     ctx.fillStyle = grd;
     ctx.beginPath();
-    ctx.arc(0, 0, this.w * 2.5, 0, Math.PI * 2);
+    ctx.arc(0, 0, this.w * 3, 0, Math.PI * 2);
     ctx.fill();
 
-    // lantern body
+    // body
     ctx.beginPath();
-    ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 3);
-    ctx.fillStyle = `hsla(${this.hue},60%,12%,0.85)`;
+    ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 4);
+    ctx.fillStyle = `hsla(${this.hue},50%,10%,0.88)`;
     ctx.fill();
-    ctx.strokeStyle = `hsla(${this.hue},70%,55%,${0.6 + pulse*0.3})`;
+    ctx.strokeStyle = `hsla(${this.hue},65%,50%,${0.45 + pulse * 0.3})`;
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // inner glow
-    const innerGrd = ctx.createRadialGradient(0, 0, 0, 0, 0, this.w * 0.5);
-    innerGrd.addColorStop(0, `hsla(${this.hue},90%,75%,${0.8 * brightness})`);
-    innerGrd.addColorStop(1, `hsla(${this.hue},70%,50%,0)`);
+    // inner light
+    const innerGrd = ctx.createRadialGradient(0,0,0,0,0,this.w*0.5);
+    innerGrd.addColorStop(0, `hsla(${this.hue},90%,72%,${0.6 * brightness})`);
+    innerGrd.addColorStop(1, `hsla(${this.hue},70%,45%,0)`);
     ctx.fillStyle = innerGrd;
     ctx.beginPath();
-    ctx.ellipse(0, 0, this.w*0.4, this.h*0.35, 0, 0, Math.PI*2);
+    ctx.ellipse(0, 0, this.w*0.38, this.h*0.32, 0, 0, Math.PI*2);
     ctx.fill();
 
     // top hook
     ctx.beginPath();
     ctx.moveTo(0, -this.h/2);
-    ctx.lineTo(0, -this.h/2 - 8);
-    ctx.strokeStyle = `hsla(${this.hue},50%,50%,0.5)`;
+    ctx.lineTo(0, -this.h/2 - 14);
+    ctx.strokeStyle = `hsla(${this.hue},40%,45%,0.4)`;
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // horizontal bars
-    for (let i = -1; i <= 1; i++) {
+    // bars
+    [-0.28, 0, 0.28].forEach(f => {
       ctx.beginPath();
-      ctx.moveTo(-this.w/2, i * this.h * 0.22);
-      ctx.lineTo( this.w/2, i * this.h * 0.22);
-      ctx.strokeStyle = `hsla(${this.hue},60%,45%,0.3)`;
+      ctx.moveTo(-this.w/2, f * this.h);
+      ctx.lineTo( this.w/2, f * this.h);
+      ctx.strokeStyle = `hsla(${this.hue},50%,40%,0.25)`;
       ctx.lineWidth = 0.6;
       ctx.stroke();
-    }
+    });
 
     ctx.restore();
   }
 }
 
 // ── PARTICLE SYSTEMS ────────────────────────
-const AF_COINS   = Array.from({length: 28}, () => new Coin());
-const TE_CIRCLES = [
-  new MagicCircle(0, 0, 180, 0.003, 0.18),
-  new MagicCircle(0, 0, 120, -0.005, 0.25),
-  new MagicCircle(0, 0,  70,  0.008, 0.3),
-];
-const TE_LANTERNS = Array.from({length: 12}, () => new Lantern());
+const AF_COINS  = Array.from({length: 22}, () => new Coin());
+const TE_LANTERN = new FixedLantern();
+let   TE_CIRCLES = [];
 
 function positionCircles() {
   const cx = fxCanvas.width / 2;
   const cy = fxCanvas.height / 2;
-  TE_CIRCLES.forEach(c => { c.x = cx; c.y = cy; });
+  const base = Math.min(fxCanvas.width, fxCanvas.height);
+  TE_CIRCLES = [
+    new MagicCircle(cx, cy, base * 0.28,  0.0025, 0.14, 6),
+    new MagicCircle(cx, cy, base * 0.18, -0.004,  0.20, 5),
+    new MagicCircle(cx, cy, base * 0.10,  0.007,  0.24, 7),
+  ];
 }
 positionCircles();
 window.addEventListener('resize', positionCircles);
@@ -1826,7 +1570,8 @@ function drawAF() {
 function drawTE() {
   fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
   TE_CIRCLES.forEach(c => { c.update(); c.draw(fxCtx); });
-  TE_LANTERNS.forEach(l => { l.update(); l.draw(fxCtx); });
+  TE_LANTERN.update();
+  TE_LANTERN.draw(fxCtx);
 }
 
 function startFX(mode) {
@@ -1834,28 +1579,217 @@ function startFX(mode) {
   if (fxAnim) cancelAnimationFrame(fxAnim);
   fxCanvas.style.opacity = '1';
   const loop = () => {
-    if (fxMode === 'af') drawAF();
-    else drawTE();
+    if (fxMode === 'af') drawAF(); else drawTE();
     fxAnim = requestAnimationFrame(loop);
   };
   loop();
 }
 
-function stopFX() {
-  if (fxAnim) cancelAnimationFrame(fxAnim);
-  fxCanvas.style.opacity = '0';
-  setTimeout(() => fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height), 800);
-}
-
-// ── 切り替え時にエフェクト ─────────────────
-const _origEnterWorld = enterWorld;
 function enterWorldWithFX(w) {
   startFX(w);
-  setTimeout(stopFX, 2200);
-  _origEnterWorld(w);
+  enterWorld(w);
 }
 
-// ── タイトル画面では常時エフェクト ──────────
+// ══════════════════════════════════════════════
+//  砂時計トランジション（線のみ・時間停止演出）
+// ══════════════════════════════════════════════
+let isTransitioning = false;
+
+function hourglassTransition(targetWorld, callback) {
+  if (isTransitioning) return;
+  isTransitioning = true;
+
+  const tc = document.createElement('canvas');
+  tc.style.cssText = 'position:fixed;inset:0;z-index:500;pointer-events:all;';
+  tc.width  = window.innerWidth;
+  tc.height = window.innerHeight;
+  document.body.appendChild(tc);
+  const ctx = tc.getContext('2d');
+
+  const W = tc.width, H = tc.height;
+  const cx = W / 2, cy = H / 2;
+
+  // 世界ごとの色
+  const fromCol = currentWorld === 'af'
+    ? { r:200, g:180, b:80  }
+    : { r:58,  g:176, b:200 };
+  const toCol = targetWorld === 'af'
+    ? { r:200, g:180, b:80  }
+    : { r:58,  g:176, b:200 };
+
+  // 砂時計の横線データ生成
+  // 上半分：上ほど長い（台形）→ くびれ
+  // 下半分：くびれ → 下ほど長い（台形逆）
+  const LINE_COUNT = 18; // 片側の線数
+  const MAX_W = 130;
+  const MIN_W = 8;
+  const LINE_H = 9;     // 線間隔
+  const NECK_Y = 0;     // くびれ位置
+
+  function getLineWidth(i, half) {
+    // half: 'top' or 'bottom'
+    // i: 0=くびれ側, LINE_COUNT-1=端側
+    const t = i / (LINE_COUNT - 1);
+    return MIN_W + (MAX_W - MIN_W) * t;
+  }
+
+  // 線の状態管理
+  // topLines[0] = くびれに最も近い線
+  const topLines = Array.from({length: LINE_COUNT}, (_, i) => ({
+    width: getLineWidth(i, 'top'),
+    y: NECK_Y - (i + 0.5) * LINE_H,
+    alpha: 1,
+    visible: true,
+  }));
+  const bottomLines = Array.from({length: LINE_COUNT}, (_, i) => ({
+    width: getLineWidth(i, 'bottom'),
+    y: NECK_Y + (i + 0.5) * LINE_H,
+    alpha: 0,
+    visible: false,
+  }));
+
+  // フェーズ管理
+  // phase1: 上の線が端から消えていく（砂が落ちる）
+  // phase2: くびれで時間停止（線が震える）
+  // phase3: 下の線がくびれから積み重なる
+  const PHASE1_FRAMES = LINE_COUNT * 4;   // 線1本あたり4フレームで消える
+  const PHASE2_FRAMES = 40;               // 停止演出
+  const PHASE3_FRAMES = LINE_COUNT * 4;
+  const TOTAL = PHASE1_FRAMES + PHASE2_FRAMES + PHASE3_FRAMES;
+
+  let frame = 0;
+  let worldSwitched = false;
+  let shakeOffset = 0;
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  function drawLines(ctx, offset) {
+    ctx.save();
+    ctx.translate(cx, cy + offset);
+
+    // 上の線
+    topLines.forEach((line, i) => {
+      if (!line.visible || line.alpha <= 0) return;
+      const col = i < LINE_COUNT * 0.3
+        ? toCol   // くびれ近くは新しい色
+        : fromCol;
+      ctx.globalAlpha = line.alpha * 0.75;
+      ctx.strokeStyle = `rgb(${col.r},${col.g},${col.b})`;
+      ctx.lineWidth = 1.8;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-line.width / 2, line.y);
+      ctx.lineTo( line.width / 2, line.y);
+      ctx.stroke();
+    });
+
+    // 下の線
+    bottomLines.forEach((line, i) => {
+      if (!line.visible || line.alpha <= 0) return;
+      const col = i < LINE_COUNT * 0.3
+        ? fromCol
+        : toCol;
+      ctx.globalAlpha = line.alpha * 0.75;
+      ctx.strokeStyle = `rgb(${col.r},${col.g},${col.b})`;
+      ctx.lineWidth = 1.8;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-line.width / 2, line.y);
+      ctx.lineTo( line.width / 2, line.y);
+      ctx.stroke();
+    });
+
+    // くびれの中心点（常に光る）
+    ctx.globalAlpha = 0.6;
+    ctx.fillStyle = `rgb(${lerp(fromCol.r,toCol.r,frame/TOTAL)},${lerp(fromCol.g,toCol.g,frame/TOTAL)},${lerp(fromCol.b,toCol.b,frame/TOTAL)})`;
+    ctx.beginPath();
+    ctx.arc(0, 0, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  function animate() {
+    frame++;
+
+    // 背景
+    const bgAlpha = (() => {
+      if (frame < PHASE1_FRAMES * 0.3) return frame / (PHASE1_FRAMES * 0.3) * 0.6;
+      if (frame > TOTAL - PHASE3_FRAMES * 0.3) return (TOTAL - frame) / (PHASE3_FRAMES * 0.3) * 0.6;
+      return 0.6;
+    })();
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = `rgba(0,0,0,${bgAlpha})`;
+    ctx.fillRect(0, 0, W, H);
+
+    // Phase 1: 上の線を端（LINE_COUNT-1）から消していく
+    if (frame <= PHASE1_FRAMES) {
+      const progress = frame / PHASE1_FRAMES;
+      const disappearIndex = Math.floor(progress * LINE_COUNT);
+      topLines.forEach((line, i) => {
+        const reverseI = LINE_COUNT - 1 - i; // 端から消す
+        if (reverseI < disappearIndex) {
+          line.alpha = Math.max(0, line.alpha - 0.15);
+          if (line.alpha <= 0) line.visible = false;
+        }
+      });
+    }
+
+    // Phase 2: 時間停止（震える）
+    if (frame > PHASE1_FRAMES && frame <= PHASE1_FRAMES + PHASE2_FRAMES) {
+      const p = (frame - PHASE1_FRAMES) / PHASE2_FRAMES;
+      shakeOffset = Math.sin(frame * 0.8) * (2 - p * 2);
+
+      // 中間で世界切り替え
+      if (!worldSwitched && p >= 0.5) {
+        worldSwitched = true;
+        startFX(targetWorld);
+        enterWorld(targetWorld);
+      }
+
+      // くびれ近くの線が色変わり始める
+      topLines.forEach((line, i) => {
+        if (i < 3 && line.visible) {
+          line.alpha = 0.4 + Math.sin(frame * 0.3 + i) * 0.3;
+        }
+      });
+    } else {
+      shakeOffset *= 0.85;
+    }
+
+    // Phase 3: 下の線をくびれから積み上げる
+    if (frame > PHASE1_FRAMES + PHASE2_FRAMES) {
+      const p = (frame - PHASE1_FRAMES - PHASE2_FRAMES) / PHASE3_FRAMES;
+      const appearIndex = Math.floor(p * LINE_COUNT);
+      bottomLines.forEach((line, i) => {
+        if (i < appearIndex) {
+          line.visible = true;
+          line.alpha = Math.min(1, line.alpha + 0.12);
+        }
+      });
+    }
+
+    drawLines(ctx, shakeOffset);
+
+    if (frame < TOTAL) {
+      requestAnimationFrame(animate);
+    } else {
+      tc.remove();
+      isTransitioning = false;
+      if (callback) callback();
+    }
+  }
+
+  animate();
+}
+
+function enterWorldWithTransition(w) {
+  if (isTransitioning) return;
+  if (w === currentWorld && document.getElementById('main-screen').classList.contains('hidden') === false) return;
+  hourglassTransition(w);
+}
+
+// 全定義完了後に起動
 startFX('af');
 </script>
 </body>
