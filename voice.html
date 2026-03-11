@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
+<html lang="ja"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ArcadicOff — Voice Archive</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cinzel+Decorative:wght@400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Noto+Serif+JP:wght@300;400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&amp;family=Cinzel+Decorative:wght@400&amp;family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&amp;family=Noto+Serif+JP:wght@300;400&amp;family=Share+Tech+Mono&amp;display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════════════
    VARIABLES
@@ -595,7 +593,7 @@ body.world-te .main-footer{border-color:var(--te-border);color:var(--te-dim);}
   TITLE SCREEN
 ══════════════════ -->
 <!-- エフェクト Canvas（背面） -->
-<canvas id="fx-canvas" style="position:fixed;inset:0;z-index:1;pointer-events:none;transition:opacity .8s;"></canvas>
+<canvas id="fx-canvas" style="position: fixed; inset: 0px; z-index: 1; pointer-events: none; transition: opacity 0.8s; opacity: 1;" width="384" height="713"></canvas>
 
 <div class="screen" id="title-screen" style="z-index:10;">
   <div style="display:flex;flex-direction:column;align-items:center;position:relative;z-index:2;">
@@ -617,7 +615,7 @@ body.world-te .main-footer{border-color:var(--te-border);color:var(--te-dim);}
     <header class="main-header">
       <div class="header-left">
         <div class="header-title" id="header-title-tap">ArcadicOff</div>
-        <div class="header-world" id="header-world-label">— Voice Archive —</div>
+        <div class="header-world" id="header-world-label">— Afstasia —</div>
       </div>
       <div class="header-btns">
         <button class="icon-btn" onclick="enterWorldWithTransition(currentWorld==='af'?'te':'af')" id="world-switch-btn" title="世界を切り替え">⇄</button>
@@ -628,10 +626,24 @@ body.world-te .main-footer{border-color:var(--te-border);color:var(--te-dim);}
 
     <nav class="toc">
       <div class="toc-label">目次</div>
-      <div class="toc-links" id="toc-links"></div>
+      <div class="toc-links" id="toc-links"><a class="toc-link" href="#char-milan">ミラン・レスファイファー</a></div>
     </nav>
 
-    <div id="char-body"></div>
+    <div id="char-body"><section class="char-section" id="char-milan" style="animation-delay: 0s;">
+      <div class="char-header">
+        <div class="char-name">ミラン・レスファイファー</div>
+        <div class="char-role">第一王子</div>
+        <div class="char-count">0/2</div>
+      </div>
+      <div class="voice-list" id="vl-milan"><div class="voice-item">
+        <div class="voice-text">セリフをここに入力してください。</div>
+        <button class="play-btn no-audio" onclick="void(0)">▷</button>
+      </div><div class="voice-item">
+        <div class="voice-text">セリフをここに入力してください。</div>
+        <button class="play-btn no-audio" onclick="void(0)">▷</button>
+      </div></div>
+      
+    </section></div>
 
     <footer class="main-footer">— ArcadicOff Voice Archive —</footer>
   </div>
@@ -667,10 +679,10 @@ body.world-te .main-footer{border-color:var(--te-border);color:var(--te-dim);}
   <div class="pin-box">
     <div class="pin-title">— Admin —</div>
     <div class="pin-dots" id="pin-dots">
-      <div class="pin-dot" id="pd0"></div>
-      <div class="pin-dot" id="pd1"></div>
-      <div class="pin-dot" id="pd2"></div>
-      <div class="pin-dot" id="pd3"></div>
+      <div class="pin-dot filled" id="pd0"></div>
+      <div class="pin-dot filled" id="pd1"></div>
+      <div class="pin-dot filled" id="pd2"></div>
+      <div class="pin-dot filled" id="pd3"></div>
     </div>
     <div class="pin-keypad">
       <button class="pin-key" onclick="pinInput('1')">1</button>
@@ -694,11 +706,11 @@ body.world-te .main-footer{border-color:var(--te-border);color:var(--te-dim);}
 <!-- ══════════════════
   ADMIN PANEL
 ══════════════════ -->
-<div class="admin-overlay" id="admin-overlay">
+<div class="admin-overlay open" id="admin-overlay">
   <div class="admin-panel">
     <div class="admin-header">
       <div class="admin-title">✦ Voice Admin</div>
-      <div class="admin-save-status" id="admin-save-status">—</div>
+      <div class="admin-save-status" id="admin-save-status" style="color: rgba(80, 200, 120, 0.8);">Last saved: 18:50</div>
     </div>
     <div class="admin-body">
 
@@ -721,7 +733,28 @@ body.world-te .main-footer{border-color:var(--te-border);color:var(--te-dim);}
       <!-- キャラ管理 -->
       <div class="admin-section">
         <div class="admin-section-title">キャラクター管理</div>
-        <div id="admin-char-list"></div>
+        <div id="admin-char-list"><div style="font-family: Cinzel, serif; font-size: 0.48rem; letter-spacing: 0.4em; opacity: 0.5; margin: 12px 0px 6px;">AFSTASIA</div><div class="admin-char-item">
+        <div style="flex:1;">
+          <div style="font-family:'Noto Serif JP',serif;font-size:.85rem;">ミラン・レスファイファー</div>
+          <div style="font-size:.58rem;opacity:.5;letter-spacing:.1em;">第一王子 · 2 voices</div>
+        </div>
+        <button class="admin-btn" onclick="adminEditChar('afstasia',0)" style="font-size:.48rem;padding:6px 12px;">編集</button>
+        <button class="admin-btn" onclick="adminDeleteChar('afstasia',0)" style="font-size:.48rem;padding:6px 12px;border-color:rgba(200,80,80,.3);color:rgba(200,80,80,.6);">削除</button>
+      </div><div class="admin-char-item">
+        <div style="flex:1;">
+          <div style="font-family:'Noto Serif JP',serif;font-size:.85rem;">テラミー</div>
+          <div style="font-size:.58rem;opacity:.5;letter-spacing:.1em;"> · 0 voices</div>
+        </div>
+        <button class="admin-btn" onclick="adminEditChar('afstasia',1)" style="font-size:.48rem;padding:6px 12px;">編集</button>
+        <button class="admin-btn" onclick="adminDeleteChar('afstasia',1)" style="font-size:.48rem;padding:6px 12px;border-color:rgba(200,80,80,.3);color:rgba(200,80,80,.6);">削除</button>
+      </div><div style="font-family: Cinzel, serif; font-size: 0.48rem; letter-spacing: 0.4em; opacity: 0.5; margin: 12px 0px 6px;">TELOSTIA</div><div class="admin-char-item">
+        <div style="flex:1;">
+          <div style="font-family:'Noto Serif JP',serif;font-size:.85rem;">スファレー</div>
+          <div style="font-size:.58rem;opacity:.5;letter-spacing:.1em;">錬金術師 · 2 voices</div>
+        </div>
+        <button class="admin-btn" onclick="adminEditChar('telostia',0)" style="font-size:.48rem;padding:6px 12px;">編集</button>
+        <button class="admin-btn" onclick="adminDeleteChar('telostia',0)" style="font-size:.48rem;padding:6px 12px;border-color:rgba(200,80,80,.3);color:rgba(200,80,80,.6);">削除</button>
+      </div></div>
         <div class="admin-btn-row">
           <button class="admin-btn primary" onclick="adminAddChar()">＋ キャラ追加</button>
         </div>
@@ -750,7 +783,7 @@ body.world-te .main-footer{border-color:var(--te-border);color:var(--te-dim);}
           <button class="admin-btn primary" onclick="saveGHSettings()">✓ 設定保存</button>
           <button class="admin-btn primary" onclick="pushToGitHub()">🚀 GitHubに保存</button>
         </div>
-        <div id="gh-status" style="font-size:.58rem;letter-spacing:.15em;margin-top:8px;min-height:14px;"></div>
+        <div id="gh-status" style="font-size:.58rem;letter-spacing:.15em;margin-top:8px;min-height:14px;">⏳ 保存中...</div>
       </div>
 
       <div class="admin-btn-row" style="margin-top:8px;">
@@ -765,30 +798,52 @@ body.world-te .main-footer{border-color:var(--te-border);color:var(--te-dim);}
 //  DATA
 // ══════════════════════════════════════════════
 let voiceData = {
-  bgm: { af: '', te: '' },
-  afstasia: [
+  "bgm": {
+    "af": "",
+    "te": ""
+  },
+  "afstasia": [
     {
-      id: 'milan',
-      name: 'ミラン・レスファイファー',
-      role: '第一王子',
-      world: 'afstasia',
-      voices: [
-        { text: 'セリフをここに入力してください。', url: '' },
-        { text: 'セリフをここに入力してください。', url: '' },
+      "id": "milan",
+      "name": "ミラン・レスファイファー",
+      "role": "第一王子",
+      "world": "afstasia",
+      "voices": [
+        {
+          "text": "セリフをここに入力してください。",
+          "url": ""
+        },
+        {
+          "text": "セリフをここに入力してください。",
+          "url": ""
+        }
       ]
     },
+    {
+      "id": "テラミー_1773222623339",
+      "name": "テラミー",
+      "role": "",
+      "world": "afstasia",
+      "voices": []
+    }
   ],
-  telostia: [
+  "telostia": [
     {
-      id: 'sfale',
-      name: 'スファレー',
-      role: '錬金術師',
-      world: 'telostia',
-      voices: [
-        { text: 'セリフをここに入力してください。', url: '' },
-        { text: 'セリフをここに入力してください。', url: '' },
+      "id": "sfale",
+      "name": "スファレー",
+      "role": "錬金術師",
+      "world": "telostia",
+      "voices": [
+        {
+          "text": "セリフをここに入力してください。",
+          "url": ""
+        },
+        {
+          "text": "セリフをここに入力してください。",
+          "url": ""
+        }
       ]
-    },
+    }
   ]
 };
 
@@ -1792,5 +1847,6 @@ function enterWorldWithTransition(w) {
 // 全定義完了後に起動
 startFX('af');
 </script>
-</body>
-</html>
+
+
+</body></html>
