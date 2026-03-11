@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ArcadicOff — Voice Archive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cinzel+Decorative:wght@400&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Serif+JP:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --af-bg: #f7f5f0;
+  --af-bg2: #eeebe3;
+  --af-text: #2a2318;
+  --af-dim: #8a7d6a;
+  --af-gold: #9a7d3a;
+  --af-gold2: #c8a84b;
+  --af-border: rgba(154,125,58,.18);
+  --af-grid: rgba(154,125,58,.07);
+
+  --te-bg: #080c14;
+  --te-bg2: #0d1220;
+  --te-text: #c8d8e8;
+  --te-dim: #4a6880;
+  --te-blue: #3ab0c8;
+  --te-blue2: #5ac8e0;
+  --te-border: rgba(58,176,200,.18);
+  --te-grid: rgba(58,176,200,.05);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Noto Serif JP', serif;
+  transition: background .6s, color .6s;
+  min-height: 100vh;
+}
+
+/* ── WORLD STATES ── */
+body.world-af {
+  background: var(--af-bg);
+  color: var(--af-text);
+}
+body.world-te {
+  background: var(--te-bg);
+  color: var(--te-text);
+}
+
+/* ── GRID BACKGROUND ── */
+.grid-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity .6s;
+}
+body.world-af .grid-bg {
+  background-image:
+    linear-gradient(var(--af-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--af-grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+body.world-te .grid-bg {
+  background-image:
+    linear-gradient(var(--te-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--te-grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* ── LAYOUT ── */
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+/* ── HEADER ── */
+.site-header {
+  padding: 48px 0 40px;
+  border-bottom: 1px solid;
+  margin-bottom: 40px;
+  transition: border-color .6s;
+}
+body.world-af .site-header { border-color: var(--af-border); }
+body.world-te .site-header { border-color: var(--te-border); }
+
+.site-title {
+  font-family: 'Cinzel Decorative', cursive;
+  font-size: clamp(1.4rem, 5vw, 2.2rem);
+  letter-spacing: .1em;
+  margin-bottom: 6px;
+  transition: color .6s;
+}
+body.world-af .site-title { color: var(--af-gold); }
+body.world-te .site-title { color: var(--te-blue); }
+
+.site-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: .75rem;
+  letter-spacing: .4em;
+  transition: color .6s;
+}
+body.world-af .site-sub { color: var(--af-dim); }
+body.world-te .site-sub { color: var(--te-dim); }
+
+/* ── WORLD TOGGLE ── */
+.world-toggle {
+  display: flex;
+  gap: 2px;
+  margin-top: 28px;
+  width: fit-content;
+  border: 1px solid;
+  padding: 2px;
+  transition: border-color .6s;
+}
+body.world-af .world-toggle { border-color: var(--af-border); }
+body.world-te .world-toggle { border-color: var(--te-border); }
+
+.w-btn {
+  font-family: 'Cinzel', serif;
+  font-size: .58rem;
+  letter-spacing: .4em;
+  text-transform: uppercase;
+  padding: 8px 22px;
+  border: none;
+  cursor: pointer;
+  transition: all .35s;
+  background: transparent;
+}
+body.world-af .w-btn { color: var(--af-dim); }
+body.world-te .w-btn { color: var(--te-dim); }
+
+body.world-af .w-btn.active {
+  background: var(--af-gold);
+  color: #f7f5f0;
+}
+body.world-te .w-btn.active {
+  background: var(--te-blue);
+  color: #080c14;
+}
+
+/* ── TOC ── */
+.toc {
+  padding: 24px 28px;
+  margin-bottom: 40px;
+  border: 1px solid;
+  transition: border-color .6s, background .6s;
+}
+body.world-af .toc {
+  border-color: var(--af-border);
+  background: rgba(154,125,58,.04);
+}
+body.world-te .toc {
+  border-color: var(--te-border);
+  background: rgba(58,176,200,.03);
+}
+
+.toc-title {
+  font-family: 'Cinzel', serif;
+  font-size: .55rem;
+  letter-spacing: .5em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  transition: color .6s;
+}
+body.world-af .toc-title { color: var(--af-gold); }
+body.world-te .toc-title { color: var(--te-blue); }
+
+.toc-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+.toc-item a {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: .9rem;
+  letter-spacing: .08em;
+  text-decoration: none;
+  transition: color .3s;
+}
+body.world-af .toc-item a { color: var(--af-dim); }
+body.world-te .toc-item a { color: var(--te-dim); }
+body.world-af .toc-item a:hover { color: var(--af-gold); }
+body.world-te .toc-item a:hover { color: var(--te-blue); }
+.toc-item a::before { content: '— '; opacity: .4; }
+
+/* ── CHARACTER SECTION ── */
+.char-section {
+  margin-bottom: 56px;
+  animation: fadeUp .6s ease both;
+}
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.char-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid;
+  margin-bottom: 24px;
+  transition: border-color .6s;
+}
+body.world-af .char-header { border-color: var(--af-border); }
+body.world-te .char-header { border-color: var(--te-border); }
+
+.char-name {
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  letter-spacing: .15em;
+  transition: color .6s;
+}
+body.world-af .char-name { color: var(--af-gold); }
+body.world-te .char-name { color: var(--te-blue); }
+
+.char-role {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: .78rem;
+  letter-spacing: .2em;
+  transition: color .6s;
+}
+body.world-af .char-role { color: var(--af-dim); }
+body.world-te .char-role { color: var(--te-dim); }
+
+.char-count {
+  margin-left: auto;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: .65rem;
+  letter-spacing: .2em;
+  transition: color .6s;
+}
+body.world-af .char-count { color: rgba(154,125,58,.4); }
+body.world-te .char-count { color: rgba(58,176,200,.3); }
+
+/* ── VOICE ITEMS ── */
+.voice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.voice-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border: 1px solid transparent;
+  transition: all .25s;
+  cursor: default;
+}
+body.world-af .voice-item:hover {
+  border-color: var(--af-border);
+  background: rgba(154,125,58,.04);
+}
+body.world-te .voice-item:hover {
+  border-color: var(--te-border);
+  background: rgba(58,176,200,.03);
+}
+
+.voice-text {
+  font-family: 'Noto Serif JP', serif;
+  font-size: .88rem;
+  line-height: 1.7;
+  letter-spacing: .05em;
+  transition: color .6s;
+}
+body.world-af .voice-text { color: var(--af-text); }
+body.world-te .voice-text { color: var(--te-text); }
+
+.voice-empty {
+  font-style: italic;
+  transition: color .6s;
+}
+body.world-af .voice-empty { color: rgba(154,125,58,.3); }
+body.world-te .voice-empty { color: rgba(58,176,200,.2); }
+
+/* ── PLAY BUTTON ── */
+.play-btn {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .25s;
+  font-size: .7rem;
+}
+body.world-af .play-btn {
+  border-color: var(--af-gold);
+  color: var(--af-gold);
+}
+body.world-te .play-btn {
+  border-color: var(--te-blue);
+  color: var(--te-blue);
+}
+body.world-af .play-btn:hover {
+  background: var(--af-gold);
+  color: #f7f5f0;
+}
+body.world-te .play-btn:hover {
+  background: var(--te-blue);
+  color: #080c14;
+}
+.play-btn.playing {
+  animation: pulse 1s ease infinite;
+}
+@keyframes pulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+.play-btn.no-audio {
+  opacity: .25;
+  cursor: not-allowed;
+}
+
+/* ── DIVIDER ── */
+.section-divider {
+  height: 1px;
+  margin: 48px 0;
+  transition: background .6s;
+}
+body.world-af .section-divider {
+  background: linear-gradient(90deg, transparent, var(--af-gold2), transparent);
+  opacity: .2;
+}
+body.world-te .section-divider {
+  background: linear-gradient(90deg, transparent, var(--te-blue), transparent);
+  opacity: .15;
+}
+
+/* ── FOOTER ── */
+.site-footer {
+  padding: 32px 0;
+  border-top: 1px solid;
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: .7rem;
+  letter-spacing: .3em;
+  transition: border-color .6s, color .6s;
+}
+body.world-af .site-footer { border-color: var(--af-border); color: var(--af-dim); }
+body.world-te .site-footer { border-color: var(--te-border); color: var(--te-dim); }
+
+/* ── WORLD CONTENT ── */
+.world-content { display: none; }
+.world-content.active { display: block; }
+
+/* ── NO AUDIO MSG ── */
+.no-audio-note {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: .7rem;
+  letter-spacing: .2em;
+  text-align: center;
+  padding: 8px;
+  margin-top: 4px;
+  transition: color .6s;
+}
+body.world-af .no-audio-note { color: rgba(154,125,58,.35); }
+body.world-te .no-audio-note { color: rgba(58,176,200,.25); }
+</style>
+</head>
+<body class="world-af">
+
+<div class="grid-bg"></div>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="site-title">ArcadicOff</div>
+    <div class="site-sub">— Voice Archive —</div>
+
+    <div class="world-toggle" style="margin-top:28px;">
+      <button class="w-btn active" id="btn-af" onclick="switchWorld('af')">☀ Afstasia</button>
+      <button class="w-btn" id="btn-te" onclick="switchWorld('te')">◈ Telostia</button>
+    </div>
+  </header>
+
+  <!-- AFSTASIA -->
+  <div class="world-content active" id="content-af">
+
+    <nav class="toc">
+      <div class="toc-title">目次</div>
+      <ul class="toc-list" id="toc-af"></ul>
+    </nav>
+
+    <div id="chars-af"></div>
+
+  </div>
+
+  <!-- TELOSTIA -->
+  <div class="world-content" id="content-te">
+
+    <nav class="toc">
+      <div class="toc-title">目次</div>
+      <ul class="toc-list" id="toc-te"></ul>
+    </nav>
+
+    <div id="chars-te"></div>
+
+  </div>
+
+  <footer class="site-footer">— ArcadicOff Voice Archive —</footer>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  DATA
+//  音声URLは "" のままにしておくと再生ボタンが無効になります
+//  URLを入れると再生できます（SoundCloud埋め込みURL、GitHubのrawファイル等）
+// ══════════════════════════════════════════════
+
+const voiceData = {
+  afstasia: [
+    {
+      id: 'milan',
+      name: 'ミラン・レスファイファー',
+      role: '第一王子',
+      voices: [
+        { text: 'セリフをここに入力してください。', url: '' },
+        { text: 'セリフをここに入力してください。', url: '' },
+        { text: 'セリフをここに入力してください。', url: '' },
+      ]
+    },
+    // キャラを追加する場合はここに追記
+  ],
+  telostia: [
+    {
+      id: 'sfale',
+      name: 'スファレー',
+      role: '錬金術師',
+      voices: [
+        { text: 'セリフをここに入力してください。', url: '' },
+        { text: 'セリフをここに入力してください。', url: '' },
+        { text: 'セリフをここに入力してください。', url: '' },
+      ]
+    },
+    // キャラを追加する場合はここに追記
+  ]
+};
+
+// ══════════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════════
+let currentAudio = null;
+let currentBtn   = null;
+
+function renderWorld(world) {
+  const chars  = voiceData[world] || [];
+  const tocEl  = document.getElementById(`toc-${world === 'afstasia' ? 'af' : 'te'}`);
+  const bodyEl = document.getElementById(`chars-${world === 'afstasia' ? 'af' : 'te'}`);
+
+  tocEl.innerHTML  = '';
+  bodyEl.innerHTML = '';
+
+  chars.forEach((char, ci) => {
+    // TOC
+    const li = document.createElement('li');
+    li.className = 'toc-item';
+    li.innerHTML = `<a href="#char-${char.id}">${char.name}</a>`;
+    tocEl.appendChild(li);
+
+    // Section
+    const sec = document.createElement('section');
+    sec.className = 'char-section';
+    sec.id = `char-${char.id}`;
+    sec.style.animationDelay = `${ci * .08}s`;
+
+    const voiceCount = char.voices.filter(v => v.url).length;
+
+    sec.innerHTML = `
+      <div class="char-header">
+        <div class="char-name">${char.name}</div>
+        <div class="char-role">${char.role}</div>
+        <div class="char-count">${voiceCount} / ${char.voices.length} voices</div>
+      </div>
+      <div class="voice-list" id="vlist-${char.id}"></div>
+      ${ci < chars.length - 1 ? '<div class="section-divider"></div>' : ''}
+    `;
+    bodyEl.appendChild(sec);
+
+    // Voice items
+    const vlist = document.getElementById(`vlist-${char.id}`);
+    char.voices.forEach((v, vi) => {
+      const item = document.createElement('div');
+      item.className = 'voice-item';
+      item.innerHTML = `
+        <div class="voice-text">${v.text || '<span class="voice-empty">— セリフ未設定 —</span>'}</div>
+        <button class="play-btn ${v.url ? '' : 'no-audio'}"
+          onclick="${v.url ? `playVoice(this, '${v.url}')` : 'void(0)'}"
+          title="${v.url ? '再生' : '音声未設定'}">
+          ▷
+        </button>
+      `;
+      vlist.appendChild(item);
+    });
+  });
+}
+
+function playVoice(btn, url) {
+  // 同じボタンを押したら停止
+  if (currentBtn === btn && currentAudio && !currentAudio.paused) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    btn.textContent = '▷';
+    btn.classList.remove('playing');
+    currentAudio = null;
+    currentBtn   = null;
+    return;
+  }
+  // 前の音声を停止
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    if (currentBtn) { currentBtn.textContent = '▷'; currentBtn.classList.remove('playing'); }
+  }
+  const audio = new Audio(url);
+  audio.play().catch(() => {
+    btn.textContent = '▷';
+    btn.classList.remove('playing');
+  });
+  btn.textContent = '■';
+  btn.classList.add('playing');
+  currentAudio = audio;
+  currentBtn   = btn;
+  audio.onended = () => {
+    btn.textContent = '▷';
+    btn.classList.remove('playing');
+    currentAudio = null;
+    currentBtn   = null;
+  };
+}
+
+// ══════════════════════════════════════════════
+//  WORLD SWITCH
+// ══════════════════════════════════════════════
+function switchWorld(w) {
+  // 音声停止
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+    if (currentBtn) { currentBtn.textContent = '▷'; currentBtn.classList.remove('playing'); currentBtn = null; }
+  }
+  document.body.className = `world-${w}`;
+  document.getElementById('btn-af').classList.toggle('active', w === 'af');
+  document.getElementById('btn-te').classList.toggle('active', w === 'te');
+  document.getElementById('content-af').classList.toggle('active', w === 'af');
+  document.getElementById('content-te').classList.toggle('active', w === 'te');
+}
+
+// ── INIT ──
+renderWorld('afstasia');
+renderWorld('telostia');
+</script>
+</body>
+</html>
